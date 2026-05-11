@@ -425,12 +425,12 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               color="bg-[#F5F8FA]"
               badgeColor="bg-[#E5EEF1] text-[#5D848C]"
             />
-            <DogConciergeCard 
-              name="Taco"
+            <DogConciergeCard
+              name="Nuc"
               role="Adventure Guide"
-              personality="Curious, adventurous, funny."
-              style="Professional dog backpack with rolled map."
-              vibe="Travel, discovery, city guides, explorer."
+              personality="Curious, adventurous, ready for anything."
+              style="Explorer collar, always set for the next trip."
+              vibe="Travel, discovery, city guides, weekend escapes."
               color="bg-[#FAF9F5]"
               badgeColor="bg-[#F1EEE5] text-[#8C845D]"
             />
@@ -620,7 +620,7 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
                 setImageFailed(true);
               }
             }}
-            className={`relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700 ${name === 'Taco' ? 'scale-[1.45]' : ''}`}
+            className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700"
           />
         ) : (
           <div className="relative z-10 text-charcoal/20 group-hover:scale-110 group-hover:text-brand-orange transition-all duration-700">

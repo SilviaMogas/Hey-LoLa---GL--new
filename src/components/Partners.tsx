@@ -25,14 +25,14 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
             className="space-y-6 max-w-3xl pt-8"
           >
             <span className="inline-flex items-center gap-2 text-brand-orange bg-brand-orange/5 px-3 py-1.5 rounded-full font-black uppercase tracking-[0.3em] text-[9px]">
-              <Store size={10} /> For Businesses
+              <Store size={10} /> Partner Network
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black italic tracking-tighter leading-[0.9] text-charcoal">
-              Join the Hey Lola <br className="hidden md:block"/>
-              <span className="text-stone-300">Partner Network</span><span className="text-brand-orange">.</span>
+              Join the boutique <br className="hidden md:block"/>
+              <span className="text-stone-300">dog-friendly network</span><span className="text-brand-orange">.</span>
             </h1>
             <p className="text-lg md:text-xl font-medium text-stone-500 max-w-xl italic leading-tight">
-              Connect with dog parents looking for trusted places, services and experiences for life with their dogs.
+              Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -50,8 +50,11 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
       <section className="px-5 sm:px-6 py-16 bg-white border-y border-stone-100">
         <div className="max-w-5xl mx-auto">
           <div className="text-center space-y-4 mb-14 max-w-2xl mx-auto">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Why Join?</span>
-            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Built for dog-friendly businesses<span className="text-brand-orange">.</span></h2>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Partner Benefits</span>
+            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Verified partners. Better experiences<span className="text-brand-orange">.</span></h2>
+            <p className="text-sm text-stone-500 font-light italic leading-relaxed pt-1">
+              Hey Lola works with dog-friendly businesses that want to welcome dog parents with trust, quality and simple member perks.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -59,22 +62,22 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
               <div className="w-12 h-12 bg-stone-50 inline-flex items-center justify-center rounded-full text-charcoal mb-2">
                 <MapPin size={20} />
               </div>
-              <h3 className="text-lg font-bold italic text-charcoal">Be discovered</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">Appear in member city guides and filters when dog parents are looking for coffee, dinner, or a place to stay.</p>
+              <h3 className="text-lg font-bold italic text-charcoal">Be discovered by dog parents</h3>
+              <p className="text-sm text-stone-500 leading-relaxed">Appear in the curated city guide when dog parents are looking for trusted places to eat, stay or play.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-[#EBF1E9] inline-flex items-center justify-center rounded-full text-[#7A8C6E] mb-2">
                 <ShieldCheck size={20} />
               </div>
-              <h3 className="text-lg font-bold italic text-charcoal">Build trust</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">Verified partners stand out with a dedicated badge, letting members know your venue genuinely welcomes dogs.</p>
+              <h3 className="text-lg font-bold italic text-charcoal">Build trust with a Verified badge</h3>
+              <p className="text-sm text-stone-500 leading-relaxed">Claim your profile and pass our manual review to earn the Verified badge that tells dog parents your venue genuinely welcomes them.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-stone-50 inline-flex items-center justify-center rounded-full text-charcoal mb-2">
                 <CheckCircle size={20} />
               </div>
-              <h3 className="text-lg font-bold italic text-charcoal">Bring qualified customers</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">Offer simple member perks to drive foot traffic and build loyalty with a high-intent audience.</p>
+              <h3 className="text-lg font-bold italic text-charcoal">Reach a qualified lifestyle audience</h3>
+              <p className="text-sm text-stone-500 leading-relaxed">Offer simple member perks and get priority visibility during the Miami launch — join early to set the tone.</p>
             </div>
           </div>
         </div>
@@ -119,7 +122,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
                 tier: 'Free',
                 desc: 'Basic directory listing.',
                 partners: [
-                  { name: 'Pups & Cups', city: 'Miami', status: 'Pending verification', perk: null },
+                  { name: 'Pups & Cups', city: 'Miami', status: 'Listed', perk: null },
                   { name: 'Miami Dog Run', city: 'Miami', status: 'Verified', perk: null },
                 ]
               },
@@ -186,7 +189,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
         <div className="max-w-2xl mx-auto space-y-8">
           <h2 className="text-3xl md:text-4xl font-serif italic tracking-tight">Launching first in Miami<span className="text-brand-orange">.</span></h2>
           <p className="text-stone-400 font-light italic text-lg">
-            We are onboarding founding partners in Miami right now. Join early and get priority visibility during the launch.
+            We are onboarding founding partners in Miami right now. Join early and get priority visibility during the launch. New York City and Barcelona coming next.
           </p>
           <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
             <button onClick={onClaimBusiness} className="luxury-button bg-white text-charcoal h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-100 transition-all flex items-center justify-center gap-2">

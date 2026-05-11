@@ -4,7 +4,8 @@ import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star } f
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
-import { MembershipCard, type MembershipPlan } from './MembershipCard';
+import { MembershipCard } from './MembershipCard';
+import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
 
 interface HomeProps {
   onExplore: () => void;
@@ -349,7 +350,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {PLANS.map((plan, i) => {
+          {MEMBERSHIP_PLANS.map((plan, i) => {
             const handleClick = () => {
               if (plan.id === 'black') {
                 setShowFoundingModal(true);
@@ -720,79 +721,6 @@ function FeatureCard({ icon, title, description, onClick }: { icon: React.ReactN
     </button>
   );
 }
-
-const PLANS: MembershipPlan[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    tagline: 'Organise your dog\'s essentials and explore trusted places.',
-    features: [
-      'Pet records — vaccines, chip, vet & emergency contacts',
-      'Curated dog-friendly city guide',
-      'Save your favourite trusted places',
-      'Boutique concierge community',
-    ],
-    cta: 'Get started',
-    highlight: false,
-    showPrice: true,
-  },
-  {
-    id: 'local',
-    name: 'Local',
-    price: '$6.99',
-    period: 'per month',
-    tagline: 'For the dog parent who wants more from their city.',
-    features: [
-      'Everything in Free',
-      'Local member perks from verified partners',
-      'One city guide — full concierge access',
-      'Priority recommendations',
-    ],
-    cta: 'Join waitlist',
-    highlight: false,
-    badge: 'Popular',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'plus',
-    name: 'Plus',
-    price: '$12.99',
-    period: 'per month',
-    tagline: 'For the dog parent who travels with their dog.',
-    features: [
-      'Everything in Local',
-      'All city guides — full concierge access',
-      'Priority partner perks across cities',
-      'Travel-ready pet records',
-    ],
-    cta: 'Join waitlist',
-    highlight: false,
-    badge: 'Recommended',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'black',
-    name: 'Black',
-    price: '$24.99',
-    period: 'per month',
-    tagline: 'A boutique concierge for the most committed dog parents.',
-    features: [
-      'Everything in Plus',
-      'Early access to new cities & partners',
-      'Exclusive Black member perks',
-      'Founding member badge',
-    ],
-    cta: 'Join waitlist',
-    highlight: false,
-    badge: 'Black',
-    comingSoon: true,
-    showPrice: false,
-  },
-];
 
 function ActivityCard({ location, tag, title, author, image, comingSoon, onClick }: { location: string, tag: string, title: string, author: string, image?: string, comingSoon?: boolean, onClick?: () => void }) {
   const { t } = useTranslation();

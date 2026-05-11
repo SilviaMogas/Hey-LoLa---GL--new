@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipCard, type MembershipPlan } from './MembershipCard';
+import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
 
 interface ClubProps {
   onBack: () => void;
@@ -12,80 +13,6 @@ interface ClubProps {
   onRequireLogin?: (plan: 'local' | 'plus' | 'black') => void;
   onJoinWaitlist?: (plan: string) => void;
 }
-
-const PLANS: MembershipPlan[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    tagline: 'Organise your dog\'s essentials and explore trusted places.',
-    features: [
-      'Pet records — vaccines, chip, vet & emergency contacts',
-      'Curated dog-friendly city guide',
-      'Save your favourite trusted places',
-      'Boutique concierge community',
-    ],
-    cta: 'Get started free',
-    highlight: false,
-    showPrice: true,
-  },
-  {
-    id: 'local',
-    name: 'Local',
-    price: '$6.99',
-    period: 'per month',
-    tagline: 'For the dog parent who wants more from their city.',
-    features: [
-      'Everything in Free',
-      'Local member perks from verified partners',
-      'One city guide — full concierge access',
-      'Priority recommendations',
-    ],
-    cta: 'Join Miami waitlist',
-    highlight: false,
-    badge: 'Coming Soon',
-    comingSoon: true,
-    showPrice: false,
-    billingNote: 'Launching first in Miami.',
-  },
-  {
-    id: 'plus',
-    name: 'Plus',
-    price: '$12.99',
-    period: 'per month',
-    tagline: 'For the dog parent who travels with their dog.',
-    features: [
-      'Everything in Local',
-      'All city guides — full concierge access',
-      'Priority partner perks across cities',
-      'Travel-ready pet records',
-    ],
-    cta: 'Join waitlist',
-    highlight: false,
-    badge: 'Coming Soon',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'black',
-    name: 'Black',
-    price: '$24.99',
-    period: 'per month',
-    tagline: 'A boutique concierge for the most committed dog parents.',
-    features: [
-      'Everything in Plus',
-      'Early access to new cities & partners',
-      'Exclusive Black member perks',
-      'Founding member badge',
-    ],
-    cta: 'Join waitlist',
-    highlight: false,
-    badge: 'Coming Soon',
-    comingSoon: true,
-    showPrice: false,
-  },
-];
 
 type PaidPlanId = 'local' | 'plus' | 'black';
 
@@ -178,7 +105,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {PLANS.map((plan, i) => (
+          {MEMBERSHIP_PLANS.map((plan, i) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}

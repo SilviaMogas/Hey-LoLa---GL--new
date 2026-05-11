@@ -29,10 +29,10 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           >
             <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">Brand Book</span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white">
-              The Pack<span className="text-brand-orange">.</span>
+              The Concierges<span className="text-brand-orange">.</span>
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
-              Four illustrated concierges, four personalities. Together they shape how Hey Lola sounds, feels and moves — a boutique pack for modern dog parents.
+              Four illustrated concierges, four personalities. Together they shape how Hey Lola sounds, feels and moves — a boutique concierge crew for modern dog parents.
             </p>
           </motion.div>
         </div>
@@ -223,7 +223,7 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
       {/* Other concierges */}
       <section className="py-12 px-5 sm:px-6 max-w-7xl mx-auto">
         <div className="text-center space-y-2 mb-8">
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The rest of the pack</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The rest of the concierges</span>
           <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight">Meet the others<span className="text-brand-orange">.</span></h2>
         </div>
         <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">

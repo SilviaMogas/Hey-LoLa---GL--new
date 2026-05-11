@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Linkedin, Instagram, Check } from 'lucide-react';
+import { Linkedin, Instagram, Check, ArrowRight } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
-import { paths } from '../lib/routes';
+import { paths, buildPath } from '../lib/routes';
 import { BrandLogo } from './BrandLogo';
+import { CONCIERGES, conciergePose } from '../data/concierges';
 
 const SUPPORT_EMAIL = 'hey@heylola.co';
 
@@ -66,7 +67,7 @@ export const Footer: React.FC = () => {
               <nav className="flex flex-col gap-2 sm:gap-3 items-start text-sm font-medium text-stone-500 italic">
                 <button onClick={() => handleNavigate(paths.explore)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Explore Gems</button>
                 <button onClick={() => handleNavigate(paths.community)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Hub</button>
-                <button onClick={() => handleNavigate('/#pack')} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Pack</button>
+                <button onClick={() => handleNavigate(paths.brandBook)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Concierges</button>
                 <button onClick={() => handleNavigate(paths.blog)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Journal</button>
                 <button onClick={() => handleNavigate(paths.club)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Hey Lola Club</button>
                 <button onClick={() => handleNavigate(paths.about)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Manifesto</button>
@@ -121,6 +122,39 @@ export const Footer: React.FC = () => {
               <Instagram size={16} />
             </a>
           </div>
+        </div>
+      </div>
+
+      {/* Brand Book — concierge access row */}
+      <div className="max-w-7xl mx-auto mt-10 pt-8 border-t border-stone-100 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-6">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Brand Book</span>
+            <p className="text-base sm:text-lg font-serif italic text-charcoal/80 mt-1">The Hey Lola Concierges.</p>
+          </div>
+          <button
+            onClick={() => handleNavigate(paths.brandBook)}
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors self-start md:self-auto"
+          >
+            View brand book <ArrowRight size={11} />
+          </button>
+        </div>
+        <div className="grid grid-cols-4 gap-3 sm:gap-4">
+          {CONCIERGES.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => handleNavigate(buildPath.brandBookCharacter(c.id))}
+              className={`group flex flex-col items-center gap-2 rounded-[1.25rem] ${c.color} border border-stone-100 p-3 sm:p-4 transition-all duration-500 hover:shadow-xl hover:-translate-y-1`}
+              aria-label={`Open ${c.name}'s concierge page`}
+            >
+              <div className="w-full aspect-square flex items-center justify-center">
+                <img src={conciergePose(c.id, 1)} alt={c.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <p className="text-xs sm:text-sm font-serif italic text-charcoal">{c.name}</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 text-center leading-tight">{c.role}</p>
+            </button>
+          ))}
         </div>
       </div>
 

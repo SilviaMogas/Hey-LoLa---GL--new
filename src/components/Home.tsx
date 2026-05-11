@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Check, Star } from 'lucide-react';
+import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
+import { MembershipPlansSection } from './MembershipPlansSection';
 
 interface HomeProps {
   onExplore: () => void;
@@ -82,16 +83,16 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 md:gap-6 pt-1 sm:pt-2 md:pt-4"
           >
             <button
-              onClick={onExplore}
+              onClick={onSignUp}
               className="luxury-button-primary w-full sm:w-auto h-11 sm:h-12 px-9 sm:px-11 text-[11px] sm:text-xs shadow-lg"
             >
-              {t.common.explore}
+              {t.home.ctaPrimary}
             </button>
             <button
-              onClick={onSignUp}
+              onClick={onExplore}
               className="luxury-button-secondary w-full sm:w-auto h-11 sm:h-12 px-9 sm:px-11 text-[11px] sm:text-xs bg-white/60 backdrop-blur-md"
             >
-              {t.home.ctaPrimary}
+              {t.home.ctaSecondary}
             </button>
           </motion.div>
         </div>
@@ -121,9 +122,9 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         >
           <div className="h-20 sm:h-28 md:h-32 w-px bg-stone-300 mt-3 md:mt-4 shrink-0" />
           <div className="space-y-4 sm:space-y-6">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-stone-400">Curated Ecosystem</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-stone-400">Curated City Guide</span>
             <h2 className="text-3xl md:text-4xl font-serif tracking-tight leading-[0.85] text-charcoal italic">
-              World <br /><span className="text-stone-300">Destinations<span className="text-brand-orange">.</span></span>
+              Trusted <br /><span className="text-stone-300">Cities<span className="text-brand-orange">.</span></span>
             </h2>
             <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light leading-snug italic max-w-xl">
               {t.home.networkDesc}
@@ -283,26 +284,26 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                 </h2>
               </div>
               <p className="text-2xl sm:text-3xl text-white/70 font-light italic leading-snug">
-                A better city life for you and your dog.
+                A boutique lifestyle concierge for life with your dog.
               </p>
               <p className="text-base sm:text-lg text-stone-400 font-light leading-relaxed max-w-lg">
-                Discover trusted dog-friendly places, unlock local perks, save your favourite spots, keep your pet essentials organised, and explore city guides created by real dog parents.
+                Organise your dog's essentials, discover trusted dog-friendly places, and access curated local perks through a concierge-style experience designed for modern dog parents.
               </p>
               <p className="text-sm text-stone-500 leading-relaxed max-w-lg">
-                Hey Lola Club brings together dog parents, local creators and pet-friendly venues in one trusted ecosystem. We are starting city by city — with local guides, verified places, member perks and useful pet records.
+                The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools to organise their dog's life. We are starting city by city — Miami first, then New York City and Barcelona.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <button
                   onClick={onSignUp}
                   className="luxury-button bg-white text-charcoal h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 hover:scale-[1.02] transition-all shadow-xl"
                 >
-                  Join as a founding member
+                  Join Hey Lola
                 </button>
                 <button
                   onClick={onExplore}
                   className="luxury-button border border-white/20 text-white/70 hover:text-white hover:border-white/40 h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-all"
                 >
-                  Explore local picks
+                  Explore the City
                 </button>
               </div>
             </motion.div>
@@ -314,10 +315,10 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { icon: <MapPin size={18} />, label: 'Dog-friendly places', desc: 'Verified & community-recommended venues in your city.' },
-                { icon: <Star size={18} />, label: 'Member perks', desc: 'Exclusive discounts and priority access from partner venues.' },
-                { icon: <PawPrint size={18} />, label: 'Pet profiles', desc: 'Passport, records, vaccines and essential info in one place.' },
-                { icon: <MessageSquare size={18} />, label: 'Community', desc: 'Local creators, city guides and a trusted dog parent network.' },
+                { icon: <MapPin size={18} />, label: 'Trusted places', desc: 'A curated city guide of dog-friendly restaurants, cafés, hotels and parks.' },
+                { icon: <Star size={18} />, label: 'Curated perks', desc: 'Simple member benefits from verified partners who welcome dog parents.' },
+                { icon: <PawPrint size={18} />, label: 'Pet records', desc: 'Vaccines, microchip, vet contacts and emergency notes — neatly organised.' },
+                { icon: <MessageSquare size={18} />, label: 'Concierge support', desc: 'Helpful guidance for everyday moments, trips and life with your dog.' },
               ].map(({ icon, label, desc }) => (
                 <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3 hover:bg-white/8 transition-colors">
                   <div className="text-white/50">{icon}</div>
@@ -331,44 +332,26 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
       </section>
 
       {/* ── Membership Plans ── */}
-      <section className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center space-y-4 mb-6"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
-          <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
-          </h2>
-          <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
-            Start free and upgrade when you're ready. Founding members keep their early access price — forever.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <PricingCard plan={plan} onSignUp={onSignUp} onClub={onClub} onFounding={() => setShowFoundingModal(true)} />
-            </motion.div>
-          ))}
-        </div>
-
+      <MembershipPlansSection
+        onSelect={(plan) => {
+          if (plan.id === 'black') {
+            setShowFoundingModal(true);
+          } else if (plan.id === 'free') {
+            onSignUp();
+          } else {
+            onClub ? onClub() : onSignUp();
+          }
+        }}
+      />
+      <div className="px-5 sm:px-6 max-w-7xl mx-auto">
         <FoundingMemberModal
           isOpen={showFoundingModal}
           onClose={() => setShowFoundingModal(false)}
         />
-        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
+        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6 pb-8">
           Founding members will keep their early access price.
         </p>
-      </section>
+      </div>
 
       {/* ── Built with local dog voices — Creator Banner ── */}
       <section className="py-8 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-b border-stone-100">
@@ -468,7 +451,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         <div className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-2xl md:rounded-3xl lg:rounded-3xl bg-charcoal p-8 sm:p-6 md:p-8 lg:p-8 text-center space-y-8 relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.25)] md:shadow-[0_50px_100px_rgba(0,0,0,0.3)]">
           <div className="relative z-10 space-y-8 md:space-y-8">
             <div className="space-y-4 md:space-y-6">
-              <span className="text-white/40 font-black uppercase tracking-[0.35em] sm:tracking-[0.5em] text-[10px]">The Future of Pet Parenting</span>
+              <span className="text-white/40 font-black uppercase tracking-[0.35em] sm:tracking-[0.5em] text-[10px]">A boutique club for modern dog parents</span>
               <h2 className="text-3xl md:text-3xl lg:text-3xl text-white tracking-tight leading-[0.85] sm:leading-[0.8] font-serif italic max-w-3xl mx-auto">{t.home.readyForLiftoff}</h2>
             </div>
             <p className="text-stone-400 text-base sm:text-lg md:text-xl font-light max-w-lg mx-auto italic leading-snug px-5 sm:px-8">{t.home.joinThousands}</p>
@@ -706,170 +689,6 @@ function FeatureCard({ icon, title, description, onClick }: { icon: React.ReactN
         <p className="text-sm sm:text-base text-stone-400 font-light leading-snug italic tracking-tight">{description}</p>
       </div>
     </button>
-  );
-}
-
-interface PlanData {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  tagline: string;
-  features: string[];
-  cta: string;
-  highlight: boolean;
-  badge?: string;
-  comingSoon?: boolean;
-  showPrice?: boolean;
-}
-
-const PLANS: PlanData[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    tagline: 'Start exploring dog-friendly places and build your pet profile.',
-    features: [
-      'Pet profile & passport',
-      'Explore dog-friendly places',
-      'Community feed access',
-      'Basic city guides',
-    ],
-    cta: 'Get started',
-    highlight: false,
-    showPrice: true,
-  },
-  {
-    id: 'local',
-    name: 'Local',
-    price: '$6.99',
-    period: 'per month',
-    tagline: 'For the dog parent who loves their city and wants more from it.',
-    features: [
-      'Everything in Free',
-      'Save favourite places',
-      'Member perks & discounts',
-      'One city guide — full access',
-    ],
-    cta: 'Join early access',
-    highlight: false,
-    badge: 'Popular',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'plus',
-    name: 'Plus',
-    price: '$12.99',
-    period: 'per month',
-    tagline: 'For the dog parent who travels and wants the full experience.',
-    features: [
-      'Everything in Local',
-      'All city guides — full access',
-      'Priority venue perks',
-      'Travel documents & records',
-    ],
-    cta: 'Join early access',
-    highlight: false,
-    badge: 'Recommended',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'black',
-    name: 'Black',
-    price: '$24.99',
-    period: 'per month',
-    tagline: 'For the most committed dog traveller. Unlimited and always first.',
-    features: [
-      'Everything in Plus',
-      'Early access to new cities',
-      'Exclusive Black member perks',
-      'Founding member badge',
-    ],
-    cta: 'Join Founding Circle',
-    highlight: false,
-    badge: 'Black',
-    showPrice: true,
-  },
-];
-
-function PricingCard({ plan, onSignUp, onClub, onFounding }: { plan: PlanData; onSignUp: () => void; onClub?: () => void; onFounding: () => void }) {
-  const handleClick = () => {
-    if (plan.id === 'black') {
-      onFounding();
-    } else if (plan.id === 'free') {
-      onSignUp();
-    } else {
-      onClub ? onClub() : onSignUp();
-    }
-  };
-
-  return (
-    <div className={`relative flex flex-col h-full rounded-[1.5rem] border p-6 space-y-4 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 font-boutique ${
-      plan.highlight
-        ? 'bg-charcoal text-white border-charcoal shadow-[0_20px_60px_rgba(0,0,0,0.25)]'
-        : 'bg-white text-charcoal border-stone-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)]'
-    }`}>
-      {plan.badge && (
-        <div className="absolute -top-2 left-5 flex gap-1.5 overflow-visible">
-          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap ${
-            plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
-          }`}>
-            {plan.badge}
-          </div>
-          {plan.comingSoon && (
-            <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
-              Coming Soon
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-2 pt-2">
-        <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-          {plan.name}
-        </p>
-        {(plan.showPrice !== false) ? (
-          <div className="flex items-end gap-1">
-            <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
-              {plan.price}
-            </span>
-            <span className={`text-sm pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-              /{plan.period}
-            </span>
-          </div>
-        ) : (
-          <div className="h-10 flex items-center">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
-          </div>
-        )}
-        <p className={`text-[13px] font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
-          {plan.tagline}
-        </p>
-      </div>
-
-      <ul className="space-y-2.5 flex-1">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-3">
-            <Check size={14} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-brand-orange' : 'text-charcoal/40'}`} />
-            <span className={`text-[12px] leading-snug ${plan.highlight ? 'text-white/80' : 'text-stone-500'}`}>{f}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={handleClick}
-        className={`w-full h-10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:scale-[1.02] active:scale-95 ${
-          plan.highlight
-            ? 'bg-white text-charcoal hover:bg-stone-100'
-            : 'bg-charcoal text-white hover:bg-charcoal/80'
-        }`}
-      >
-        {plan.cta}
-      </button>
-    </div>
   );
 }
 

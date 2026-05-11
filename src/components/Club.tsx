@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Check, ArrowRight, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
+import type { MembershipPlan } from './MembershipCard';
+import { MembershipPlansSection } from './MembershipPlansSection';
 
 interface ClubProps {
   onBack: () => void;
@@ -12,94 +13,6 @@ interface ClubProps {
   onRequireLogin?: (plan: 'local' | 'plus' | 'black') => void;
   onJoinWaitlist?: (plan: string) => void;
 }
-
-interface PlanData {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  tagline: string;
-  features: string[];
-  cta: string;
-  highlight: boolean;
-  badge?: string;
-  billingNote?: string;
-  comingSoon?: boolean;
-  showPrice?: boolean;
-}
-
-const PLANS: PlanData[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    tagline: 'Start exploring dog-friendly places and build your pet profile.',
-    features: [
-      'Pet profile & passport',
-      'Explore dog-friendly places',
-      'Community feed access',
-      'Basic city guides',
-    ],
-    cta: 'Get started free',
-    highlight: false,
-    showPrice: true,
-  },
-  {
-    id: 'local',
-    name: 'Local',
-    price: '$6.99',
-    period: 'per month',
-    tagline: 'For the dog parent who loves their city and wants more from it.',
-    features: [
-      'Everything in Free',
-      'Save favourite places',
-      'Member perks & discounts',
-      'One city guide — full access',
-    ],
-    cta: 'Join Miami Waitlist',
-    highlight: false,
-    badge: 'Coming Soon',
-    comingSoon: true,
-    showPrice: false,
-    billingNote: 'Coming Soon in Miami.',
-  },
-  {
-    id: 'plus',
-    name: 'Travel',
-    price: '$12.99',
-    period: 'per month',
-    tagline: 'For the dog parent who travels and wants the full experience.',
-    features: [
-      'Everything in Local',
-      'All city guides — full access',
-      'Priority venue perks',
-      'Travel documents & records',
-    ],
-    cta: 'Join Waitlist',
-    highlight: false,
-    badge: 'Coming Soon',
-    comingSoon: true,
-    showPrice: false,
-  },
-  {
-    id: 'black',
-    name: 'Black',
-    price: '$24.99',
-    period: 'per month',
-    tagline: 'For the most committed dog traveller. Unlimited and always first.',
-    features: [
-      'Everything in Plus',
-      'Early access to new cities',
-      'Exclusive Black member perks',
-      'Founding member badge',
-    ],
-    cta: 'Join Founding Circle',
-    highlight: false,
-    badge: 'Coming Soon',
-    showPrice: true,
-  },
-];
 
 type PaidPlanId = 'local' | 'plus' | 'black';
 
@@ -131,7 +44,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
     }
   };
 
-  const handleCardClick = (plan: PlanData) => {
+  const handleCardClick = (plan: MembershipPlan) => {
     if (plan.id === 'black') {
       setShowFoundingModal(true);
       return;
@@ -168,48 +81,19 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
               </h1>
             </div>
             <p className="text-sm md:text-base text-stone-400 font-light italic leading-snug max-w-md">
-              A better city life for you and your dog. Pick a plan to unlock perks.
+              A boutique lifestyle concierge for life with your dog. Start free — paid memberships coming soon.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Pricing — matches the Home boutique-tiers layout. */}
-      <section ref={pricingRef} id="pricing" className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto scroll-mt-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center space-y-4 mb-6"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
-          <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
-          </h2>
-          <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
-            Start free and upgrade when you're ready. Founding members keep their early access price — forever.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <ClubPricingCard
-                plan={plan}
-                onClick={() => handleCardClick(plan)}
-                busy={busyPlan === plan.id}
-                isCurrent={currentPlan === plan.id}
-              />
-            </motion.div>
-          ))}
-        </div>
-
+      <MembershipPlansSection
+        sectionRef={pricingRef}
+        onSelect={handleCardClick}
+        busyPlanId={busyPlan}
+        currentPlanId={currentPlan}
+      />
+      <div className="px-5 sm:px-6 max-w-7xl mx-auto pb-8">
         <FoundingMemberModal
           isOpen={showFoundingModal}
           onClose={() => setShowFoundingModal(false)}
@@ -225,7 +109,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         {error && (
           <p className="text-center text-xs text-red-500 mt-4">{error}</p>
         )}
-      </section>
+      </div>
 
       {/* FAQ teaser */}
       <section className="py-10 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-stone-100">
@@ -235,10 +119,10 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
             <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight">Common questions<span className="text-brand-orange">.</span></h2>
           </div>
           {[
-            { q: 'When will paid plans launch?', a: 'We\'re rolling out paid memberships in 2025. Join the early access list now and you\'ll be the first to know — and lock in founding member pricing.' },
-            { q: 'What cities are available?', a: 'Barcelona, Miami, and New York City are live. We\'re actively adding venues and expanding to new cities. Toronto, Dubai, Paris and Singapore are coming next.' },
-            { q: 'Can I use Hey Lola for free?', a: 'Yes. The Free plan gives you full access to explore venues, build a pet profile, and browse the community feed — no card required.' },
-            { q: 'What are member perks?', a: 'Verified partner venues offer exclusive perks to Hey Lola Club members: discounts, free items, priority booking and pet-friendly experiences. Perks are shown on venue cards when active.' },
+            { q: 'What is Hey Lola?', a: 'Hey Lola is a boutique lifestyle concierge for dog parents. It helps you organise your dog\'s essentials, discover trusted dog-friendly places, and access curated local perks.' },
+            { q: 'When will paid memberships launch?', a: 'Local, Plus and Black are coming soon. We activate them only after our partner network in each city is verified. Join the waitlist to be the first to know.' },
+            { q: 'Which cities are available?', a: 'Launching first in Miami. New York City and Barcelona coming next.' },
+            { q: 'Can I use Hey Lola for free?', a: 'Yes. The Free plan is active today and gives you pet records, the curated city guide, saved places and the boutique concierge community — no card required.' },
           ].map(({ q, a }, i) => (
             <motion.div
               key={i}
@@ -280,81 +164,3 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
   );
 };
 
-function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; onClick: () => void; busy: boolean; isCurrent: boolean }) {
-  const cta = isCurrent ? 'Current plan' : plan.cta;
-  return (
-    <div className={cn(
-      'relative flex flex-col h-full rounded-[1.5rem] border p-6 space-y-4 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 font-boutique',
-      plan.highlight
-        ? 'bg-charcoal text-white border-charcoal shadow-[0_20px_60px_rgba(0,0,0,0.25)]'
-        : 'bg-white text-charcoal border-stone-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)]',
-    )}>
-      {plan.badge && (
-        <div className="absolute -top-2 left-5 flex gap-1.5 overflow-visible">
-          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap ${
-            plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
-          }`}>
-            {plan.badge}
-          </div>
-          {plan.comingSoon && (
-            <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
-              Coming Soon
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-2 pt-2">
-        <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-          {plan.name}
-        </p>
-        {(plan.showPrice !== false) ? (
-          <div className="flex items-end gap-1">
-            <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
-              {plan.price}
-            </span>
-            <span className={`text-sm pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-              /{plan.period}
-            </span>
-          </div>
-        ) : (
-          <div className="h-10 flex items-center">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
-          </div>
-        )}
-        <p className={`text-[13px] font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
-          {plan.tagline}
-        </p>
-      </div>
-
-      <ul className="space-y-2.5 flex-1">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-3">
-            <Check size={14} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-brand-orange' : 'text-charcoal/40'}`} />
-            <span className={`text-[12px] leading-snug ${plan.highlight ? 'text-white/80' : 'text-stone-500'}`}>{f}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="space-y-2">
-        <button
-          onClick={onClick}
-          disabled={busy || isCurrent}
-          className={`w-full h-10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-            plan.highlight
-              ? 'bg-white text-charcoal hover:bg-stone-100'
-              : 'bg-charcoal text-white hover:bg-charcoal/80'
-          }`}
-        >
-          {busy && <Loader2 size={12} className="animate-spin" />}
-          {cta}
-        </button>
-        {plan.billingNote && !isCurrent && (
-          <p className={`text-[10px] text-center leading-snug ${plan.highlight ? 'text-white/40' : 'text-stone-400'}`}>
-            {plan.billingNote}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}

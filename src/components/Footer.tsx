@@ -79,6 +79,8 @@ export const Footer: React.FC = () => {
               <nav className="flex flex-col gap-2 sm:gap-3 items-start text-sm font-medium text-stone-500 italic">
                 <button onClick={() => handleNavigate(paths.creators)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Creator Partners</button>
                 <button onClick={() => handleNavigate(paths.partners)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Partner Network</button>
+                <button onClick={() => handleNavigate(paths.brandBook)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Brand Book</button>
+                <button onClick={() => handleNavigate(paths.media)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Press &amp; Media</button>
                 <button onClick={() => handleNavigate(paths.privacy)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">{t.footer.privacy}</button>
                 <button onClick={() => handleNavigate(paths.terms)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">{t.footer.terms}</button>
                 <a

@@ -56,6 +56,9 @@ const Club = lazy(() => import('./components/Club').then(m => ({ default: m.Club
 const Creators = lazy(() => import('./components/Creators').then(m => ({ default: m.Creators })));
 const Partners = lazy(() => import('./components/Partners').then(m => ({ default: m.Partners })));
 const Start = lazy(() => import('./components/Start').then(m => ({ default: m.Start })));
+const BrandBook = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBook })));
+const BrandBookCharacter = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBookCharacter })));
+const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Media })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -294,6 +297,7 @@ function AppContent() {
                   onClub={() => navigate(paths.club)}
                   onCreators={() => navigate(paths.creators)}
                   onCommunity={() => navigate(paths.community)}
+                  onConcierge={(name) => navigate(buildPath.brandBookCharacter(name))}
                 />
               </FadeIn>
             } />
@@ -339,6 +343,18 @@ function AppContent() {
                   onClaimBusiness={() => openWaitlist('partner')}
                 />
               </FadeIn>
+            } />
+            <Route path={paths.brandBook} element={
+              <FadeIn>
+                <BrandBook
+                  onBack={() => navigate(paths.home)}
+                  onOpenCharacter={(name) => navigate(buildPath.brandBookCharacter(name))}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.brandBookCharacter} element={<BrandBookCharacterRoute />} />
+            <Route path={paths.media} element={
+              <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
             } />
 
             {/* ── Public app surfaces ───────────────────────────────── */}
@@ -633,6 +649,23 @@ function ClaimListingRoute() {
   return (
     <FadeIn>
       <ClaimListing token={token} onBack={() => navigate(paths.home)} />
+    </FadeIn>
+  );
+}
+
+function BrandBookCharacterRoute() {
+  const navigate = useNavigate();
+  const { name } = useParams<{ name: string }>();
+  const allowed = new Set(['lola', 'bruno', 'milo', 'nuc']);
+  const id = (name || '').toLowerCase();
+  if (!allowed.has(id)) return <Navigate to={paths.brandBook} replace />;
+  return (
+    <FadeIn>
+      <BrandBookCharacter
+        id={id as 'lola' | 'bruno' | 'milo' | 'nuc'}
+        onBack={() => navigate(paths.brandBook)}
+        onOther={(other) => navigate(buildPath.brandBookCharacter(other))}
+      />
     </FadeIn>
   );
 }

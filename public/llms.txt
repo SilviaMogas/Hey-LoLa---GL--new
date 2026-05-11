@@ -1,0 +1,35 @@
+# Hey Lola
+
+> Hey Lola is a boutique lifestyle concierge for dog parents. It helps modern dog parents organise their dog's essentials, discover trusted dog-friendly places, and access curated local perks.
+
+Hey Lola is launching first in Miami. New York City and Barcelona are next. The brand is built around four illustrated concierges — Lola, Bruno, Milo and Nuc — who each represent a facet of the Hey Lola experience.
+
+## Brand
+- Tagline: Your dog's lifestyle concierge.
+- Alternative tagline: A boutique lifestyle concierge for life with your dog.
+- Tone: Premium, warm, elegant, clear, helpful, trustworthy, concierge-style, lifestyle-driven. Never childish, never overly technical, no blockchain or crypto language.
+
+## Concierges
+- [Lola — Dog Concierge & Founder](https://heylola.co/brand-book/lola): Elegant poodle concierge who sets the tone. Knows the best places.
+- [Bruno — Urban Cool Expert](https://heylola.co/brand-book/bruno): Cafés, restaurants, rooftops, Miami cool.
+- [Milo — Community Heart](https://heylola.co/brand-book/milo): Warm, trustworthy, family-friendly, the community face.
+- [Nuc — Adventure Guide](https://heylola.co/brand-book/nuc): Travel, road trips, dog-friendly weekends beyond the city.
+
+## Pages
+- [Home](https://heylola.co/): Hero, cities, membership tiers, concierges and the brand pitch.
+- [Hey Lola Club](https://heylola.co/club): Boutique membership with Free / Local / Plus / Black tiers. Free is active; paid tiers are coming soon.
+- [Community](https://heylola.co/community): Concierge community feed, leaderboard and Miami Pack.
+- [Explore](https://heylola.co/explore): Trusted dog-friendly venues curated by Hey Lola.
+- [Partners](https://heylola.co/partners): Verified dog-friendly businesses joining the network.
+- [Brand Book](https://heylola.co/brand-book): Logos, palette, typography, voice and the four concierges.
+- [Press & Media](https://heylola.co/media): Press contact (hey@heylola.co).
+- [About](https://heylola.co/about): The story behind Hey Lola.
+- [FAQ](https://heylola.co/faq): Common questions about the platform, memberships and verification.
+
+## Cities
+- Miami — Launch city.
+- New York City — Coming next.
+- Barcelona — Coming next.
+
+## Contact
+hey@heylola.co

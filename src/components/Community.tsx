@@ -1,565 +1,418 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, limit } from 'firebase/firestore';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  MessageSquare,
-  Heart,
-  Send,
-  Loader2,
-  Shield,
-  Activity,
-  Waves,
-  Globe,
-  PawPrint,
-  User,
-  ArrowLeft,
+  ArrowRight,
+  MapPin,
   Sparkles,
-  Wine,
-  Utensils,
-  Trees,
-  Lightbulb,
-  Users,
-  ChevronDown,
+  Gift,
+  Trophy,
+  Heart,
+  MessageSquare,
+  Award,
 } from 'lucide-react';
-import { Post } from '../types';
-import { useTranslation } from '../lib/LanguageContext';
-import { track } from '../lib/analytics';
+import { CONCIERGES, conciergePose } from '../data/concierges';
 
 interface CommunityProps {
-  petName: string;
+  petName?: string;
   initialMode?: 'community' | 'support';
 }
 
-// Reddit-style collapsible sidebar.
-// Each `category` is a top-level group that the user can expand / collapse;
-// each city has its own group with 5 sub-channels (bars, restaurants,
-// parks, tips, singles) so every conversation stays on-topic.
-const cityChannels = (cityKey: string, cityLabel: string) => [
-  { id: `${cityKey}-bars`,        name: `${cityKey}-bars`,        icon: <Wine size={15} />,     topic: `Pet-friendly bars and rooftops in ${cityLabel}` },
-  { id: `${cityKey}-restaurants`, name: `${cityKey}-restaurants`, icon: <Utensils size={15} />, topic: `Where to dine with your companion in ${cityLabel}` },
-  { id: `${cityKey}-parks`,       name: `${cityKey}-parks`,       icon: <Trees size={15} />,    topic: `Best parks, beaches and walks in ${cityLabel}` },
-  { id: `${cityKey}-tips`,        name: `${cityKey}-tips`,        icon: <Lightbulb size={15} />, topic: `Local hacks and recommendations for ${cityLabel}` },
-  { id: `${cityKey}-singles`,     name: `${cityKey}-singles`,     icon: <Users size={15} />,    topic: `Single pet parents meeting up in ${cityLabel}` },
-];
-
-const COMMUNITIES = [
-  {
-    category: 'Global',
-    channels: [
-      { id: 'global-lounge', name: 'lounge',       icon: <Sparkles size={15} />, topic: 'Open conversations across the HeyLola community' },
-      { id: 'global-health', name: 'health-sync',  icon: <Activity size={15} />, topic: 'Health and biometric data' },
-      { id: 'global-rules',  name: 'travel-rules', icon: <Shield size={15} />,   topic: 'International travel requirements' },
-    ],
-  },
-  {
-    category: 'Species',
-    channels: [
-      { id: 'species-dogs', name: 'dog-parents', icon: <PawPrint size={15} />, topic: 'Connecting dog parents worldwide' },
-      { id: 'species-cats', name: 'cat-lounge',  icon: <Waves size={15} />,    topic: 'Insights for cat companions' },
-    ],
-  },
-  { category: 'Barcelona',     channels: cityChannels('bcn',    'Barcelona') },
-  { category: 'Miami',         channels: cityChannels('mia',    'Miami') },
-  { category: 'New York City', channels: cityChannels('nyc',    'New York City') },
-];
-
-function relativeTime(ts?: { toDate?: () => Date } | null): string {
-  if (!ts?.toDate) return 'now';
-  const date = ts.toDate();
-  const diff = Math.max(0, Date.now() - date.getTime());
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'now';
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d`;
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+interface FeedPost {
+  id: string;
+  author: string;
+  handle: string;
+  avatar: string;
+  badge?: string;
+  city?: string;
+  body: string;
+  spot?: string;
+  likes: number;
+  replies: number;
+  timeAgo: string;
 }
 
-export const Community: React.FC<CommunityProps> = ({ petName, initialMode = 'community' }) => {
-  const { t } = useTranslation();
-  void t;
-  const [activeView, setActiveView] = useState<'feed' | 'topics' | 'messages'>(
-    initialMode === 'support' ? 'messages' : 'feed'
+interface LeaderboardEntry {
+  id: string;
+  team: string;
+  caption: string;
+  avatar: string;
+  checkins: number;
+  trend: 'up' | 'steady';
+}
+
+const MIAMI_PACK_TAGLINE = "Join dog parents exploring Miami's best dog-friendly cafés, hotels, parks, and experiences.";
+
+const COMMUNITY_CARDS = [
+  {
+    id: 'miami-pack',
+    title: 'Miami Pack',
+    description: MIAMI_PACK_TAGLINE,
+    cta: 'Join Pack',
+    icon: MapPin,
+    accent: 'bg-[#F5F8FA] text-[#5D848C]',
+    cover: 'bg-gradient-to-br from-[#F5F8FA] via-[#FBFCFD] to-white',
+    badge: 'Live in Miami',
+  },
+  {
+    id: 'lolas-picks',
+    title: "Lola's Picks",
+    description: 'Weekly curated places hand-selected by Lola — chic cafés, dog-friendly hotels and corner tables that keep treats behind the counter.',
+    cta: 'View Picks',
+    icon: Sparkles,
+    accent: 'bg-[#FDF8F6] text-[#C4622D]',
+    cover: 'bg-gradient-to-br from-[#FDF8F6] via-[#FCF6F2] to-white',
+    badge: 'Updated weekly',
+  },
+  {
+    id: 'partner-perks',
+    title: 'Partner Perks',
+    description: 'Unlock perks from verified dog-friendly businesses — welcome treats, priority booking, member-only experiences.',
+    cta: 'Explore Perks',
+    icon: Gift,
+    accent: 'bg-[#F7F9F5] text-[#6E8C5D]',
+    cover: 'bg-gradient-to-br from-[#F7F9F5] via-[#FBFCF8] to-white',
+    badge: 'Verified partners',
+  },
+  {
+    id: 'challenges',
+    title: 'Community Challenges',
+    description: 'Check in at dog-friendly venues, collect badges and unlock seasonal experiences with your concierge.',
+    cta: 'Start Challenge',
+    icon: Trophy,
+    accent: 'bg-[#FAF9F5] text-[#8C845D]',
+    cover: 'bg-gradient-to-br from-[#FAF9F5] via-[#FDFCF9] to-white',
+    badge: 'Season 01',
+  },
+];
+
+const LEADERBOARD: LeaderboardEntry[] = [
+  {
+    id: 'lola-silvia',
+    team: 'Lola & Silvia',
+    caption: 'Concierge crew · Miami',
+    avatar: conciergePose('lola', 1),
+    checkins: 32,
+    trend: 'up',
+  },
+  {
+    id: 'bruno-crew',
+    team: "Bruno's Crew",
+    caption: 'Wynwood & Downtown · Miami',
+    avatar: conciergePose('bruno', 1),
+    checkins: 27,
+    trend: 'up',
+  },
+  {
+    id: 'milo-club',
+    team: 'Milo Trail Club',
+    caption: 'Family weekends · Miami',
+    avatar: conciergePose('milo', 1),
+    checkins: 24,
+    trend: 'steady',
+  },
+  {
+    id: 'nuc-city-pack',
+    team: 'Nuc City Pack',
+    caption: 'Beach + road trips · Miami',
+    avatar: conciergePose('nuc', 1),
+    checkins: 21,
+    trend: 'up',
+  },
+];
+
+const SEED_FEED: FeedPost[] = [
+  {
+    id: 'silvia-1',
+    author: 'Silvia & Lola',
+    handle: 'silviamogas',
+    avatar: conciergePose('lola', 2),
+    badge: 'Founder',
+    city: 'Miami',
+    body: "Brunch at Pura Vida Brickell with Lola today — they brought a bowl of water before we even sat down. Filing this one under 'corner-table material'.",
+    spot: 'Pura Vida Brickell',
+    likes: 18,
+    replies: 4,
+    timeAgo: '2h',
+  },
+  {
+    id: 'silvia-2',
+    author: 'Silvia & Bruno',
+    handle: 'silviamogas',
+    avatar: conciergePose('bruno', 3),
+    badge: 'Concierge crew',
+    city: 'Miami',
+    body: 'Bruno tip: weekday afternoons at Wynwood Walls are blissfully quiet — perfect for slow walks before the rooftop crowd kicks in.',
+    spot: 'Wynwood Walls',
+    likes: 12,
+    replies: 2,
+    timeAgo: '6h',
+  },
+  {
+    id: 'silvia-3',
+    author: 'Silvia & Milo',
+    handle: 'silviamogas',
+    avatar: conciergePose('milo', 4),
+    badge: 'Community',
+    city: 'Miami',
+    body: 'Milo says the new dog meet-up on Sunday at Margaret Pace Park has the friendliest pack so far. Anyone joining next week?',
+    spot: 'Margaret Pace Park',
+    likes: 9,
+    replies: 5,
+    timeAgo: '1d',
+  },
+  {
+    id: 'silvia-4',
+    author: 'Silvia & Nuc',
+    handle: 'silviamogas',
+    avatar: conciergePose('nuc', 5),
+    badge: 'Adventures',
+    city: 'Miami → Key Biscayne',
+    body: 'Day trip with Nuc to Hobie Beach. Tide was calm, the dog-friendly stretch is bigger than I remembered. Bring a towel — and a flat white from Vice City Coffee on the way back.',
+    spot: 'Hobie Beach',
+    likes: 21,
+    replies: 7,
+    timeAgo: '2d',
+  },
+];
+
+export const Community: React.FC<CommunityProps> = (_props) => {
+  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
+  const sortedLeaderboard = useMemo(
+    () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
+    [],
   );
-  const [activeChannelId, setActiveChannelId] = useState(initialMode === 'support' ? '' : COMMUNITIES[0].channels[0].id);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [newPost, setNewPost] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [isPosting, setIsPosting] = useState(false);
-  const [botTyping, setBotTyping] = useState(false);
-
-  const [activeDM, setActiveDM] = useState<{ id: string; name: string } | null>(
-    initialMode === 'support' ? { id: 'support_team', name: 'HeyLola Assistant' } : null
-  );
-  const [dmMessages, setDmMessages] = useState<any[]>([]);
-  const dmScrollRef = useRef<HTMLDivElement>(null);
-
-  const activeChannel = useMemo(() => {
-    for (const group of COMMUNITIES) {
-      const found = group.channels.find((c) => c.id === activeChannelId);
-      if (found) return found;
-    }
-    return COMMUNITIES[0].channels[0];
-  }, [activeChannelId]);
-
-  useEffect(() => {
-    if ((activeView === 'feed' || activeView === 'topics') && activeChannelId) {
-      setLoading(true);
-      const q = query(
-        collection(db, 'posts'),
-        where('channel', '==', activeChannelId),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          setPosts(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Post[]);
-          setLoading(false);
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.GET, 'posts');
-          setLoading(false);
-        }
-      );
-      return () => unsubscribe();
-    }
-  }, [activeChannelId, activeView]);
-
-  useEffect(() => {
-    if (activeView === 'messages' && activeDM && auth.currentUser) {
-      setLoading(true);
-      const dmId = [auth.currentUser.uid, activeDM.id].sort().join('_');
-      const q = query(collection(db, `dms/${dmId}/messages`), orderBy('createdAt', 'asc'));
-
-      const unsubscribe = onSnapshot(q, async (snapshot) => {
-        setDmMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-        setLoading(false);
-
-        // First-time greeting from support team (not from user)
-        if (snapshot.empty && activeDM.id === 'support_team' && auth.currentUser) {
-          const dmId = [auth.currentUser.uid, activeDM.id].sort().join('_');
-          try {
-            await addDoc(collection(db, `dms/${dmId}/messages`), {
-              senderId: 'support_team',
-              displayName: 'HeyLola Assistant',
-              content: `Hi! 👋 I'm the HeyLola AI assistant — ask me anything about pet documents, travel rules, vaccinations or vet emergencies. For anything I can't solve, tap "Contact us" up top to email our team.`,
-              createdAt: serverTimestamp(),
-            });
-          } catch (error) {
-            handleFirestoreError(error, OperationType.CREATE, `dms/${dmId}/messages`);
-          }
-        }
-      });
-      return () => unsubscribe();
-    }
-  }, [activeView, activeDM]);
-
-  // Auto-scroll DM container to bottom on new message
-  useEffect(() => {
-    if (activeView === 'messages' && dmScrollRef.current) {
-      dmScrollRef.current.scrollTop = dmScrollRef.current.scrollHeight;
-    }
-  }, [dmMessages, activeView]);
-
-  const handlePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPost.trim() || !auth.currentUser) return;
-    setIsPosting(true);
-    try {
-      await addDoc(collection(db, 'posts'), {
-        userId: auth.currentUser.uid,
-        displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Friend',
-        petName: petName || 'Partner',
-        channel: activeChannelId,
-        content: newPost,
-        likes: 0,
-        createdAt: serverTimestamp(),
-      });
-      track('community_post_created', { channel: activeChannelId });
-      setNewPost('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'posts');
-    } finally {
-      setIsPosting(false);
-    }
-  };
-
-  // Calls the /api/chat serverless function for an AI reply, then posts
-  // it to the DM thread as if it were sent by the support team.
-  const requestBotReply = async (userMessage: string, dmId: string) => {
-    setBotTyping(true);
-    try {
-      const recent = dmMessages.slice(-10).map((m: any) => ({
-        role: m.senderId === auth.currentUser?.uid ? 'user' : 'assistant',
-        content: m.content,
-      }));
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, history: recent }),
-      });
-      const data = await res.json().catch(() => ({}));
-      const reply = (data.reply as string | undefined) ||
-        "I'm having trouble right now — please email hey@heylola.co and our team will follow up.";
-      await addDoc(collection(db, `dms/${dmId}/messages`), {
-        senderId: 'support_team',
-        displayName: 'HeyLola Assistant',
-        content: reply,
-        createdAt: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error('bot reply failed', err);
-    } finally {
-      setBotTyping(false);
-    }
-  };
-
-  const handleSendMessage = async (content: string, auto = false) => {
-    if (!content.trim() || !auth.currentUser || !activeDM) return;
-    const dmId = [auth.currentUser.uid, activeDM.id].sort().join('_');
-    try {
-      await addDoc(collection(db, `dms/${dmId}/messages`), {
-        senderId: auth.currentUser.uid,
-        displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0],
-        content,
-        createdAt: serverTimestamp(),
-      });
-      if (!auto) {
-        setNewPost('');
-        track('support_message_sent');
-      }
-      // If the user is talking to support_team, fire the AI assistant
-      if (!auto && activeDM.id === 'support_team') {
-        requestBotReply(content, dmId);
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `dms/${dmId}/messages`);
-    }
-  };
-
-  const totalChannels = COMMUNITIES.reduce((sum, g) => sum + g.channels.length, 0);
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-[0_20px_60px_rgba(0,0,0,0.06)] h-[calc(100vh-160px)] min-h-[560px]">
-      {/* Header */}
-      <header className="px-5 sm:px-8 py-4 sm:py-5 bg-white border-b border-stone-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-          <div className="flex flex-col">
-            <h1 className="text-base sm:text-lg font-black italic tracking-tighter text-charcoal leading-none">
-              The <span className="text-stone-300">Hub</span><span className="text-brand-orange">.</span>
-            </h1>
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mt-1">{totalChannels} channels</span>
-          </div>
+    <div className="bg-white text-charcoal font-boutique min-h-screen">
+      <div className="max-w-6xl mx-auto px-5 sm:px-6">
+        {/* Header */}
+        <motion.header
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-8 sm:pt-10 pb-8 sm:pb-10 space-y-3"
+        >
+          <span className="inline-block text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">
+            Hey Lola Community
+          </span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-charcoal">
+            Your concierge<br />
+            <span className="text-stone-300">community</span><span className="text-brand-orange">.</span>
+          </h1>
+          <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-xl">
+            Discover dog-friendly places, perks, and city packs with other dog parents.
+          </p>
+        </motion.header>
 
-          <div className="h-6 w-px bg-stone-100 hidden md:block" />
+        {/* Main cards grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-10 sm:pb-12">
+          {COMMUNITY_CARDS.map((card, i) => (
+            <CommunityCard key={card.id} card={card} delay={i * 0.08} />
+          ))}
+        </section>
 
-          <nav className="flex gap-1 overflow-x-auto scrollbar-hide -mx-1 px-1">
-            {(['feed', 'topics', 'messages'] as const).map((view) => (
-              <button
-                key={view}
-                onClick={() => {
-                  setActiveView(view);
-                  if (view === 'feed') setActiveChannelId(COMMUNITIES[0].channels[0].id);
-                }}
-                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${
-                  activeView === view
-                    ? 'bg-charcoal text-white'
-                    : 'text-stone-400 hover:text-charcoal hover:bg-stone-50'
-                }`}
-              >
-                {view === 'feed' ? 'Feed' : view === 'topics' ? 'Topics' : 'Messages'}
-              </button>
-            ))}
-          </nav>
+        {/* Tabs */}
+        <div className="flex items-center gap-2 border-b border-stone-100 mb-8">
+          <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<MessageSquare size={13} />}>
+            Latest posts
+          </TabButton>
+          <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={13} />}>
+            Top explorers
+          </TabButton>
         </div>
 
-        <a
-          href="mailto:hey@heylola.co?subject=HeyLola%20—%20Support%20request"
-          onClick={() => track('support_chat_opened', { from: 'header_email' })}
-          className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-stone-100 hover:border-stone-200 hover:bg-stone-50 transition-all group shrink-0 self-stretch md:self-auto justify-center"
-        >
-          <span className="relative flex h-1.5 w-1.5 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
-          </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal whitespace-nowrap">Contact us</span>
-        </a>
-      </header>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sub-navigation */}
         <AnimatePresence mode="wait">
-          {activeView !== 'feed' && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className={`bg-stone-50/60 border-r border-stone-100 overflow-y-auto scrollbar-hide shrink-0 ${
-                (activeView === 'topics' && activeChannelId) || (activeView === 'messages' && activeDM)
-                  ? 'hidden md:block'
-                  : 'block w-full md:w-[280px]'
-              }`}
+          {activeTab === 'feed' ? (
+            <motion.section
+              key="feed"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="space-y-3 sm:space-y-4 pb-16"
             >
-              <div className="p-5 sm:p-6 space-y-7">
-                {activeView === 'topics' ? (
-                  COMMUNITIES.map((comm) => (
-                    <div key={comm.category} className="space-y-2">
-                      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 px-2">{comm.category}</h3>
-                      <div className="space-y-0.5">
-                        {comm.channels.map((channel) => (
-                          <button
-                            key={channel.id}
-                            onClick={() => setActiveChannelId(channel.id)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                              activeChannelId === channel.id
-                                ? 'bg-charcoal text-white'
-                                : 'text-stone-500 hover:bg-stone-100 hover:text-charcoal'
-                            }`}
-                          >
-                            <span className="shrink-0 opacity-70">{channel.icon}</span>
-                            <span className="truncate">#{channel.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="space-y-3">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 px-2">Recent Chats</h3>
-                    <button
-                      onClick={() => setActiveDM({ id: 'support_team', name: 'HeyLola Assistant' })}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
-                        activeDM?.id === 'support_team'
-                          ? 'bg-charcoal text-white'
-                          : 'bg-white border border-stone-100 text-charcoal hover:border-stone-200'
-                      }`}
-                    >
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                        activeDM?.id === 'support_team' ? 'bg-white/15' : 'bg-stone-100'
-                      }`}>
-                        <User size={15} />
-                      </div>
-                      <div className="text-left flex-1 min-w-0">
-                        <p className="truncate text-sm font-black">HeyLola Assistant</p>
-                        <p className="text-[9px] opacity-60 uppercase tracking-[0.2em] font-black mt-0.5">AI · Always on</p>
-                      </div>
-                    </button>
-                  </div>
-                )}
+              {SEED_FEED.map((post) => (
+                <FeedItem key={post.id} post={post} />
+              ))}
+            </motion.section>
+          ) : (
+            <motion.section
+              key="leaderboard"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="space-y-4 pb-16"
+            >
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">This Week's Top Explorers</span>
+                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">Concierge leaderboard<span className="text-brand-orange">.</span></h2>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Updates Sunday</span>
               </div>
-            </motion.aside>
+
+              <ol className="space-y-2 sm:space-y-3">
+                {sortedLeaderboard.map((entry, i) => (
+                  <LeaderboardRow key={entry.id} entry={entry} rank={i + 1} />
+                ))}
+              </ol>
+            </motion.section>
           )}
         </AnimatePresence>
-
-        {/* Content Area */}
-        <main
-          className={`flex-1 flex flex-col bg-white overflow-hidden relative ${
-            activeView !== 'feed' && !activeChannelId && !activeDM ? 'hidden md:flex' : 'flex'
-          }`}
-        >
-          {activeView === 'topics' && activeChannelId && (
-            <button
-              onClick={() => setActiveChannelId('')}
-              className="md:hidden flex items-center gap-2 px-5 py-3 text-stone-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-stone-50 hover:text-charcoal"
-            >
-              <ArrowLeft size={14} /> Back to Topics
-            </button>
-          )}
-          {activeView === 'messages' && activeDM && (
-            <button
-              onClick={() => setActiveDM(null)}
-              className="md:hidden flex items-center gap-2 px-5 py-3 text-stone-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-stone-50 hover:text-charcoal"
-            >
-              <ArrowLeft size={14} /> Back to Chats
-            </button>
-          )}
-
-          {activeView === 'feed' || (activeView === 'topics' && activeChannelId) ? (
-            <>
-              {/* Channel Header */}
-              {activeView === 'topics' && activeChannelId && (
-                <div className="px-5 sm:px-8 py-5 border-b border-stone-100 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-stone-50 text-charcoal rounded-xl flex items-center justify-center border border-stone-100">
-                      {activeChannel?.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <h2 className="text-lg sm:text-xl font-black tracking-tighter leading-none text-charcoal">
-                        #{activeChannel?.name}
-                      </h2>
-                      <p className="text-stone-400 text-xs mt-1 truncate">
-                        {activeChannel?.topic}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Thread List */}
-              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-5 sm:py-6 space-y-3 scrollbar-hide">
-                {loading && (activeView === 'feed' || activeChannelId) ? (
-                  <div className="flex flex-col items-center justify-center py-8 gap-4 text-stone-300">
-                    <Loader2 className="animate-spin" size={28} />
-                  </div>
-                ) : posts.length > 0 ? (
-                  posts.map((post) => (
-                    <article
-                      key={post.id}
-                      className="bg-white p-5 rounded-2xl border border-stone-100 hover:border-stone-200 hover:shadow-sm transition-all group"
-                    >
-                      <header className="flex justify-between items-start mb-3 gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 bg-stone-50 rounded-full flex items-center justify-center font-black text-xs text-charcoal shrink-0 border border-stone-100">
-                            {post.displayName?.[0]?.toUpperCase() || 'U'}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="font-black text-sm text-charcoal truncate leading-tight">{post.displayName}</h4>
-                            <p className="text-[9px] font-black text-stone-400 uppercase tracking-[0.2em] truncate mt-0.5">
-                              {post.petName ? `${post.petName}'s parent` : 'HeyLola member'}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-[9px] font-black tracking-[0.15em] uppercase text-stone-300 shrink-0 mt-1">
-                          {relativeTime((post as any).createdAt)}
-                        </span>
-                      </header>
-                      <p className="text-charcoal text-[15px] leading-relaxed whitespace-pre-line break-words">
-                        {post.content}
-                      </p>
-                      <footer className="flex gap-5 mt-4 pt-4 border-t border-stone-50">
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-stone-400 hover:text-charcoal transition-colors">
-                          <Heart size={13} /> {post.likes || 0}
-                        </button>
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-stone-400 hover:text-charcoal transition-colors">
-                          <MessageSquare size={13} /> Reply
-                        </button>
-                      </footer>
-                    </article>
-                  ))
-                ) : (
-                  <div className="text-center py-8 space-y-4">
-                    <div className="w-14 h-14 bg-stone-50 rounded-2xl flex items-center justify-center mx-auto text-stone-300 border border-stone-100">
-                      <MessageSquare size={22} />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-base font-black text-charcoal">Nothing here yet</p>
-                      <p className="text-sm text-stone-400 max-w-xs mx-auto">
-                        Be the first to start the conversation in <span className="text-charcoal font-black">#{activeChannel?.name}</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : activeView === 'messages' && activeDM ? (
-            <>
-              {/* DM Header */}
-              <div className="px-5 sm:px-8 py-4 border-b border-stone-100 shrink-0 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-charcoal flex items-center justify-center text-white shrink-0">
-                  <User size={16} />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-base font-black tracking-tight text-charcoal leading-none truncate">
-                    {activeDM.name}
-                  </h2>
-                  <p className="text-stone-400 text-[9px] font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> AI · Replies in seconds
-                  </p>
-                </div>
-              </div>
-
-              {/* Messages Flow */}
-              <div
-                ref={dmScrollRef}
-                className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 space-y-3 scrollbar-hide flex flex-col"
-              >
-                {dmMessages.map((msg) => {
-                  const isMe = msg.senderId === auth.currentUser?.uid;
-                  return (
-                    <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`flex flex-col gap-1 max-w-[80%] md:max-w-[65%] ${isMe ? 'items-end' : 'items-start'}`}>
-                        <div
-                          className={`px-4 py-3 rounded-2xl text-[14px] leading-relaxed whitespace-pre-line break-words ${
-                            isMe
-                              ? 'bg-charcoal text-white rounded-br-sm'
-                              : 'bg-stone-50 text-charcoal rounded-bl-sm border border-stone-100'
-                          }`}
-                        >
-                          {msg.content}
-                        </div>
-                        <span className="text-[9px] font-black tracking-[0.15em] uppercase text-stone-300 px-1">
-                          {relativeTime(msg.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-                {botTyping && (
-                  <div className="flex justify-start">
-                    <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-stone-50 border border-stone-100 inline-flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="hidden md:flex flex-col items-center justify-center h-full text-stone-300 p-8 text-center space-y-5">
-              <div className="w-16 h-16 bg-stone-50 rounded-2xl flex items-center justify-center border border-stone-100 text-stone-300">
-                <Globe size={28} />
-              </div>
-              <div className="space-y-2 max-w-sm">
-                <p className="text-base font-black text-charcoal">Pick a channel or chat</p>
-                <p className="text-sm text-stone-400">Select a topic on the left to start connecting with the HeyLola community.</p>
-              </div>
-            </div>
-          )}
-
-          {/* Input Area — sits in the normal flex flow right below the messages
-              so it never floats off-screen on tall containers */}
-          {(activeView === 'feed' || activeChannelId || activeDM) && (
-            <div className="shrink-0 px-3 sm:px-6 pb-3 sm:pb-4 pt-2 bg-white border-t border-stone-50 z-10">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!newPost.trim()) return;
-                  if (activeView === 'messages') {
-                    handleSendMessage(newPost);
-                  } else {
-                    handlePost(e);
-                  }
-                }}
-                className="bg-white p-1.5 rounded-full border border-stone-200 shadow-[0_4px_18px_-6px_rgba(0,0,0,0.10)] flex items-center gap-1.5"
-              >
-                <input
-                  type="text"
-                  value={newPost}
-                  onChange={(e) => setNewPost(e.target.value)}
-                  placeholder={activeView === 'messages' ? 'Ask the AI assistant anything…' : 'Ask the community anything…'}
-                  className="flex-1 h-11 pl-5 bg-transparent border-transparent rounded-full focus:outline-none transition-all text-charcoal placeholder:text-stone-300 text-sm"
-                  autoComplete="off"
-                />
-                <button
-                  type="submit"
-                  disabled={!newPost.trim() || isPosting || botTyping}
-                  aria-label="Send"
-                  className="w-11 h-11 bg-charcoal text-white rounded-full flex items-center justify-center hover:bg-stone-800 transition-all hover:scale-105 active:scale-95 disabled:opacity-25 disabled:hover:bg-charcoal disabled:hover:scale-100 shrink-0"
-                >
-                  {isPosting || botTyping ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                </button>
-              </form>
-            </div>
-          )}
-        </main>
       </div>
     </div>
   );
 };
+
+interface CardData {
+  id: string;
+  title: string;
+  description: string;
+  cta: string;
+  icon: React.ComponentType<{ size?: number }>;
+  accent: string;
+  cover: string;
+  badge?: string;
+}
+
+function CommunityCard({ card, delay }: { card: CardData; delay: number }) {
+  const Icon = card.icon;
+  return (
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay }}
+      className={`group relative text-left rounded-[1.75rem] border border-stone-100 ${card.cover} p-6 sm:p-7 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40 overflow-hidden`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className={`w-11 h-11 rounded-2xl ${card.accent} flex items-center justify-center`}>
+          <Icon size={18} />
+        </div>
+        {card.badge && (
+          <span className="text-[9px] font-black uppercase tracking-[0.25em] text-stone-400 bg-white/70 backdrop-blur-sm px-2.5 py-1 rounded-full border border-stone-100">
+            {card.badge}
+          </span>
+        )}
+      </div>
+      <div className="mt-6 space-y-2">
+        <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none text-charcoal">
+          {card.title}
+        </h3>
+        <p className="text-sm text-stone-500 font-light leading-relaxed pr-2">
+          {card.description}
+        </p>
+      </div>
+      <div className="mt-6 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-charcoal">
+        {card.cta}
+        <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+      </div>
+    </motion.button>
+  );
+}
+
+function TabButton({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative inline-flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${
+        active ? 'text-charcoal' : 'text-stone-400 hover:text-stone-600'
+      }`}
+    >
+      {icon}
+      {children}
+      {active && (
+        <motion.span layoutId="tab-underline" className="absolute -bottom-px left-0 right-0 h-px bg-charcoal" />
+      )}
+    </button>
+  );
+}
+
+function FeedItem({ post }: { post: FeedPost }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="rounded-[1.5rem] border border-stone-100 bg-white p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-lg transition-shadow duration-500"
+    >
+      <header className="flex items-start gap-4">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-stone-50 border border-stone-100 overflow-hidden shrink-0 flex items-center justify-center">
+          <img src={post.avatar} alt={post.author} className="w-full h-full object-contain" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <p className="text-sm font-serif italic text-charcoal">{post.author}</p>
+            {post.badge && (
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 bg-stone-50 border border-stone-100 px-2 py-0.5 rounded-full">
+                {post.badge}
+              </span>
+            )}
+            <span className="text-[10px] text-stone-400 font-medium">· {post.timeAgo}</span>
+          </div>
+          {post.city && (
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 mt-1 inline-flex items-center gap-1">
+              <MapPin size={9} /> {post.city}
+            </p>
+          )}
+        </div>
+      </header>
+
+      <p className="text-sm sm:text-[15px] text-charcoal/90 leading-relaxed mt-4">{post.body}</p>
+
+      {post.spot && (
+        <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-charcoal bg-stone-50 border border-stone-100 px-3 py-1.5 rounded-full">
+          <MapPin size={10} /> {post.spot}
+        </div>
+      )}
+
+      <footer className="mt-5 pt-4 border-t border-stone-100 flex items-center gap-5 text-stone-400">
+        <button type="button" className="inline-flex items-center gap-2 text-[11px] font-medium hover:text-charcoal transition-colors">
+          <Heart size={13} /> {post.likes}
+        </button>
+        <button type="button" className="inline-flex items-center gap-2 text-[11px] font-medium hover:text-charcoal transition-colors">
+          <MessageSquare size={13} /> {post.replies}
+        </button>
+      </footer>
+    </motion.article>
+  );
+}
+
+function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
+  const isTop = rank === 1;
+  return (
+    <motion.li
+      initial={{ opacity: 0, x: -8 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: rank * 0.04 }}
+      className={`flex items-center gap-4 rounded-2xl border p-3 sm:p-4 ${
+        isTop ? 'bg-charcoal text-white border-charcoal shadow-xl' : 'bg-white border-stone-100 hover:shadow-md'
+      } transition-shadow duration-500`}
+    >
+      <span className={`text-2xl sm:text-3xl font-serif italic w-10 text-center ${isTop ? 'text-white/70' : 'text-stone-300'}`}>
+        {String(rank).padStart(2, '0')}
+      </span>
+      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center ${
+        isTop ? 'bg-white/10' : 'bg-stone-50 border border-stone-100'
+      }`}>
+        <img src={entry.avatar} alt={entry.team} className="w-full h-full object-contain" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm sm:text-base font-serif italic leading-none ${isTop ? 'text-white' : 'text-charcoal'}`}>{entry.team}</p>
+        <p className={`text-[11px] mt-1 italic font-light ${isTop ? 'text-white/60' : 'text-stone-400'}`}>{entry.caption}</p>
+      </div>
+      <div className="text-right">
+        <p className={`text-2xl font-serif italic leading-none ${isTop ? 'text-white' : 'text-charcoal'}`}>{entry.checkins}</p>
+        <p className={`text-[9px] font-black uppercase tracking-[0.2em] mt-1 inline-flex items-center gap-1 ${
+          isTop ? 'text-white/60' : 'text-stone-400'
+        }`}>
+          <Award size={9} /> check-ins
+        </p>
+      </div>
+    </motion.li>
+  );
+}

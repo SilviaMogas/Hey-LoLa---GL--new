@@ -388,14 +388,14 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         </div>
       </section>
 
-      {/* Meet the Pack Section */}
-      <section id="pack" className="py-16 sm:py-24 px-5 sm:px-6 bg-stone-50/50 relative overflow-hidden">
+      {/* Meet the Concierges Section */}
+      <section id="concierges" className="py-16 sm:py-24 px-5 sm:px-6 bg-stone-50/50 relative overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-16 relative z-10">
           <div className="text-center space-y-4">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The Concierges</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Pack</span><span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Concierges</span><span className="text-brand-orange">.</span></h2>
             <p className="text-lg text-stone-500 font-light italic max-w-xl mx-auto leading-relaxed">
-              Your expert guides to the dog-friendly world. Ready to share their local secrets and bark-worthy recommendations.
+              Your boutique guides to the dog-friendly world. Tap any concierge to open their brand book and the full pose pack.
             </p>
           </div>
 

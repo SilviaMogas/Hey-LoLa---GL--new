@@ -7,6 +7,11 @@ import { BrandLogo } from './BrandLogo';
 
 const SUPPORT_EMAIL = 'hey@heylola.co';
 
+interface FooterColumn {
+  heading: string;
+  links: { label: string; path: string; ariaLabel?: string }[];
+}
+
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -17,10 +22,6 @@ export const Footer: React.FC = () => {
     navigate(path);
   };
 
-  // The plain `mailto:` only works for visitors who have a default email
-  // client set on their device — most desktops don't. So we also copy the
-  // address to the clipboard and surface a small "Copied" confirmation,
-  // while letting the mailto navigate in parallel.
   const handleCopyEmail = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     try {
       if (navigator.clipboard?.writeText) {
@@ -31,114 +32,137 @@ export const Footer: React.FC = () => {
     } catch {
       // Clipboard not available — let the mailto: fallback handle it.
     }
-    // Don't preventDefault — the browser still tries the mailto: handler.
     void e;
   };
 
-  return (
-    <footer id="footer" className="py-8 sm:py-10 px-5 sm:px-8 md:px-10 border-t border-stone-100 bg-stone-50/60 relative overflow-hidden">
-      {/* Decorative vertical mask line */}
-      <div className="absolute left-[8%] top-0 bottom-0 w-px bg-stone-50 hidden lg:block" />
+  const columns: FooterColumn[] = [
+    {
+      heading: 'Discover',
+      links: [
+        { label: 'Explore Gems', path: paths.explore },
+        { label: 'Community', path: paths.community },
+        { label: 'Journal', path: paths.blog },
+        { label: 'FAQ', path: paths.faq },
+      ],
+    },
+    {
+      heading: 'Membership',
+      links: [
+        { label: 'Hey Lola Club', path: paths.club },
+        { label: 'Join Hey Lola', path: paths.start },
+        { label: 'Manifesto', path: paths.about },
+      ],
+    },
+    {
+      heading: 'Brand',
+      links: [
+        { label: 'Brand Book', path: paths.brandBook },
+        { label: 'The Concierges', path: paths.brandBook },
+        { label: 'Press & Media', path: paths.media },
+      ],
+    },
+    {
+      heading: 'Partners',
+      links: [
+        { label: 'Partner Network', path: paths.partners },
+        { label: 'Creator Partners', path: paths.creators },
+        { label: t.footer.privacy, path: paths.privacy },
+        { label: t.footer.terms, path: paths.terms },
+      ],
+    },
+  ];
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-8 lg:gap-10 items-start relative z-10 font-boutique">
-        <div className="flex flex-col items-center lg:items-start gap-4 sm:gap-5 lg:gap-6 lg:col-span-4">
-          <div
-            className="cursor-pointer group flex flex-col items-center lg:items-start gap-3"
-            onClick={() => handleNavigate(paths.home)}
-          >
-            <BrandLogo size="2xl" className="group-hover:scale-105 transition-transform duration-1000 grayscale-[0.5] group-hover:grayscale-0" />
-            <div className="h-0.5 w-[50%] bg-stone-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
-          </div>
-          <div className="space-y-2 max-w-sm text-center lg:text-left">
-            <p className="text-base sm:text-lg md:text-xl font-serif italic text-charcoal/80 leading-[1.15] tracking-tight">
+  return (
+    <footer
+      id="footer"
+      role="contentinfo"
+      aria-label="Hey Lola site footer"
+      className="border-t border-stone-100 bg-stone-50/60 relative overflow-hidden font-boutique"
+    >
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-10 py-12 sm:py-14 relative z-10">
+        {/* Top: brand block + nav columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+          <div className="lg:col-span-4 flex flex-col items-center lg:items-start gap-5 text-center lg:text-left">
+            <button
+              type="button"
+              className="cursor-pointer group flex flex-col items-center lg:items-start gap-3"
+              onClick={() => handleNavigate(paths.home)}
+              aria-label="Go to Hey Lola home"
+            >
+              <BrandLogo size="2xl" className="group-hover:scale-105 transition-transform duration-700 grayscale-[0.5] group-hover:grayscale-0" />
+              <span className="h-0.5 w-12 bg-stone-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
+            </button>
+            <p className="text-base sm:text-lg font-serif italic text-charcoal/80 leading-snug max-w-sm">
               {t.footer.tagline}
             </p>
-            <div className="flex items-center gap-3 justify-center lg:justify-start opacity-30">
-              <div className="w-1.5 h-1.5 bg-charcoal rounded-full" />
-              <div className="w-20 h-px bg-charcoal" />
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              onClick={handleCopyEmail}
+              className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-charcoal transition-colors italic"
+              title={`Click to email or copy ${SUPPORT_EMAIL}`}
+            >
+              {SUPPORT_EMAIL}
+              {copied && (
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-emerald-600 not-italic font-black">
+                  <Check size={10} /> Copied
+                </span>
+              )}
+            </a>
+            <div className="flex items-center gap-3 pt-2">
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-400 hover:text-charcoal hover:shadow-md transition-all duration-300"
+                aria-label="Hey Lola on LinkedIn"
+              >
+                <Linkedin size={15} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-400 hover:text-charcoal hover:shadow-md transition-all duration-300"
+                aria-label="Hey Lola on Instagram"
+              >
+                <Instagram size={15} />
+              </a>
             </div>
           </div>
+
+          <nav aria-label="Footer navigation" className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            {columns.map((col) => (
+              <div key={col.heading} className="space-y-3">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400 border-b border-stone-100 pb-2">
+                  {col.heading}
+                </h2>
+                <ul className="space-y-2.5 text-sm text-stone-500 italic">
+                  {col.links.map((link) => (
+                    <li key={`${col.heading}-${link.label}`}>
+                      <button
+                        type="button"
+                        onClick={() => handleNavigate(link.path)}
+                        className="hover:text-charcoal transition-colors text-left"
+                        aria-label={link.ariaLabel ?? link.label}
+                      >
+                        {link.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:gap-6 lg:col-span-4 lg:pt-4">
-           <div className="space-y-3 sm:space-y-4">
-              <h4 className="text-[10px] font-black font-sans uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-2">Platform</h4>
-              <nav className="flex flex-col gap-2 sm:gap-3 items-start text-sm font-medium text-stone-500 italic">
-                <button onClick={() => handleNavigate(paths.explore)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Explore Gems</button>
-                <button onClick={() => handleNavigate(paths.community)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Hub</button>
-                <button onClick={() => handleNavigate('/#pack')} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Pack</button>
-                <button onClick={() => handleNavigate(paths.blog)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Journal</button>
-                <button onClick={() => handleNavigate(paths.club)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Hey Lola Club</button>
-                <button onClick={() => handleNavigate(paths.about)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Manifesto</button>
-                <button onClick={() => handleNavigate(paths.faq)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">FAQ</button>
-                <button onClick={() => handleNavigate(paths.start)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Join Hey Lola</button>
-              </nav>
-           </div>
-           <div className="space-y-3 sm:space-y-4">
-              <h4 className="text-[10px] font-black font-sans uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-2">Partners</h4>
-              <nav className="flex flex-col gap-2 sm:gap-3 items-start text-sm font-medium text-stone-500 italic">
-                <button onClick={() => handleNavigate(paths.creators)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Creator Partners</button>
-                <button onClick={() => handleNavigate(paths.partners)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Partner Network</button>
-                <button onClick={() => handleNavigate(paths.brandBook)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Brand Book</button>
-                <button onClick={() => handleNavigate(paths.media)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Press &amp; Media</button>
-                <button onClick={() => handleNavigate(paths.privacy)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">{t.footer.privacy}</button>
-                <button onClick={() => handleNavigate(paths.terms)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">{t.footer.terms}</button>
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}`}
-                  onClick={handleCopyEmail}
-                  className="inline-flex items-center gap-2 hover:text-charcoal transition-all hover:translate-x-1 duration-500"
-                  title={`Click to email or copy ${SUPPORT_EMAIL}`}
-                >
-                  {SUPPORT_EMAIL}
-                  {copied && (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-emerald-600 not-italic">
-                      <Check size={10} /> Copied
-                    </span>
-                  )}
-                </a>
-              </nav>
-           </div>
-        </div>
-
-        <div className="flex flex-col items-center lg:items-end gap-4 sm:gap-5 lg:col-span-4 lg:pt-4 font-sans">
-           <div className="flex items-center gap-4">
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-[1rem] border-2 border-white bg-white flex items-center justify-center text-stone-300 hover:text-charcoal hover:shadow-xl hover:-translate-y-1 transition-all duration-500 shadow-sm"
-              aria-label="LinkedIn"
-            >
-              <Linkedin size={16} />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-10 h-10 rounded-[1rem] border-2 border-white bg-white flex items-center justify-center text-stone-300 hover:text-charcoal hover:shadow-xl hover:-translate-y-1 transition-all duration-500 shadow-sm"
-              aria-label="Instagram"
-            >
-              <Instagram size={16} />
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto pt-6 sm:pt-8 md:pt-10 mt-8 sm:mt-8 md:mt-8 border-t border-stone-100 flex flex-col items-center justify-center relative z-10">
-        <div className="flex flex-col items-center gap-3 sm:gap-4 text-center">
-          <div className="flex items-center gap-3">
-            <BrandLogo size="md" />
-          </div>
-
-          <div className="space-y-2 max-w-md text-center">
-            <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] text-charcoal/70">
-              © {new Date().getFullYear()} BMBWeb3 Global FZCO — All rights reserved.
-            </p>
-            <p className="text-[10px] sm:text-xs font-medium text-stone-400 italic font-boutique leading-relaxed">
-              IFZA Business Park, Building A1 · Dubai Silicon Oasis<br />
-              P.O. Box 342001 · Dubai, UAE
-            </p>
-          </div>
+        {/* Legal strip */}
+        <div className="mt-12 pt-6 border-t border-stone-100 flex flex-col md:flex-row items-center md:items-baseline gap-3 md:gap-4 justify-between text-center md:text-left">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-charcoal/70">
+            © {new Date().getFullYear()} BMBWeb3 Global FZCO — {t.footer.rights}
+          </p>
+          <p className="text-[11px] text-stone-400 font-light italic leading-relaxed">
+            IFZA Business Park · Dubai Silicon Oasis · P.O. Box 342001 · Dubai, UAE
+          </p>
         </div>
       </div>
     </footer>

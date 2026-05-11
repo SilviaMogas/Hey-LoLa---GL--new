@@ -26,6 +26,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { motion } from 'motion/react';
 import { LanguageProvider } from './lib/LanguageContext';
 import { CookieBanner } from './components/CookieBanner';
+import { ComingSoon, hasAccess } from './components/ComingSoon';
 
 import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 
@@ -63,6 +64,31 @@ const ViewFallback = () => (
 );
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState<boolean>(() => hasAccess());
+
+  useEffect(() => {
+    // Allow bypass via ?access=HelloMiami in the URL so we can share a direct link.
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('access');
+    if (code && code.toLowerCase() === 'hellomiami') {
+      try { window.localStorage.setItem('hl_access_granted', '1'); } catch { /* ignore */ }
+      setUnlocked(true);
+      params.delete('access');
+      const rest = params.toString();
+      const url = window.location.pathname + (rest ? `?${rest}` : '') + window.location.hash;
+      window.history.replaceState({}, '', url);
+    }
+  }, []);
+
+  if (!unlocked) {
+    return (
+      <ErrorBoundary>
+        <ComingSoon onUnlock={() => setUnlocked(true)} />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <LanguageProvider>

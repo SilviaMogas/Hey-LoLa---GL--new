@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
-import { MembershipCard, type MembershipPlan } from './MembershipCard';
-import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
+import type { MembershipPlan } from './MembershipCard';
+import { MembershipPlansSection } from './MembershipPlansSection';
 
 interface ClubProps {
   onBack: () => void;
@@ -87,42 +87,13 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         </div>
       </section>
 
-      {/* Pricing — matches the Home boutique-tiers layout. */}
-      <section ref={pricingRef} id="pricing" className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto scroll-mt-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center space-y-4 mb-6"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
-          <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
-          </h2>
-          <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
-            The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Start free — paid tiers coming soon.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {MEMBERSHIP_PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <MembershipCard
-                plan={plan}
-                onClick={() => handleCardClick(plan)}
-                busy={busyPlan === plan.id}
-                isCurrent={currentPlan === plan.id}
-              />
-            </motion.div>
-          ))}
-        </div>
-
+      <MembershipPlansSection
+        sectionRef={pricingRef}
+        onSelect={handleCardClick}
+        busyPlanId={busyPlan}
+        currentPlanId={currentPlan}
+      />
+      <div className="px-5 sm:px-6 max-w-7xl mx-auto pb-8">
         <FoundingMemberModal
           isOpen={showFoundingModal}
           onClose={() => setShowFoundingModal(false)}
@@ -138,7 +109,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         {error && (
           <p className="text-center text-xs text-red-500 mt-4">{error}</p>
         )}
-      </section>
+      </div>
 
       {/* FAQ teaser */}
       <section className="py-10 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-stone-100">

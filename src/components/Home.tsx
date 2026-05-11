@@ -4,8 +4,7 @@ import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star } f
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
-import { MembershipCard } from './MembershipCard';
-import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
+import { MembershipPlansSection } from './MembershipPlansSection';
 
 interface HomeProps {
   onExplore: () => void;
@@ -333,55 +332,26 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
       </section>
 
       {/* ── Membership Plans ── */}
-      <section className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center space-y-4 mb-6"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
-          <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
-          </h2>
-          <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
-            The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Start free — paid tiers coming soon.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {MEMBERSHIP_PLANS.map((plan, i) => {
-            const handleClick = () => {
-              if (plan.id === 'black') {
-                setShowFoundingModal(true);
-              } else if (plan.id === 'free') {
-                onSignUp();
-              } else {
-                onClub ? onClub() : onSignUp();
-              }
-            };
-            return (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-              >
-                <MembershipCard plan={plan} onClick={handleClick} />
-              </motion.div>
-            );
-          })}
-        </div>
-
+      <MembershipPlansSection
+        onSelect={(plan) => {
+          if (plan.id === 'black') {
+            setShowFoundingModal(true);
+          } else if (plan.id === 'free') {
+            onSignUp();
+          } else {
+            onClub ? onClub() : onSignUp();
+          }
+        }}
+      />
+      <div className="px-5 sm:px-6 max-w-7xl mx-auto">
         <FoundingMemberModal
           isOpen={showFoundingModal}
           onClose={() => setShowFoundingModal(false)}
         />
-        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
+        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6 pb-8">
           Founding members will keep their early access price.
         </p>
-      </section>
+      </div>
 
       {/* ── Built with local dog voices — Creator Banner ── */}
       <section className="py-8 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-b border-stone-100">

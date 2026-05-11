@@ -625,9 +625,9 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent_70%)]" />
         
         {!imageFailed ? (
-          <img 
-            src={imagePath} 
-            alt={name} 
+          <img
+            src={imagePath}
+            alt={name}
             onError={() => {
               if (imgExt === 'png') {
                 setImgExt('jpg');
@@ -637,7 +637,7 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
                 setImageFailed(true);
               }
             }}
-            className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700" 
+            className={`relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700 ${name === 'Taco' ? 'scale-[1.45]' : ''}`}
           />
         ) : (
           <div className="relative z-10 text-charcoal/20 group-hover:scale-110 group-hover:text-brand-orange transition-all duration-700">

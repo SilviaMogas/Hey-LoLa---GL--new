@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Check, MapPin, Star, PawPrint, MessageSquare, ArrowRight, Loader2 } from 'lucide-react';
-import { auth } from '../lib/firebase';
-import { getTier } from '../lib/membership';
-import type { MemberPlan } from '../types';
+import { ArrowLeft, Check, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FoundingMemberModal } from './FoundingMemberModal';
 
@@ -177,31 +174,31 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         </div>
       </section>
 
-      {/* Pricing — moved up so the four plans land in the same viewport. */}
-      <section ref={pricingRef} id="pricing" className="pt-7 pb-10 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-8">
+      {/* Pricing — matches the Home boutique-tiers layout. */}
+      <section ref={pricingRef} id="pricing" className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto scroll-mt-8">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center space-y-1.5 mb-6"
+          className="text-center space-y-4 mb-6"
         >
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Membership Plans</span>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight leading-[0.95]">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
+          <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
             Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
           </h2>
-          <p className="text-sm text-stone-400 font-light italic max-w-xl mx-auto">
+          <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
             Start free and upgrade when you're ready. Founding members keep their early access price — forever.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {PLANS.map((plan, i) => (
             <motion.div
               key={plan.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: i * 0.08 }}
             >
               <ClubPricingCard
                 plan={plan}
@@ -283,49 +280,32 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
   );
 };
 
-// Hex equivalents of the tier dot colours in src/lib/membership.ts.
-// Used as the top-border accent of each pricing card so the colour is
-// visible even when the dot is too small to be the dominant signal.
-function tierBorderColor(planId: string): string {
-  switch (planId) {
-    case 'black': return '#1F1F1F';
-    case 'plus': return '#3B82F6';
-    case 'local': return '#E07A30';
-    default: return '#D6D3D1';
-  }
-}
-
 function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; onClick: () => void; busy: boolean; isCurrent: boolean }) {
   const cta = isCurrent ? 'Current plan' : plan.cta;
-  const tier = getTier(plan.id as MemberPlan, false);
   return (
     <div className={cn(
-      'relative flex flex-col h-full rounded-2xl border-t-4 border-x border-b p-4 lg:p-5 space-y-3 lg:space-y-4 transition-all duration-300 hover:shadow-xl font-boutique',
+      'relative flex flex-col h-full rounded-[1.5rem] border p-6 space-y-4 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 font-boutique',
       plan.highlight
-        ? 'bg-charcoal text-white border-charcoal shadow-[0_15px_45px_rgba(0,0,0,0.20)]'
-        : 'bg-white text-charcoal border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]',
-    )} style={{ borderTopColor: tierBorderColor(plan.id) }}>
+        ? 'bg-charcoal text-white border-charcoal shadow-[0_20px_60px_rgba(0,0,0,0.25)]'
+        : 'bg-white text-charcoal border-stone-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)]',
+    )}>
       {plan.badge && (
-        <div className="absolute -top-2.5 left-4 flex gap-1.5 overflow-visible">
-          <div className={`px-3 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.25em] whitespace-nowrap ${
+        <div className="absolute -top-2 left-5 flex gap-1.5 overflow-visible">
+          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap ${
             plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
           }`}>
             {plan.badge}
           </div>
           {plan.comingSoon && (
-            <div className={`px-3 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.25em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
+            <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
               Coming Soon
             </div>
           )}
         </div>
       )}
 
-      <div className="space-y-1 pt-1">
-        <p className={cn(
-          'inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.3em]',
-          plan.highlight ? 'text-white/70' : tier.textClass,
-        )}>
-          <span className={cn('w-1.5 h-1.5 rounded-full', tier.dotClass)} />
+      <div className="space-y-2 pt-2">
+        <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
           {plan.name}
         </p>
         {(plan.showPrice !== false) ? (
@@ -333,7 +313,7 @@ function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; o
             <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
               {plan.price}
             </span>
-            <span className={`text-xs pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
+            <span className={`text-sm pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
               /{plan.period}
             </span>
           </div>
@@ -342,15 +322,15 @@ function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; o
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
           </div>
         )}
-        <p className={`text-xs font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
+        <p className={`text-[13px] font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
           {plan.tagline}
         </p>
       </div>
 
-      <ul className="space-y-1.5 flex-1">
+      <ul className="space-y-2.5 flex-1">
         {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
-            <Check size={12} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-brand-orange' : 'text-charcoal/40'}`} />
+          <li key={f} className="flex items-start gap-3">
+            <Check size={14} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-brand-orange' : 'text-charcoal/40'}`} />
             <span className={`text-[12px] leading-snug ${plan.highlight ? 'text-white/80' : 'text-stone-500'}`}>{f}</span>
           </li>
         ))}
@@ -360,7 +340,7 @@ function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; o
         <button
           onClick={onClick}
           disabled={busy || isCurrent}
-          className={`w-full h-10 rounded-lg text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+          className={`w-full h-10 rounded-lg text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
             plan.highlight
               ? 'bg-white text-charcoal hover:bg-stone-100'
               : 'bg-charcoal text-white hover:bg-charcoal/80'

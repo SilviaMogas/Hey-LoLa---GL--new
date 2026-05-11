@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-boutique: "Cormorant Garamond", serif;
+  
+  --color-brand-orange: #F28C33;
+  --color-brand-yellow: #FBC15F;
+  --color-brand-cream: #F5F2ED;
+  --color-charcoal: #111111;
+  --color-bone: #FAF9F6;
+  --color-muted: #F8F8F8;
+  --color-stone-line: rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  html, body {
+    /* Lock horizontal overflow at the document level so no decorative
+       blob, off-canvas drawer or rogue translate can ever cause the
+       page to scroll sideways on mobile. */
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bone text-charcoal font-sans antialiased selection:bg-brand-orange/20;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent any element from breaking the viewport horizontally */
+  #root {
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans tracking-tighter font-black italic;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-orange);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Honor users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Branded scrollbar (subtle) */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(242, 140, 51, 0.25);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(242, 140, 51, 0.5); background-clip: padding-box; border: 2px solid transparent; }
+}
+
+@layer components {
+  .vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .luxury-card {
+    @apply bg-white rounded-[2rem] border border-stone-line shadow-[0_8px_40px_rgba(0,0,0,0.02)] transition-all duration-700 hover:shadow-[0_12px_60px_rgba(0,0,0,0.04)] hover:border-stone-200/50;
+  }
+  
+  .luxury-button {
+    @apply px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 disabled:opacity-50 inline-flex items-center justify-center gap-2;
+  }
+  
+  .luxury-button-primary {
+    @apply px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.18em] transition-all duration-300 active:scale-95 disabled:opacity-50 inline-flex items-center justify-center gap-2 bg-charcoal text-white hover:bg-neutral-800 shadow-lg hover:shadow-xl transition-all duration-500;
+  }
+  
+  .luxury-button-secondary {
+    @apply px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.18em] transition-all duration-300 active:scale-95 disabled:opacity-50 inline-flex items-center justify-center gap-2 bg-white text-charcoal border border-stone-line hover:border-stone-400 hover:bg-stone-50;
+  }
+  
+  .luxury-input {
+    @apply bg-white border border-stone-line rounded-2xl px-4 sm:px-5 md:px-6 py-3 md:py-3.5 focus:outline-none focus:border-brand-orange/40 focus:ring-4 focus:ring-brand-orange/10 transition-all text-sm placeholder:text-stone-300 w-full;
+  }
+
+  /* Apple-style minimal input — used in Auth and onboarding flows */
+  .apple-input {
+    @apply w-full h-11 bg-white border border-stone-200 rounded-xl px-4 text-sm text-charcoal placeholder:text-stone-300 focus:outline-none focus:border-charcoal focus:ring-2 focus:ring-stone-100 transition-colors;
+  }
+
+  .nav-link {
+    @apply text-[10px] font-black uppercase tracking-[0.14em] text-stone-400 hover:text-charcoal transition-colors relative pb-1;
+  }
+
+
+
+  .page-shell {
+    @apply min-h-screen font-boutique;
+  }
+
+  .page-hero {
+    @apply pt-16 sm:pt-20 md:pt-24 pb-6 sm:pb-7;
+  }
+
+  .page-section {
+    @apply py-10 sm:py-12 md:py-14;
+  }
+
+  .page-section-tight {
+    @apply py-8 sm:py-10 md:py-12;
+  }
+
+  .shadow-soft {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}

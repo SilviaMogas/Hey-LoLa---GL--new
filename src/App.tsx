@@ -1,0 +1,618 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { Routes, Route, useNavigate, useLocation, useParams, Navigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from './lib/useAuth';
+import { isAdminEmail } from './lib/admin';
+import { detectCity } from './lib/geo';
+import { canSavePlaces } from './lib/membership';
+import { paths, buildPath } from './lib/routes';
+import { ProtectedRoute, AdminRoute, GuestOnlyRoute } from './lib/guards';
+import { UpgradeModal } from './components/UpgradeModal';
+import { PetData } from './types';
+import { db, auth } from './lib/firebase';
+import { collection, query, where, setDoc, doc, onSnapshot } from 'firebase/firestore';
+import { sendEmailVerification } from 'firebase/auth';
+import { Home } from './components/Home';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { SoftPaywall } from './components/SoftPaywall';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { PawLoader } from './components/PawLoader';
+import { Analytics } from '@vercel/analytics/react';
+import { motion } from 'motion/react';
+import { LanguageProvider } from './lib/LanguageContext';
+import { CookieBanner } from './components/CookieBanner';
+
+import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
+
+// Code-split heavy / less-critical views — they only ship when needed
+const Auth = lazy(() => import('./components/Auth').then(m => ({ default: m.Auth })));
+const Explore = lazy(() => import('./components/Explore').then(m => ({ default: m.Explore })));
+const Community = lazy(() => import('./components/Community').then(m => ({ default: m.Community })));
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Passport = lazy(() => import('./components/Passport').then(m => ({ default: m.Passport })));
+const Onboarding = lazy(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
+const Admin = lazy(() => import('./components/Admin').then(m => ({ default: m.Admin })));
+const Blog = lazy(() => import('./components/Blog').then(m => ({ default: m.Blog })));
+const VerifyEmail = lazy(() => import('./components/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
+const VerifyVenue = lazy(() => import('./components/VerifyVenue').then(m => ({ default: m.VerifyVenue })));
+const ClaimListing = lazy(() => import('./components/ClaimListing').then(m => ({ default: m.ClaimListing })));
+const EmergencyModal = lazy(() => import('./components/EmergencyModal').then(m => ({ default: m.EmergencyModal })));
+const About = lazy(() => import('./components/About').then(m => ({ default: m.About })));
+const DmChat = lazy(() => import('./components/DmChat').then(m => ({ default: m.DmChat })));
+const VenuePage = lazy(() => import('./components/VenuePage').then(m => ({ default: m.VenuePage })));
+const ClaimByPartner = lazy(() => import('./components/ClaimByPartner').then(m => ({ default: m.ClaimByPartner })));
+const SavedPlaces = lazy(() => import('./components/SavedPlaces').then(m => ({ default: m.SavedPlaces })));
+const ClubWelcome = lazy(() => import('./components/ClubWelcome').then(m => ({ default: m.ClubWelcome })));
+const Faq = lazy(() => import('./components/Faq').then(m => ({ default: m.Faq })));
+const Privacy = lazy(() => import('./components/Privacy').then(m => ({ default: m.Privacy })));
+const Terms = lazy(() => import('./components/Terms').then(m => ({ default: m.Terms })));
+const Club = lazy(() => import('./components/Club').then(m => ({ default: m.Club })));
+const Creators = lazy(() => import('./components/Creators').then(m => ({ default: m.Creators })));
+const Partners = lazy(() => import('./components/Partners').then(m => ({ default: m.Partners })));
+const Start = lazy(() => import('./components/Start').then(m => ({ default: m.Start })));
+
+const ViewFallback = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <PawLoader size={36} className="text-brand-orange" />
+  </div>
+);
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </ErrorBoundary>
+  );
+}
+
+/* ── App-wide state that has to live above the Routes ─────────────────
+ *
+ * Modals (paywall, emergency, DM chat, upgrade) are rendered alongside
+ * Routes so they don't unmount on navigation. Pet data is fetched here
+ * because Dashboard, Passport and Explore all consume it.
+ */
+function AppContent() {
+  const { user, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [showSoftPaywall, setShowSoftPaywall] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
+  const [pets, setPets] = useState<PetData[]>([]);
+  const [activePetIndex, setActivePetIndex] = useState(0);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [activeDm, setActiveDm] = useState<{ otherUid: string; otherName: string; otherPhoto?: string; petName?: string } | null>(null);
+  const [detectedCity, setDetectedCity] = useState<'miami' | 'barcelona' | 'nyc' | null | undefined>(undefined);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [communityMode, setCommunityMode] = useState<'community' | 'support'>('community');
+  const [pendingAuthAction, setPendingAuthAction] = useState<{ action: () => void; message: string; title: string } | null>(null);
+  const [verificationChecked, setVerificationChecked] = useState(false);
+  
+  // Waitlist state
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistType, setWaitlistType] = useState<WaitlistType>('member');
+  const [waitlistPlan, setWaitlistPlan] = useState<string | undefined>();
+
+  const openWaitlist = (type: WaitlistType, plan?: string) => {
+    setWaitlistType(type);
+    setWaitlistPlan(plan);
+    setWaitlistOpen(true);
+  };
+
+  const isAdmin = isAdminEmail(user?.email);
+
+  // Scroll to top on every navigation
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, left: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  }, [location.pathname]);
+
+  // City detection — re-runs when the auth profile loads so we promote
+  // homeCity over IP-based detection when the user is signed in.
+  useEffect(() => {
+    let active = true;
+    detectCity(profile?.homeCity ?? null)
+      .then((city) => { if (active) setDetectedCity(city); })
+      .catch(() => { if (active) setDetectedCity(null); });
+    return () => { active = false; };
+  }, [profile?.homeCity]);
+
+  // Poll for email verification while the user is unverified
+  useEffect(() => {
+    if (user && !user.emailVerified) {
+      const interval = setInterval(async () => {
+        await auth.currentUser?.reload();
+        if (auth.currentUser?.emailVerified) {
+          clearInterval(interval);
+          setVerificationChecked(true);
+        }
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // Bounce signed-out users off authenticated routes
+  const authenticatedPaths = useRef<Set<string>>(new Set([
+    paths.dashboard, paths.passport, paths.admin, paths.saved, paths.onboarding,
+  ]));
+  useEffect(() => {
+    if (!user && authenticatedPaths.current.has(location.pathname)) {
+      navigate(paths.home, { replace: true });
+      setVerificationChecked(false);
+      setPets([]);
+      setActivePetIndex(0);
+      setShowProfileEditor(false);
+    }
+  }, [user, location.pathname, navigate]);
+
+  // Run any deferred action once auth + verification both succeed
+  useEffect(() => {
+    if (user && user.emailVerified && pendingAuthAction) {
+      pendingAuthAction.action();
+      setPendingAuthAction(null);
+    }
+  }, [user, pendingAuthAction]);
+
+  // Live pet collection — drives Dashboard / Passport / Explore behavior
+  useEffect(() => {
+    if (!user) return;
+    if (!user.emailVerified && !verificationChecked) return;
+
+    const q = query(collection(db, 'pets'), where('userId', '==', user.uid));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const fetchedPets = snap.docs.map(d => ({ id: d.id, ...d.data() } as PetData));
+      setPets(fetchedPets);
+
+      const profileLoaded = profile !== null;
+      const needsOnboarding = profileLoaded && !profile.onboarded && fetchedPets.length === 0;
+
+      if (needsOnboarding && location.pathname !== paths.onboarding) {
+        navigate(paths.onboarding, { replace: true });
+      } else if (fetchedPets.length > 0 && profileLoaded && !profile.onboarded) {
+        // Has pets but profile not flagged — silent fix-up
+        setDoc(doc(db, 'users', user.uid), { onboarded: true, onboardingStep: 3 }, { merge: true });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, verificationChecked, profile?.onboarded, location.pathname, navigate]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <PawLoader size={48} className="text-brand-orange" />
+      </div>
+    );
+  }
+
+  const handleRequireAuth = (action?: () => void, title?: string, message?: string) => {
+    if (action) {
+      setPendingAuthAction({
+        action,
+        title: title || 'Authentication Required',
+        message: message || 'Please join or sign in to access this feature.',
+      });
+    }
+    setShowSoftPaywall(true);
+  };
+
+  const handleConnectSupport = () => {
+    setCommunityMode('support');
+    navigate(paths.community);
+  };
+
+  // Hide chrome (Navbar/Footer) on focused, single-purpose flows.
+  const hideChrome =
+    location.pathname === paths.login ||
+    location.pathname === paths.signup ||
+    location.pathname === paths.onboarding ||
+    location.pathname.startsWith('/verify/') ||
+    location.pathname.startsWith('/claim-listing/') ||
+    location.pathname.startsWith('/venue/') ||
+    location.pathname === paths.claim;
+
+  const showFooter = !hideChrome;
+  const isHome = location.pathname === paths.home;
+  const noPaddingPaths = new Set<string>([paths.home, paths.about, paths.login, paths.signup, paths.onboarding]);
+  const mainPadding = isHome || noPaddingPaths.has(location.pathname) ? '' : 'pt-24 pb-24';
+
+  return (
+    <div className="min-h-screen bg-white font-sans selection:bg-stone-200 flex flex-col relative overflow-hidden">
+      <div className="fixed left-4 md:left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-center text-[9px] md:text-[11px] font-bold uppercase tracking-[0.6em] text-stone-200 pointer-events-none z-0 hidden lg:block whitespace-nowrap mix-blend-multiply">
+        Boutique Pet Lifestyle
+      </div>
+
+      {!hideChrome && (
+        <Navbar
+          setShowEmergency={setShowEmergency}
+          user={user}
+          profile={profile}
+          isAdmin={isAdmin}
+          onShowProfile={() => {
+            setShowProfileEditor(true);
+            navigate(paths.dashboard);
+          }}
+        />
+      )}
+
+      <main className={`flex-grow ${mainPadding}`}>
+        <Suspense fallback={<ViewFallback />}>
+          <Routes>
+            {/* ── Public marketing & content ────────────────────────── */}
+            <Route path={paths.home} element={
+              <FadeIn>
+                <Home
+                  onExplore={() => navigate(paths.explore)}
+                  onSignUp={() => navigate(paths.signup)}
+                  onBlog={() => navigate(paths.blog)}
+                  onClub={() => navigate(paths.club)}
+                  onCreators={() => navigate(paths.creators)}
+                  onCommunity={() => navigate(paths.community)}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.about} element={
+              <FadeIn><About onBack={() => navigate(paths.home)} onExplore={() => navigate(paths.explore)} /></FadeIn>
+            } />
+            <Route path={paths.start} element={
+              <FadeIn><Start onBack={() => navigate(paths.home)} onExplore={() => navigate(paths.explore)} /></FadeIn>
+            } />
+            <Route path={paths.blog} element={
+              <FadeIn><Blog onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.faq} element={
+              <FadeIn><Faq onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.privacy} element={
+              <FadeIn><Privacy onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.terms} element={
+              <FadeIn><Terms onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.club} element={
+              <FadeIn>
+                <Club
+                  onBack={() => navigate(paths.home)}
+                  onSignUp={() => navigate(paths.signup)}
+                  isLoggedIn={!!user && !!user.emailVerified}
+                  currentPlan={profile?.memberPlan}
+                  onRequireLogin={() => navigate(paths.signup)}
+                  onJoinWaitlist={(plan) => openWaitlist('member', plan)}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.clubWelcome} element={<ClubWelcomeRoute profile={profile} />} />
+            <Route path={paths.creators} element={
+              <FadeIn><Creators onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.partners} element={
+              <FadeIn>
+                <Partners
+                  onBack={() => navigate(paths.home)}
+                  onJoinWaitlist={() => openWaitlist('partner')}
+                  onClaimBusiness={() => openWaitlist('partner')}
+                />
+              </FadeIn>
+            } />
+
+            {/* ── Public app surfaces ───────────────────────────────── */}
+            <Route path={paths.explore} element={
+              <FadeIn className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+                {user && (
+                  <div className="flex justify-between items-start">
+                    <WelcomeHeader profile={profile} email={user.email} />
+                    {isAdmin && (
+                      <button
+                        onClick={() => navigate(paths.admin)}
+                        className="bg-muted px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-charcoal transition-colors border border-stone-100"
+                      >
+                        Back Office
+                      </button>
+                    )}
+                  </div>
+                )}
+                <Explore
+                  petName={pets[activePetIndex]?.name || ''}
+                  isLoggedIn={!!user}
+                  onRequireAuth={handleRequireAuth}
+                  initialCity={detectedCity === undefined ? undefined : detectedCity}
+                  canSave={canSavePlaces(profile?.memberPlan, isAdmin)}
+                  onRequireUpgrade={() => setUpgradeModalOpen(true)}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.community} element={
+              <FadeIn className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+                <Community petName={pets[activePetIndex]?.name || ''} initialMode={communityMode} />
+              </FadeIn>
+            } />
+            <Route path={paths.venue} element={<VenueRoute />} />
+            <Route path={paths.verifyVenue} element={<VerifyVenueRoute />} />
+            <Route path={paths.claimListing} element={<ClaimListingRoute />} />
+
+            {/* ── Auth flow ────────────────────────────────────────── */}
+            <Route path={paths.login} element={
+              <GuestOnlyRoute>
+                <AuthRoute initialMode="login" onAfterAuth={() => setShowSoftPaywall(false)} />
+              </GuestOnlyRoute>
+            } />
+            <Route path={paths.signup} element={
+              <GuestOnlyRoute>
+                <AuthRoute initialMode="signup" onAfterAuth={() => setShowSoftPaywall(false)} />
+              </GuestOnlyRoute>
+            } />
+            <Route path={paths.verifyEmail} element={
+              <ProtectedRoute>
+                <FadeIn><VerifyEmail email={user?.email || ''} onResend={() => sendEmailVerification(auth.currentUser!)} /></FadeIn>
+              </ProtectedRoute>
+            } />
+            <Route path={paths.onboarding} element={
+              <ProtectedRoute>
+                <FadeIn>
+                  <Onboarding
+                    userId={user?.uid || ''}
+                    userName={user?.displayName || ''}
+                    profile={profile}
+                    onComplete={() => navigate(paths.dashboard)}
+                    onBack={() => navigate(paths.home)}
+                  />
+                </FadeIn>
+              </ProtectedRoute>
+            } />
+
+            {/* ── Authenticated app ────────────────────────────────── */}
+            <Route path={paths.dashboard} element={
+              <ProtectedRoute>
+                <FadeIn className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+                  <Dashboard
+                    user={user}
+                    profile={profile}
+                    pets={pets}
+                    onAddPet={() => navigate(paths.onboarding)}
+                    onExplore={() => navigate(paths.explore)}
+                    onConnectSupport={handleConnectSupport}
+                    initialShowProfile={showProfileEditor}
+                    onProfileFormClose={() => setShowProfileEditor(false)}
+                    onOpenPet={(idx) => { setActivePetIndex(idx); navigate(paths.passport); }}
+                    activePetIndex={activePetIndex}
+                    onOpenDm={(otherUid, otherName, petName) => setActiveDm({ otherUid, otherName, petName })}
+                    onViewAllSaved={() => navigate(paths.saved)}
+                    isAdmin={isAdmin}
+                  />
+                </FadeIn>
+              </ProtectedRoute>
+            } />
+            <Route path={paths.passport} element={
+              <ProtectedRoute>
+                <FadeIn className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+                  <Passport
+                    key={pets[activePetIndex]?.id || 'no-pet'}
+                    petData={pets[activePetIndex]}
+                    setPetData={(newData) => {
+                      const updated = [...pets];
+                      updated[activePetIndex] = newData;
+                      setPets(updated);
+                    }}
+                    ownerMemberPlan={profile?.memberPlan}
+                    ownerIsAdmin={isAdmin}
+                  />
+                </FadeIn>
+              </ProtectedRoute>
+            } />
+            <Route path={paths.saved} element={
+              <ProtectedRoute>
+                <FadeIn className="px-4 sm:px-6 py-6 max-w-5xl mx-auto">
+                  <SavedPlaces
+                    user={user ? { uid: user.uid } : null}
+                    onBack={() => navigate(paths.dashboard)}
+                    onExplore={() => navigate(paths.explore)}
+                  />
+                </FadeIn>
+              </ProtectedRoute>
+            } />
+            <Route path={paths.claim} element={<ClaimByPartnerRoute user={user} />} />
+            <Route path={paths.admin} element={
+              <AdminRoute>
+                <FadeIn><Admin onBack={() => navigate(paths.dashboard)} /></FadeIn>
+              </AdminRoute>
+            } />
+
+            {/* ── 404 catch-all ────────────────────────────────────── */}
+            <Route path="*" element={<Navigate to={paths.home} replace />} />
+          </Routes>
+        </Suspense>
+      </main>
+
+      {showFooter && <Footer />}
+
+      <SoftPaywall
+        isOpen={showSoftPaywall}
+        onClose={() => {
+          setShowSoftPaywall(false);
+          setPendingAuthAction(null);
+        }}
+        onAuth={(mode) => {
+          setShowSoftPaywall(false);
+          navigate(mode === 'login' ? paths.login : paths.signup);
+        }}
+        title={pendingAuthAction?.title}
+        message={pendingAuthAction?.message}
+      />
+
+      <Suspense fallback={null}>
+        {showEmergency && (
+          <EmergencyModal
+            isOpen={showEmergency}
+            onClose={() => setShowEmergency(false)}
+            petData={pets[activePetIndex] || {} as PetData}
+          />
+        )}
+      </Suspense>
+      <Suspense fallback={null}>
+        {activeDm && user && (
+          <DmChat
+            meProfile={profile}
+            otherUid={activeDm.otherUid}
+            otherName={activeDm.otherName}
+            otherPhoto={activeDm.otherPhoto}
+            petName={activeDm.petName}
+            onClose={() => setActiveDm(null)}
+          />
+        )}
+      </Suspense>
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
+        onUpgrade={() => {
+          setUpgradeModalOpen(false);
+          navigate(paths.club);
+        }}
+      />
+      <Analytics />
+      <CookieBanner onNavigatePrivacy={() => navigate(paths.privacy)} />
+      <WaitlistModal
+        isOpen={waitlistOpen}
+        onClose={() => setWaitlistOpen(false)}
+        type={waitlistType}
+        initialPlan={waitlistPlan}
+      />
+    </div>
+  );
+}
+
+/* ── Helper components ─────────────────────────────────────────────── */
+
+function FadeIn({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function WelcomeHeader({ profile, email }: { profile?: any | null, email?: string | null }) {
+  const firstName = profile?.firstName || profile?.displayName?.split(' ')[0] || email?.split('@')[0] || 'there';
+  return (
+    <div className="mb-4 sm:mb-6 animate-fade-in">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-charcoal">
+        <span className="italic font-light text-stone-400">Hey</span> {firstName}<span className="text-brand-orange">.</span>
+      </h1>
+    </div>
+  );
+}
+
+/* ── Per-route wrappers for params + lazy loading ──────────────────── */
+
+function AuthRoute({ initialMode, onAfterAuth }: { initialMode: 'login' | 'signup'; onAfterAuth: () => void }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+
+  // After successful auth, return the user to ?from= if present, else
+  // dashboard (existing user) or onboarding (newly created account).
+  const handleSuccess = (isNew: boolean) => {
+    onAfterAuth();
+    const from = searchParams.get('from');
+    if (from) {
+      navigate(decodeURIComponent(from), { replace: true });
+      return;
+    }
+    navigate(isNew ? paths.onboarding : paths.dashboard, { replace: true });
+  };
+
+  return (
+    <FadeIn>
+      <Auth
+        initialMode={mode}
+        onSuccess={handleSuccess}
+        onSwitch={() => setMode(mode === 'login' ? 'signup' : 'login')}
+        onBack={() => navigate(paths.home)}
+      />
+    </FadeIn>
+  );
+}
+
+function ClubWelcomeRoute({ profile }: { profile: any }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const plan = searchParams.get('plan');
+  return (
+    <FadeIn>
+      <ClubWelcome
+        plan={plan}
+        membership={profile?.membership}
+        memberPlan={profile?.memberPlan}
+        onGoToDashboard={() => navigate(paths.dashboard)}
+        onExplore={() => navigate(paths.explore)}
+      />
+    </FadeIn>
+  );
+}
+
+function VenueRoute() {
+  const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+  if (!slug) return <Navigate to={paths.home} replace />;
+  return (
+    <FadeIn>
+      <VenuePage
+        slug={slug}
+        onClaim={(s) => navigate(buildPath.claim(s))}
+        onBackToApp={() => navigate(paths.home)}
+      />
+    </FadeIn>
+  );
+}
+
+function VerifyVenueRoute() {
+  const navigate = useNavigate();
+  const { placeId, token } = useParams<{ placeId: string; token: string }>();
+  if (!placeId || !token) return <Navigate to={paths.home} replace />;
+  return (
+    <FadeIn>
+      <VerifyVenue placeId={placeId} token={token} onBack={() => navigate(paths.home)} />
+    </FadeIn>
+  );
+}
+
+function ClaimListingRoute() {
+  const navigate = useNavigate();
+  const { token } = useParams<{ token: string }>();
+  if (!token) return <Navigate to={paths.home} replace />;
+  return (
+    <FadeIn>
+      <ClaimListing token={token} onBack={() => navigate(paths.home)} />
+    </FadeIn>
+  );
+}
+
+function ClaimByPartnerRoute({ user }: { user: any }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const slug = (searchParams.get('partner') || '').toLowerCase();
+  if (!slug) return <Navigate to={paths.home} replace />;
+  return (
+    <FadeIn>
+      <ClaimByPartner
+        slug={slug}
+        user={user ? { uid: user.uid, email: user.email } : null}
+        onBack={() => navigate(buildPath.venue(slug))}
+        onLogin={() => navigate(`${paths.login}?from=${encodeURIComponent(`${paths.claim}?partner=${slug}`)}`)}
+        onSubmitted={() => { /* success state lives inside the page */ }}
+      />
+    </FadeIn>
+  );
+}

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Block crawlers from authenticated and single-purpose flows
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /passport
+Disallow: /saved
+Disallow: /onboarding
+Disallow: /verify-email
+Disallow: /verify/
+Disallow: /claim
+Disallow: /claim-listing/
+
+Sitemap: https://heylola.co/sitemap.xml

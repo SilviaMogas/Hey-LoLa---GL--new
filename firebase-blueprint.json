@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "username": { "type": "string" },
+        "userType": { "type": "string", "enum": ["Dog Owner", "Business"] },
+        "photoURL": { "type": "string" },
+        "onboardingStep": { "type": "number", "description": "Current onboarding progress: 0=signup, 1=profile, 2=pet-added" },
+        "onboarded": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "username"]
+    },
+    "UsernameRecord": {
+      "title": "Username Mapping",
+      "description": "Ensures unique usernames by mapping them to UIDs",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" }
+      },
+      "required": ["uid"]
+    },
+    "Pet": {
+      "title": "Pet Passport",
+      "description": "Pet profile details",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["Dog", "Cat"] },
+        "breed": { "type": "string" },
+        "age": { "type": "string" },
+        "weight": { "type": "string" },
+        "vaxStatus": { "type": "string" },
+        "passportNumber": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["userId", "name", "type"]
+    },
+    "Place": {
+      "title": "Pet-Friendly Place",
+      "description": "Venues filtered for pet-friendliness",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "city": { "type": "string" },
+        "category": { "type": "string" },
+        "aiDescription": { "type": "string" },
+        "rating": { "type": "number" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "address": { "type": "string" },
+        "image": { "type": "string" },
+        "isVerified": { "type": "boolean" },
+        "claimedBy": { "type": "string" }
+      }
+    },
+    "CityVote": {
+      "title": "City Demand Vote",
+      "description": "Signals user interest in new cities",
+      "type": "object",
+      "properties": {
+        "cityName": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "BusinessLead": {
+      "title": "Business Inquiry",
+      "description": "Contact requests from potential business partners",
+      "type": "object",
+      "properties": {
+        "businessName": { "type": "string" },
+        "contactRole": { "type": "string" },
+        "location": { "type": "string" },
+        "reason": { "type": "string" },
+        "email": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "contacted", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["businessName", "email"]
+    },
+    "Place": {
+      "title": "Pet-Friendly Place",
+      "description": "Curated pet-friendly locations in supported cities",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Parks / green areas", "Dog-friendly cafes", "Dog-friendly restaurants", "Pet shops", "Veterinary clinics", "Grooming services", "Pet-friendly hotels", "Pet-friendly coworking spaces", "Beaches", "Other"] },
+        "city": { "type": "string", "enum": ["Miami", "New York City", "Barcelona"] },
+        "neighborhood": { "type": "string" },
+        "description": { "type": "string" },
+        "utility": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending verification", "Verified", "Community validated"] },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "city", "status"]
+    },
+    "UserFavorite": {
+      "title": "User Favorite",
+      "description": "Mapping of users to their favorite places",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "placeId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "placeId"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Individual user profiles"
+    },
+    "usernames/{username}": {
+      "schema": "UsernameRecord",
+      "description": "Unique username tracking"
+    },
+    "pets/{petId}": {
+      "schema": "Pet",
+      "description": "Pet passports linked to users"
+    },
+    "places/{placeId}": {
+      "schema": "Place",
+      "description": "Pet-friendly locations"
+    },
+    "posts/{postId}": {
+      "schema": "CommunityPost",
+      "description": "Channel posts"
+    },
+    "city_votes/{voteId}": {
+      "schema": "CityVote",
+      "description": "Community interest tracker"
+    },
+    "business_leads/{leadId}": {
+      "schema": "BusinessLead",
+      "description": "Partner inquiries"
+    },
+    "places/{placeId}": {
+      "schema": "Place",
+      "description": "Curated database of pet-friendly spots"
+    },
+    "favorites/{favoriteId}": {
+      "schema": "UserFavorite",
+      "description": "User saved locations"
+    }
+  }
+}

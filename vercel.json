@@ -1,0 +1,24 @@
+{
+  "redirects": [
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "home" }], "destination": "/", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "explore" }], "destination": "/explore", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "community" }], "destination": "/community", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "blog" }], "destination": "/blog", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "about" }], "destination": "/about", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "dashboard" }], "destination": "/dashboard", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "passport" }], "destination": "/passport", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "admin" }], "destination": "/admin", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "saved" }], "destination": "/saved", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "faq" }], "destination": "/faq", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "privacy" }], "destination": "/privacy", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "terms" }], "destination": "/terms", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "club" }], "destination": "/club", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "creators" }], "destination": "/creators", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "start" }], "destination": "/start", "permanent": true },
+    { "source": "/", "has": [{ "type": "query", "key": "view", "value": "auth" }], "destination": "/login", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

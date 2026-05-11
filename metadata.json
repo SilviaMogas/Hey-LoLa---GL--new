@@ -1,0 +1,6 @@
+{
+  "name": "HeyLola",
+  "description": "Bilingual (EN/ES) travel concierge for pet parents. Real-time maps, digital pet passports, and community hubs for your companion.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": []
+}

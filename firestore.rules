@@ -1,0 +1,209 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ────────── helpers ──────────
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      // Mirror src/lib/admin.ts — Firestore rules can't import TS so the
+      // allow-list lives in both places. Update both when adding admins.
+      return isSignedIn() && (
+        request.auth.token.email == 'hello@silviamogas.com' ||
+        request.auth.token.email == 'hey@heylola.co'
+      );
+    }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function ownsResource() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    function willOwnResource() {
+      return isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ────────── default deny ──────────
+    // Admin can read/write anything; everything else must be explicitly allowed.
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // ────────── USERS ──────────
+    match /users/{userId} {
+      allow get:    if isOwner(userId) || isAdmin();
+      allow list:   if isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Username uniqueness lookup — public read so signup can check availability;
+    // create only if signed in (and the rule prevents overwrites because doc id == username).
+    match /usernames/{username} {
+      allow read:   if true;
+      allow create: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // ────────── PETS ──────────
+    match /pets/{petId} {
+      // Owner-only reads and writes; create must declare correct userId
+      allow get:    if ownsResource() || isAdmin();
+      allow list:   if isSignedIn(); // queries are filtered client-side by userId == auth.uid
+      allow create: if willOwnResource();
+      allow update: if ownsResource();
+      allow delete: if ownsResource();
+
+      // Pet subcollections (vaccinations, weights, etc.) inherit pet ownership
+      match /{sub=**} {
+        allow read, write:
+          if isSignedIn() &&
+             get(/databases/$(database)/documents/pets/$(petId)).data.userId == request.auth.uid;
+      }
+    }
+
+    // ────────── PLACES (public read, admin write) ──────────
+    match /places/{placeId} {
+      allow read:   if true;
+      allow write:  if isAdmin();
+    }
+
+    // ────────── PLACE SECRETS (admin-only) ──────────
+    // Holds per-venue verification_token, businessEmail, contactPhone and
+    // outreach notes. NEVER readable from the client. The server-side
+    // /api/verify-venue endpoint reads these via the Firebase Admin SDK
+    // (which bypasses rules) to validate a click-to-verify request and
+    // promote the linked /places/{placeId}.status to 'Verified'.
+    match /place_secrets/{placeId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ────────── BLOG POSTS (public read, admin write) ──────────
+    match /blog_posts/{postId} {
+      allow read:   if true;
+      allow write:  if isAdmin();
+    }
+
+    // ────────── COMMUNITY POSTS ──────────
+    match /posts/{postId} {
+      // Reading the community wall requires being signed in (privacy)
+      allow read:   if isSignedIn();
+      allow create: if willOwnResource();
+      allow update: if ownsResource() || isAdmin();
+      allow delete: if ownsResource() || isAdmin();
+    }
+
+    // ────────── CITY VOTES ──────────
+    match /city_votes/{voteId} {
+      allow read:   if isSignedIn();
+      allow create: if willOwnResource();
+      allow delete: if ownsResource() || isAdmin();
+    }
+
+    // ────────── BUSINESS LEADS ──────────
+    // Public can submit (signup form); only admin can read/manage.
+    match /business_leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── ONBOARDING SUBMISSIONS ──────────
+    // Pet-parent and animal-lover sign-ups from the public /start page.
+    // Anyone can submit; only admin can read or update.
+    match /onboarding_submissions/{submissionId} {
+      allow create: if request.resource.data.source == 'website_start_page'
+                       && request.resource.data.status == 'new'
+                       && (request.resource.data.type == 'pet_parent'
+                           || request.resource.data.type == 'animal_lover');
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── VENUE CLAIMS ──────────
+    // Public venue/business claim submissions from /start. Anyone can submit;
+    // only admin can read or change status. A claim never auto-promotes a
+    // venue to verified — that requires a manual admin update.
+    match /venue_claims/{claimId} {
+      allow create: if request.resource.data.source == 'website_start_page'
+                       && request.resource.data.claimStatus == 'claim_submitted'
+                       && request.resource.data.verificationStatus == 'pending_review'
+                       && request.resource.data.perkStatus == 'not_confirmed';
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── CLAIM REQUESTS ──────────
+    // Signed-in users submit; admins review. The submitter can read their own
+    // request to track status, but cannot modify it after creation.
+    match /claim_requests/{claimId} {
+      allow create: if willOwnResource() &&
+                       request.resource.data.status == 'Pending review';
+      allow get:    if ownsResource() || isAdmin();
+      allow list:   if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // ────────── FAVORITES ──────────
+    match /favorites/{favoriteId} {
+      allow get:    if ownsResource();
+      allow list:   if isSignedIn();  // client filters by userId == auth.uid
+      allow create: if willOwnResource();
+      allow delete: if ownsResource();
+    }
+
+    // ────────── DIRECT MESSAGES ──────────
+    // dmId is "<uid1>_<uid2>" sorted alphabetically.
+    // Only the two participants can read/write. Includes 'support_team' as a
+    // virtual participant for the user→support inbox.
+    match /dms/{dmId}/messages/{msgId} {
+      function isParticipant() {
+        return isSignedIn() && (
+          dmId.matches('.*_' + request.auth.uid + '$') ||
+          dmId.matches('^' + request.auth.uid + '_.*')
+        );
+      }
+      allow read:   if isParticipant() || isAdmin();
+      allow create: if isParticipant() && (
+        request.resource.data.senderId == request.auth.uid ||
+        request.resource.data.senderId == 'support_team'
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // ────────── RESERVATION CLICKS ──────────
+    // Outbound-click telemetry written when a user taps "Reserve with
+    // OpenTable" on a venue. Anyone (including anonymous visitors) can
+    // create an event; only admins can read or modify.
+    match /reservation_clicks/{eventId} {
+      allow create: if request.resource.data.source == 'heylola'
+                       && request.resource.data.action == 'opentable_reservation_click';
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── DM THREADS (member ↔ member) ──────────
+    // Thread doc id is the two participant UIDs sorted alphabetically and
+    // joined with "_". The parent doc holds participants + last message
+    // metadata and unread counters. Each participant can read/update the
+    // thread and read all messages; only the sender can create messages.
+    match /dm_threads/{threadId} {
+      function isThreadParticipant() {
+        return isSignedIn() && request.auth.uid in resource.data.participants;
+      }
+      allow get:    if isThreadParticipant() || isAdmin();
+      allow list:   if isSignedIn();  // client filters by participants array-contains uid
+      allow create: if isSignedIn()
+                       && request.resource.data.participants.size() == 2
+                       && request.auth.uid in request.resource.data.participants;
+      allow update: if isThreadParticipant()
+                       && request.resource.data.participants == resource.data.participants;
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        function threadParticipants() {
+          return get(/databases/$(database)/documents/dm_threads/$(threadId)).data.participants;
+        }
+        allow read:   if isSignedIn() && request.auth.uid in threadParticipants();
+        allow create: if isSignedIn()
+                         && request.resource.data.fromUid == request.auth.uid
+                         && request.auth.uid in threadParticipants();
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}

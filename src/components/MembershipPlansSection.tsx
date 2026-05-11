@@ -13,7 +13,7 @@ interface MembershipPlansSectionProps {
 
 export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
   onSelect,
-  description = 'The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Start free — paid tiers coming soon.',
+  description = "Start free and upgrade when you're ready. Founding members keep their early access price — forever.",
   busyPlanId,
   currentPlanId,
   sectionRef,

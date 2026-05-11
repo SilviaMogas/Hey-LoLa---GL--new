@@ -23,7 +23,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
         >
           <div className="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] sm:rounded-[3rem] shadow-[0_30px_70px_rgba(0,0,0,0.12)] md:shadow-[0_45px_100px_rgba(0,0,0,0.12)] border-[6px] sm:border-[10px] md:border-[12px] border-white ring-1 ring-stone-100">
             <img
-              src="/lola.png"
+              src="/Untitled design (44).png"
               alt="Hey Lola Manifesto"
               className="w-full h-full object-cover bg-white"
             />

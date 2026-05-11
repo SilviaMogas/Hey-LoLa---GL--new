@@ -23,9 +23,9 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
         >
           <div className="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] sm:rounded-[3rem] shadow-[0_30px_70px_rgba(0,0,0,0.12)] md:shadow-[0_45px_100px_rgba(0,0,0,0.12)] border-[6px] sm:border-[10px] md:border-[12px] border-white ring-1 ring-stone-100">
             <img
-              src="/Untitled%20design%20%2844%29.png"
+              src="/lola.png"
               alt="Hey Lola Manifesto"
-              className="w-full h-full object-contain bg-white"
+              className="w-full h-full object-cover bg-white"
             />
           </div>
 
@@ -85,7 +85,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
               </div>
               <div className="space-y-3">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">The Context</span>
-                <p className="text-lg font-serif italic text-charcoal/80 leading-snug">Barcelona's first curated ecosystem for the modern companion.</p>
+                <p className="text-lg font-serif italic text-charcoal/80 leading-snug">The world's first curated ecosystem for the modern companion.</p>
               </div>
             </div>
 

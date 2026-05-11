@@ -7,7 +7,7 @@ import { PawLoader } from '../components/PawLoader';
 
 const Loading = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <PawLoader size={36} className="text-brand-orange" />
+    <PawLoader size={36} className="text-brand-orange" variant="scattered" />
   </div>
 );
 

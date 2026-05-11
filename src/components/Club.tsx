@@ -5,6 +5,7 @@ import { auth } from '../lib/firebase';
 import { getTier } from '../lib/membership';
 import type { MemberPlan } from '../types';
 import { cn } from '../lib/utils';
+import { FoundingMemberModal } from './FoundingMemberModal';
 
 interface ClubProps {
   onBack: () => void;
@@ -26,6 +27,8 @@ interface PlanData {
   highlight: boolean;
   badge?: string;
   billingNote?: string;
+  comingSoon?: boolean;
+  showPrice?: boolean;
 }
 
 const PLANS: PlanData[] = [
@@ -43,6 +46,7 @@ const PLANS: PlanData[] = [
     ],
     cta: 'Get started free',
     highlight: false,
+    showPrice: true,
   },
   {
     id: 'local',
@@ -59,7 +63,9 @@ const PLANS: PlanData[] = [
     cta: 'Join Miami Waitlist',
     highlight: false,
     badge: 'Coming Soon',
-    billingNote: 'Coming Soon in Miami. We will open Local memberships once enough Miami partners are verified.',
+    comingSoon: true,
+    showPrice: false,
+    billingNote: 'Coming Soon in Miami.',
   },
   {
     id: 'plus',
@@ -74,8 +80,10 @@ const PLANS: PlanData[] = [
       'Travel documents & records',
     ],
     cta: 'Join Waitlist',
-    highlight: true,
+    highlight: false,
     badge: 'Coming Soon',
+    comingSoon: true,
+    showPrice: false,
   },
   {
     id: 'black',
@@ -89,9 +97,10 @@ const PLANS: PlanData[] = [
       'Exclusive Black member perks',
       'Founding member badge',
     ],
-    cta: 'Request Early Access',
+    cta: 'Join Founding Circle',
     highlight: false,
     badge: 'Coming Soon',
+    showPrice: true,
   },
 ];
 
@@ -102,6 +111,8 @@ const isPaidPlan = (id: string): id is PaidPlanId => id === 'local' || id === 'p
 export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false, currentPlan, onRequireLogin, onJoinWaitlist }) => {
   const [error, setError] = useState<string | null>(null);
   const [cancelledBanner, setCancelledBanner] = useState(false);
+  const [showFoundingModal, setShowFoundingModal] = useState(false);
+  const [busyPlan, setBusyPlan] = useState<string | null>(null);
   const pricingRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -115,10 +126,19 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
   }, []);
 
   const startCheckout = async (planId: PaidPlanId) => {
-    onJoinWaitlist?.(planId);
+    setBusyPlan(planId);
+    try {
+      await onJoinWaitlist?.(planId);
+    } finally {
+      setBusyPlan(null);
+    }
   };
 
   const handleCardClick = (plan: PlanData) => {
+    if (plan.id === 'black') {
+      setShowFoundingModal(true);
+      return;
+    }
     if (plan.id === 'free') {
       onSignUp();
       return;
@@ -167,7 +187,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         >
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Membership Plans</span>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight leading-[0.95]">
-            Simple, honest <span className="text-stone-300">pricing</span><span className="text-brand-orange">.</span>
+            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
           </h2>
           <p className="text-sm text-stone-400 font-light italic max-w-xl mx-auto">
             Start free and upgrade when you're ready. Founding members keep their early access price — forever.
@@ -192,6 +212,11 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
             </motion.div>
           ))}
         </div>
+
+        <FoundingMemberModal
+          isOpen={showFoundingModal}
+          onClose={() => setShowFoundingModal(false)}
+        />
         <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
           Founding members keep their early access price
         </p>
@@ -281,14 +306,21 @@ function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; o
         : 'bg-white text-charcoal border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]',
     )} style={{ borderTopColor: tierBorderColor(plan.id) }}>
       {plan.badge && (
-        <div className={`absolute -top-2.5 left-4 px-3 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.25em] ${
-          plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
-        }`}>
-          {plan.badge}
+        <div className="absolute -top-2.5 left-4 flex gap-1.5 overflow-visible">
+          <div className={`px-3 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.25em] whitespace-nowrap ${
+            plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
+          }`}>
+            {plan.badge}
+          </div>
+          {plan.comingSoon && (
+            <div className={`px-3 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.25em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
+              Coming Soon
+            </div>
+          )}
         </div>
       )}
 
-      <div className="space-y-1">
+      <div className="space-y-1 pt-1">
         <p className={cn(
           'inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.3em]',
           plan.highlight ? 'text-white/70' : tier.textClass,
@@ -296,14 +328,20 @@ function ClubPricingCard({ plan, onClick, busy, isCurrent }: { plan: PlanData; o
           <span className={cn('w-1.5 h-1.5 rounded-full', tier.dotClass)} />
           {plan.name}
         </p>
-        <div className="flex items-end gap-1">
-          <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
-            {plan.price}
-          </span>
-          <span className={`text-xs pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-            /{plan.period}
-          </span>
-        </div>
+        {(plan.showPrice !== false) ? (
+          <div className="flex items-end gap-1">
+            <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
+              {plan.price}
+            </span>
+            <span className={`text-xs pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
+              /{plan.period}
+            </span>
+          </div>
+        ) : (
+          <div className="h-10 flex items-center">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
+          </div>
+        )}
         <p className={`text-xs font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
           {plan.tagline}
         </p>

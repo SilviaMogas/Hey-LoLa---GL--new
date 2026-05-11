@@ -66,6 +66,7 @@ export const Footer: React.FC = () => {
               <nav className="flex flex-col gap-2 sm:gap-3 items-start text-sm font-medium text-stone-500 italic">
                 <button onClick={() => handleNavigate(paths.explore)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Explore Gems</button>
                 <button onClick={() => handleNavigate(paths.community)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Hub</button>
+                <button onClick={() => handleNavigate('/#pack')} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">The Pack</button>
                 <button onClick={() => handleNavigate(paths.blog)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Journal</button>
                 <button onClick={() => handleNavigate(paths.club)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Hey Lola Club</button>
                 <button onClick={() => handleNavigate(paths.about)} className="hover:text-charcoal transition-all hover:translate-x-1 duration-500">Manifesto</button>
@@ -124,7 +125,6 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto pt-6 sm:pt-8 md:pt-10 mt-8 sm:mt-8 md:mt-8 border-t border-stone-100 flex flex-col items-center justify-center relative z-10">
         <div className="flex flex-col items-center gap-3 sm:gap-4 text-center">
           <div className="flex items-center gap-3">
-            <BrandLogo size="md" mark className="opacity-90" />
             <BrandLogo size="md" />
           </div>
 

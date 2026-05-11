@@ -147,7 +147,7 @@ export const Community: React.FC<CommunityProps> = ({ petName, initialMode = 'co
             await addDoc(collection(db, `dms/${dmId}/messages`), {
               senderId: 'support_team',
               displayName: 'HeyLola Assistant',
-              content: `Hi! 👋 I'm the HeyLola AI assistant — ask me anything about pet documents, travel rules, vaccinations or vet emergencies. For anything I can't solve, tap "Talk to a human" up top to email our team.`,
+              content: `Hi! 👋 I'm the HeyLola AI assistant — ask me anything about pet documents, travel rules, vaccinations or vet emergencies. For anything I can't solve, tap "Contact us" up top to email our team.`,
               createdAt: serverTimestamp(),
             });
           } catch (error) {
@@ -287,7 +287,7 @@ export const Community: React.FC<CommunityProps> = ({ petName, initialMode = 'co
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
           </span>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal whitespace-nowrap">Talk to a human</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal whitespace-nowrap">Contact us</span>
         </a>
       </header>
 

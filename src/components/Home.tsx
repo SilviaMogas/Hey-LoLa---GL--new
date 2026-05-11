@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Check, Star } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
+import { FoundingMemberModal } from './FoundingMemberModal';
 
 interface HomeProps {
   onExplore: () => void;
@@ -19,6 +20,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
   const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showFoundingModal, setShowFoundingModal] = useState(false);
   const [comingSoonHint, setComingSoonHint] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,19 +96,6 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           </motion.div>
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute top-24 left-6 hidden xl:block">
-          <span className="vertical-text text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/20">
-            BOUTIQUE PET LIFESTYLE
-          </span>
-        </div>
-
-        <div className="absolute top-24 right-6 hidden xl:block">
-          <span className="vertical-text text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/20">
-            EST. 2024 — BCN Hub
-          </span>
-        </div>
-
         {/* Decorative Blobs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <motion.div 
@@ -144,7 +133,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-            <CityCard name="Barcelona" status="Live" image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" />
+            <CityCard name="London" status="Live" image="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800" />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
             <CityCard name="Miami" status="Live" image="https://images.unsplash.com/photo-1514214246283-d427a95c5d2f?auto=format&fit=crop&w=800" />
@@ -215,7 +204,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
-              { location: "Barcelona", tag: "Editorial", title: "City stories are on the way", author: "Hey Lola", comingSoon: true },
+              { location: "London", tag: "Editorial", title: "City stories are on the way", author: "Hey Lola", comingSoon: true },
               { location: "Miami", tag: "Guides", title: "Local travel tips arriving soon", author: "Hey Lola", comingSoon: true },
               { location: "NYC", tag: "Community", title: "Real member updates coming soon", author: "Hey Lola", comingSoon: true }
             ].map((activity, i) => (
@@ -351,7 +340,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         >
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
           <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-            Simple, honest <span className="text-stone-300">pricing</span><span className="text-brand-orange">.</span>
+            Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
           </h2>
           <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">
             Start free and upgrade when you're ready. Founding members keep their early access price — forever.
@@ -367,10 +356,15 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
             >
-              <PricingCard plan={plan} onSignUp={onSignUp} onClub={onClub} />
+              <PricingCard plan={plan} onSignUp={onSignUp} onClub={onClub} onFounding={() => setShowFoundingModal(true)} />
             </motion.div>
           ))}
         </div>
+
+        <FoundingMemberModal
+          isOpen={showFoundingModal}
+          onClose={() => setShowFoundingModal(false)}
+        />
         <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
           Founding members will keep their early access price.
         </p>
@@ -387,7 +381,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           >
             <div className="space-y-6 max-w-2xl border-l-2 border-stone-300 pl-8">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Creator Partners</span>
-              <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight leading-[0.9]">
+              <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight leading-none">
                 Built with local<br /><span className="text-stone-300">dog voices</span><span className="text-brand-orange">.</span>
               </h2>
               <p className="text-xl text-stone-500 font-light italic leading-snug">
@@ -406,6 +400,66 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               </button>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Meet the Pack Section */}
+      <section id="pack" className="py-16 sm:py-24 px-5 sm:px-6 bg-stone-50/50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+          <div className="text-center space-y-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The Concierges</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Pack</span><span className="text-brand-orange">.</span></h2>
+            <p className="text-lg text-stone-500 font-light italic max-w-xl mx-auto leading-relaxed">
+              Your expert guides to the dog-friendly world. Ready to share their local secrets and bark-worthy recommendations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <DogConciergeCard 
+              name="Lola"
+              role="Dog Concierge & Founder"
+              personality="Premium, social, knows all the best places."
+              style="Chic cat-eye sunglasses, coral bandana."
+              vibe="Elegant poodle concierge, stylish & confident."
+              color="bg-[#FDF8F6]"
+              badgeColor="bg-[#F8E3DD] text-[#9E6B5D]"
+            />
+            <DogConciergeCard 
+              name="Bruno"
+              role="Urban Cool Expert"
+              personality="Cool, funny, confident, urban lifestyle."
+              style="Snapback cap, metal D-ring collar."
+              vibe="Cafés, restaurants, rooftops, Miami cool."
+              color="bg-[#F7F9F5]"
+              badgeColor="bg-[#E9F1E5] text-[#6E8C5D]"
+            />
+            <DogConciergeCard 
+              name="Milo"
+              role="Community Heart"
+              personality="Warm, trustworthy, community-focused."
+              style="Natural teal bandana, big smile."
+              vibe="Family-friendly, parks, events, happy community."
+              color="bg-[#F5F8FA]"
+              badgeColor="bg-[#E5EEF1] text-[#5D848C]"
+            />
+            <DogConciergeCard 
+              name="Taco"
+              role="Adventure Guide"
+              personality="Curious, adventurous, funny."
+              style="Professional dog backpack with rolled map."
+              vibe="Travel, discovery, city guides, explorer."
+              color="bg-[#FAF9F5]"
+              badgeColor="bg-[#F1EEE5] text-[#8C845D]"
+            />
+          </div>
+        </div>
+        
+        {/* Decorative background paws */}
+        <div className="absolute top-20 -left-10 opacity-[0.03] rotate-12 pointer-events-none">
+          <PawPrint size={200} />
+        </div>
+        <div className="absolute bottom-10 -right-10 opacity-[0.03] -rotate-12 pointer-events-none">
+          <PawPrint size={160} />
         </div>
       </section>
 
@@ -548,6 +602,79 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
   );
 };
 
+function DogConciergeCard({ name, role, personality, style, vibe, color, badgeColor }: { name: string, role: string, personality: string, style: string, vibe: string, color: string, badgeColor: string }) {
+  // Using uploaded images if available, else relevant Lucide icons
+  let Icon = PawPrint;
+  if (name === 'Lola') Icon = Star;
+  if (name === 'Bruno') Icon = MapPin;
+  if (name === 'Milo') Icon = MessageSquare;
+  if (name === 'Taco') Icon = Send;
+
+  const [imageFailed, setImageFailed] = useState(false);
+  const [imgExt, setImgExt] = useState('png');
+  const imagePath = `/${name.toLowerCase()}.${imgExt}`;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl transition-all duration-700 group cursor-default"
+    >
+      <div className={`aspect-square ${color} flex items-center justify-center relative overflow-hidden transition-all duration-700`}>
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent_70%)]" />
+        
+        {!imageFailed ? (
+          <img 
+            src={imagePath} 
+            alt={name} 
+            onError={() => {
+              if (imgExt === 'png') {
+                setImgExt('jpg');
+              } else if (imgExt === 'jpg') {
+                setImgExt('jpeg');
+              } else {
+                setImageFailed(true);
+              }
+            }}
+            className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700" 
+          />
+        ) : (
+          <div className="relative z-10 text-charcoal/20 group-hover:scale-110 group-hover:text-brand-orange transition-all duration-700">
+            <Icon size={100} strokeWidth={1} />
+          </div>
+        )}
+      </div>
+      
+      <div className="p-8 space-y-6 flex-1 flex flex-col justify-between">
+        <div className="space-y-3 text-center">
+          <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-charcoal leading-none">{name}</h3>
+          <p className="text-[12px] font-light text-stone-400 italic">
+            {role}
+          </p>
+        </div>
+        
+        <div className="space-y-4 pt-6 border-t border-stone-100">
+          <div className="space-y-1">
+            <p className="text-[13px] leading-relaxed text-charcoal">
+              <span className="font-black">Personality:</span> <span className="text-stone-500 font-light">{personality}</span>
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[13px] leading-relaxed text-charcoal">
+              <span className="font-black">Style:</span> <span className="text-stone-500 font-light">{style}</span>
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[13px] leading-relaxed text-charcoal">
+              <span className="font-black">Vibe:</span> <span className="text-stone-500 font-light">{vibe}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function CityCard({ name, status, image }: { name: string, status: string, image: string }) {
   return (
@@ -592,6 +719,8 @@ interface PlanData {
   cta: string;
   highlight: boolean;
   badge?: string;
+  comingSoon?: boolean;
+  showPrice?: boolean;
 }
 
 const PLANS: PlanData[] = [
@@ -609,6 +738,7 @@ const PLANS: PlanData[] = [
     ],
     cta: 'Get started',
     highlight: false,
+    showPrice: true,
   },
   {
     id: 'local',
@@ -625,6 +755,8 @@ const PLANS: PlanData[] = [
     cta: 'Join early access',
     highlight: false,
     badge: 'Popular',
+    comingSoon: true,
+    showPrice: false,
   },
   {
     id: 'plus',
@@ -639,8 +771,10 @@ const PLANS: PlanData[] = [
       'Travel documents & records',
     ],
     cta: 'Join early access',
-    highlight: true,
+    highlight: false,
     badge: 'Recommended',
+    comingSoon: true,
+    showPrice: false,
   },
   {
     id: 'black',
@@ -654,15 +788,18 @@ const PLANS: PlanData[] = [
       'Exclusive Black member perks',
       'Founding member badge',
     ],
-    cta: 'Join early access',
+    cta: 'Join Founding Circle',
     highlight: false,
     badge: 'Black',
+    showPrice: true,
   },
 ];
 
-function PricingCard({ plan, onSignUp, onClub }: { plan: PlanData; onSignUp: () => void; onClub?: () => void }) {
+function PricingCard({ plan, onSignUp, onClub, onFounding }: { plan: PlanData; onSignUp: () => void; onClub?: () => void; onFounding: () => void }) {
   const handleClick = () => {
-    if (plan.id === 'free') {
+    if (plan.id === 'black') {
+      onFounding();
+    } else if (plan.id === 'free') {
       onSignUp();
     } else {
       onClub ? onClub() : onSignUp();
@@ -676,25 +813,38 @@ function PricingCard({ plan, onSignUp, onClub }: { plan: PlanData; onSignUp: () 
         : 'bg-white text-charcoal border-stone-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)]'
     }`}>
       {plan.badge && (
-        <div className={`absolute -top-2 left-5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] ${
-          plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
-        }`}>
-          {plan.badge}
+        <div className="absolute -top-2 left-5 flex gap-1.5 overflow-visible">
+          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap ${
+            plan.highlight ? 'bg-brand-orange text-white' : 'bg-stone-100 text-stone-600'
+          }`}>
+            {plan.badge}
+          </div>
+          {plan.comingSoon && (
+            <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10`}>
+              Coming Soon
+            </div>
+          )}
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2 pt-2">
         <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
           {plan.name}
         </p>
-        <div className="flex items-end gap-1">
-          <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
-            {plan.price}
-          </span>
-          <span className={`text-sm pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
-            /{plan.period}
-          </span>
-        </div>
+        {(plan.showPrice !== false) ? (
+          <div className="flex items-end gap-1">
+            <span className={`text-3xl font-serif italic tracking-tight ${plan.highlight ? 'text-white' : 'text-charcoal'}`}>
+              {plan.price}
+            </span>
+            <span className={`text-sm pb-1 font-light ${plan.highlight ? 'text-white/50' : 'text-stone-400'}`}>
+              /{plan.period}
+            </span>
+          </div>
+        ) : (
+          <div className="h-10 flex items-center">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
+          </div>
+        )}
         <p className={`text-[13px] font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>
           {plan.tagline}
         </p>
@@ -704,7 +854,7 @@ function PricingCard({ plan, onSignUp, onClub }: { plan: PlanData; onSignUp: () 
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-3">
             <Check size={14} className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-brand-orange' : 'text-charcoal/40'}`} />
-            <span className={`text-[13px] leading-snug ${plan.highlight ? 'text-white/80' : 'text-stone-500'}`}>{f}</span>
+            <span className={`text-[12px] leading-snug ${plan.highlight ? 'text-white/80' : 'text-stone-500'}`}>{f}</span>
           </li>
         ))}
       </ul>

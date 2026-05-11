@@ -58,7 +58,7 @@ const Start = lazy(() => import('./components/Start').then(m => ({ default: m.St
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <PawLoader size={36} className="text-brand-orange" />
+    <PawLoader size={36} className="text-brand-orange" variant="scattered" />
   </div>
 );
 
@@ -226,9 +226,21 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-stone-200 flex flex-col relative overflow-hidden">
-      <div className="fixed left-4 md:left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-center text-[9px] md:text-[11px] font-bold uppercase tracking-[0.6em] text-stone-200 pointer-events-none z-0 hidden lg:block whitespace-nowrap mix-blend-multiply">
-        Boutique Pet Lifestyle
-      </div>
+      {/* Decorative Brand Labels - Only on Home, at the top */}
+      {isHome && (
+        <>
+          <div className="absolute top-32 left-6 2xl:left-12 hidden xl:block pointer-events-none z-0 select-none">
+            <span className="vertical-text text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/15">
+              BOUTIQUE PET LIFESTYLE
+            </span>
+          </div>
+          <div className="absolute top-32 right-6 2xl:right-12 hidden xl:block pointer-events-none z-0 select-none">
+            <span className="vertical-text text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/15">
+              EST. 2024 — BCN Hub
+            </span>
+          </div>
+        </>
+      )}
 
       {!hideChrome && (
         <Navbar

@@ -23,6 +23,9 @@ export const paths = {
   partners: '/partners',
   club: '/club',
   clubWelcome: '/club/welcome',
+  brandBook: '/brand-book',
+  brandBookCharacter: '/brand-book/:name',
+  media: '/media',
 
   /* ── Public app surfaces (no auth) ─────────────────────────────── */
   explore: '/explore',
@@ -53,6 +56,7 @@ export const buildPath = {
     `/verify/${encodeURIComponent(placeId)}/${encodeURIComponent(token)}`,
   claimListing: (token: string) => `/claim-listing/${encodeURIComponent(token)}`,
   claim: (partnerSlug: string) => `/claim?partner=${encodeURIComponent(partnerSlug)}`,
+  brandBookCharacter: (name: string) => `/brand-book/${encodeURIComponent(name.toLowerCase())}`,
 };
 
 /** Pages we actively want indexed by search engines. Used to generate
@@ -72,6 +76,8 @@ export const PUBLIC_PATHS: ReadonlyArray<keyof typeof paths> = [
   'club',
   'explore',
   'community',
+  'brandBook',
+  'media',
 ];
 
 /** Legacy ?view= values that were used before path-based routing.

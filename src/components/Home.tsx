@@ -5,6 +5,7 @@ import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipPlansSection } from './MembershipPlansSection';
+import { CONCIERGES } from '../data/concierges';
 
 interface HomeProps {
   onExplore: () => void;
@@ -13,9 +14,10 @@ interface HomeProps {
   onClub?: () => void;
   onCreators?: () => void;
   onCommunity?: () => void;
+  onConcierge?: (name: string) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity }) => {
+export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge }) => {
   const { t } = useTranslation();
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
@@ -398,42 +400,19 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <DogConciergeCard 
-              name="Lola"
-              role="Dog Concierge & Founder"
-              personality="Premium, social, knows all the best places."
-              style="Chic cat-eye sunglasses, coral bandana."
-              vibe="Elegant poodle concierge, stylish & confident."
-              color="bg-[#FDF8F6]"
-              badgeColor="bg-[#F8E3DD] text-[#9E6B5D]"
-            />
-            <DogConciergeCard 
-              name="Bruno"
-              role="Urban Cool Expert"
-              personality="Cool, funny, confident, urban lifestyle."
-              style="Snapback cap, metal D-ring collar."
-              vibe="Cafés, restaurants, rooftops, Miami cool."
-              color="bg-[#F7F9F5]"
-              badgeColor="bg-[#E9F1E5] text-[#6E8C5D]"
-            />
-            <DogConciergeCard 
-              name="Milo"
-              role="Community Heart"
-              personality="Warm, trustworthy, community-focused."
-              style="Natural teal bandana, big smile."
-              vibe="Family-friendly, parks, events, happy community."
-              color="bg-[#F5F8FA]"
-              badgeColor="bg-[#E5EEF1] text-[#5D848C]"
-            />
-            <DogConciergeCard 
-              name="Taco"
-              role="Adventure Guide"
-              personality="Curious, adventurous, funny."
-              style="Professional dog backpack with rolled map."
-              vibe="Travel, discovery, city guides, explorer."
-              color="bg-[#FAF9F5]"
-              badgeColor="bg-[#F1EEE5] text-[#8C845D]"
-            />
+            {CONCIERGES.map((c) => (
+              <DogConciergeCard
+                key={c.id}
+                name={c.name}
+                role={c.role}
+                personality={c.personality}
+                style={c.style}
+                vibe={c.vibe}
+                color={c.color}
+                badgeColor={c.badgeColor}
+                onClick={onConcierge ? () => onConcierge(c.id) : undefined}
+              />
+            ))}
           </div>
         </div>
         
@@ -585,24 +564,37 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
   );
 };
 
-function DogConciergeCard({ name, role, personality, style, vibe, color, badgeColor }: { name: string, role: string, personality: string, style: string, vibe: string, color: string, badgeColor: string }) {
+function DogConciergeCard({ name, role, personality, style, vibe, color, badgeColor, onClick }: { name: string, role: string, personality: string, style: string, vibe: string, color: string, badgeColor: string, onClick?: () => void }) {
   // Using uploaded images if available, else relevant Lucide icons
   let Icon = PawPrint;
   if (name === 'Lola') Icon = Star;
   if (name === 'Bruno') Icon = MapPin;
   if (name === 'Milo') Icon = MessageSquare;
-  if (name === 'Taco') Icon = Send;
+  if (name === 'Nuc') Icon = Send;
 
   const [imageFailed, setImageFailed] = useState(false);
   const [imgExt, setImgExt] = useState('png');
   const imagePath = `/${name.toLowerCase()}.${imgExt}`;
+  const interactive = !!onClick;
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (!onClick) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick();
+    }
+  };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl transition-all duration-700 group cursor-default"
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={handleKey}
+      aria-label={interactive ? `Open ${name}'s brand book page` : undefined}
+      className={`relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl transition-all duration-700 group ${interactive ? 'cursor-pointer hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50' : 'cursor-default'}`}
     >
       <div className={`aspect-square ${color} flex items-center justify-center relative overflow-hidden transition-all duration-700`}>
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent_70%)]" />
@@ -620,7 +612,7 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
                 setImageFailed(true);
               }
             }}
-            className={`relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700 ${name === 'Taco' ? 'scale-[1.45]' : ''}`}
+            className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700"
           />
         ) : (
           <div className="relative z-10 text-charcoal/20 group-hover:scale-110 group-hover:text-brand-orange transition-all duration-700">

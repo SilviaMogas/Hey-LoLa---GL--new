@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Download, Type, Palette, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { CONCIERGES, POSE_COUNT, conciergePose, type ConciergeProfile } from '../data/concierges';
 
@@ -10,40 +10,30 @@ interface BrandBookProps {
 }
 
 const PALETTE = [
-  { name: 'Charcoal', hex: '#1A1A1A', role: 'Primary text' },
-  { name: 'Brand Orange', hex: '#C4622D', role: 'Brand accent' },
+  { name: 'Background', hex: '#FFFFFF', role: 'Primary surfaces' },
+  { name: 'Foreground', hex: '#0A0A0A', role: 'Text & wordmark' },
+  { name: 'Warm Accent', hex: '#F28C33', role: 'Brand orange accent' },
   { name: 'Sage', hex: '#6E8C5D', role: 'Secondary accent' },
-  { name: 'Bone', hex: '#F5F0E8', role: 'Surfaces' },
-  { name: 'Stone 50', hex: '#FAFAF9', role: 'Backgrounds' },
-  { name: 'Stone 400', hex: '#A8A29E', role: 'Muted text' },
+  { name: 'Bone', hex: '#F5F0E8', role: 'Warm surfaces' },
+  { name: 'Muted', hex: '#A8A29E', role: 'Muted text' },
 ];
 
-const TYPOGRAPHY = [
-  {
-    family: 'Serif Italic',
-    sample: 'Your dog\'s lifestyle concierge.',
-    use: 'Headlines, editorial moments, brand voice.',
-    css: 'font-serif italic',
-  },
-  {
-    family: 'Boutique Sans',
-    sample: 'A boutique lifestyle concierge for life with your dog.',
-    use: 'Body copy, supporting text.',
-    css: 'font-boutique',
-  },
-  {
-    family: 'Mono Caps',
-    sample: 'MEMBERSHIP · CITY GUIDE · CONCIERGE',
-    use: 'Kickers, labels, navigation.',
-    css: 'font-sans uppercase tracking-[0.4em] text-xs font-black',
-  },
+interface LogoVariant {
+  label: string;
+  surface: string;
+  textTone: 'black' | 'white' | 'orange';
+  mark?: boolean;
+}
+
+const LOGO_VARIANTS: LogoVariant[] = [
+  { label: 'On Light',  surface: 'bg-white',       textTone: 'black' },
+  { label: 'On Dark',   surface: 'bg-charcoal',    textTone: 'white' },
 ];
 
-const VOICE = [
-  { label: 'Premium', body: 'Curated, considered, never loud.' },
-  { label: 'Warm', body: 'A friend who happens to know all the best places.' },
-  { label: 'Helpful', body: 'Clear, useful, written like a concierge — not an app.' },
-  { label: 'Lifestyle-led', body: 'About living with your dog, not just owning one.' },
+const ICON_VARIANTS: LogoVariant[] = [
+  { label: 'Icon · On Light', surface: 'bg-white',    textTone: 'black', mark: true },
+  { label: 'Icon · On Dark',  surface: 'bg-charcoal', textTone: 'white', mark: true },
+  { label: 'Icon · Accent',   surface: 'bg-bone',     textTone: 'orange', mark: true },
 ];
 
 export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
@@ -69,83 +59,60 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           >
             <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">Brand Kit</span>
             <h1 id="brandbook-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white">
-              Hey Lola Brand Book<span className="text-brand-orange">.</span>
+              Hey Lola Brand Kit<span className="text-brand-orange">.</span>
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
-              The visual and verbal system behind a boutique lifestyle concierge for dog parents. Logos, palette, type, voice and the four concierges.
+              Official brand assets and usage guidelines for Hey Lola — a boutique lifestyle concierge for dog parents.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Table of contents */}
-      <nav aria-label="Brand book sections" className="border-b border-stone-100">
-        <div className="max-w-5xl mx-auto px-5 sm:px-6 py-5 flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">
-          <a href="#logos" className="hover:text-charcoal transition-colors">01 — Logos</a>
-          <a href="#colors" className="hover:text-charcoal transition-colors">02 — Colours</a>
-          <a href="#typography" className="hover:text-charcoal transition-colors">03 — Typography</a>
-          <a href="#voice" className="hover:text-charcoal transition-colors">04 — Voice</a>
-          <a href="#concierges" className="hover:text-charcoal transition-colors">05 — Concierges</a>
-        </div>
-      </nav>
-
-      {/* 01 — Logos */}
+      {/* Logo + Wordmark */}
       <section id="logos" aria-labelledby="logos-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto">
         <header className="mb-8 space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">01 — Logos</span>
-          <h2 id="logos-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The Hey Lola wordmark<span className="text-brand-orange">.</span></h2>
-          <p className="text-sm text-stone-500 font-light italic max-w-xl leading-relaxed">
-            One wordmark, three surfaces. Keep clear space equal to the height of the "H".
-          </p>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Logo + Wordmark</span>
+          <h2 id="logos-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+            The HeyLola wordmark<span className="text-brand-orange">.</span>
+          </h2>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <LogoCard label="Light" surface="bg-white" textTone="charcoal" />
-          <LogoCard label="Cream" surface="bg-stone-50" textTone="charcoal" />
-          <LogoCard label="Dark" surface="bg-charcoal" textTone="white" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {LOGO_VARIANTS.map((v) => (
+            <LogoTile key={v.label} variant={v} />
+          ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.3em]">
-          <a
-            href="/logo.svg"
-            download
-            className="inline-flex items-center gap-2 bg-charcoal text-white px-4 py-2 rounded-full hover:bg-charcoal/80 transition-colors"
-          >
-            <Download size={11} /> SVG
-          </a>
-          <a
-            href="/favicon.svg"
-            download
-            className="inline-flex items-center gap-2 border border-stone-200 text-stone-500 px-4 py-2 rounded-full hover:text-charcoal hover:border-charcoal transition-colors"
-          >
-            <Download size={11} /> Favicon
-          </a>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 mt-12 mb-4">Icon Only</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {ICON_VARIANTS.map((v) => (
+            <LogoTile key={v.label} variant={v} />
+          ))}
         </div>
       </section>
 
-      {/* 02 — Colours */}
+      {/* Color Palette */}
       <section id="colors" aria-labelledby="colors-heading" className="py-14 sm:py-16 px-5 sm:px-6 bg-stone-50 border-y border-stone-100">
         <div className="max-w-5xl mx-auto">
           <header className="mb-8 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2"><Palette size={11} /> 02 — Colours</span>
-            <h2 id="colors-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">A warm, editorial palette<span className="text-brand-orange">.</span></h2>
-            <p className="text-sm text-stone-500 font-light italic max-w-xl leading-relaxed">
-              Charcoal carries the brand. Orange is the one accent. Sage, bone and stone tones do the rest.
-            </p>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Color Palette</span>
+            <h2 id="colors-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+              A warm, editorial palette<span className="text-brand-orange">.</span>
+            </h2>
           </header>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {PALETTE.map((c) => (
               <div key={c.hex} className="space-y-2">
                 <div
-                  className="aspect-square rounded-2xl border border-stone-200 shadow-sm"
+                  className={`aspect-square rounded-2xl border ${c.hex === '#FFFFFF' ? 'border-stone-200' : 'border-transparent'} shadow-sm`}
                   style={{ background: c.hex }}
                   aria-label={`${c.name} swatch, ${c.hex}`}
                 />
                 <div className="space-y-0.5">
-                  <p className="text-sm font-serif italic text-charcoal">{c.name}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{c.hex}</p>
-                  <p className="text-[11px] text-stone-500 italic font-light">{c.role}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{c.name}</p>
+                  <p className="text-sm font-serif italic text-charcoal">{c.hex}</p>
+                  <p className="text-[11px] text-stone-500 italic font-light leading-snug">{c.role}</p>
                 </div>
               </div>
             ))}
@@ -153,55 +120,69 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         </div>
       </section>
 
-      {/* 03 — Typography */}
+      {/* Typography */}
       <section id="typography" aria-labelledby="type-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto">
         <header className="mb-8 space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2"><Type size={11} /> 03 — Typography</span>
-          <h2 id="type-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Editorial, with a sans for clarity<span className="text-brand-orange">.</span></h2>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Typography</span>
+          <h2 id="type-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+            Two typefaces, one voice<span className="text-brand-orange">.</span>
+          </h2>
         </header>
 
-        <div className="space-y-4">
-          {TYPOGRAPHY.map((t) => (
-            <article key={t.family} className="rounded-2xl border border-stone-100 bg-white p-6 sm:p-7">
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mb-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{t.family}</p>
-                <p className="text-[11px] text-stone-400 italic">{t.use}</p>
-              </div>
-              <p className={`text-2xl sm:text-3xl ${t.css}`}>{t.sample}</p>
-            </article>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <article className="rounded-2xl border border-stone-100 bg-white p-7">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Display Font</span>
+            <p className="text-4xl sm:text-5xl font-serif italic mt-3 leading-none">Hey Lola.</p>
+            <p className="text-base font-serif italic text-charcoal/70 mt-4">Editorial Serif</p>
+            <p className="text-sm text-stone-500 font-light italic leading-relaxed mt-2">
+              Used for large headlines, taglines and editorial statements. Always set in italic.
+            </p>
+          </article>
+
+          <article className="rounded-2xl border border-stone-100 bg-white p-7">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Body Font</span>
+            <p className="text-2xl font-boutique mt-3 leading-snug">A boutique lifestyle concierge for life with your dog.</p>
+            <p className="text-base font-boutique text-charcoal/70 mt-4">Boutique Sans</p>
+            <p className="text-sm text-stone-500 font-light italic leading-relaxed mt-2">
+              Used for body text, navigation and UI elements. Wide letter-spacing for uppercase labels.
+            </p>
+          </article>
         </div>
       </section>
 
-      {/* 04 — Voice */}
-      <section id="voice" aria-labelledby="voice-heading" className="py-14 sm:py-16 px-5 sm:px-6 bg-stone-50 border-y border-stone-100">
+      {/* Usage Guidelines */}
+      <section id="usage" aria-labelledby="usage-heading" className="py-14 sm:py-16 px-5 sm:px-6 bg-stone-50 border-y border-stone-100">
         <div className="max-w-5xl mx-auto">
           <header className="mb-8 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2"><Sparkles size={11} /> 04 — Voice</span>
-            <h2 id="voice-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Premium. Warm. Useful<span className="text-brand-orange">.</span></h2>
-            <p className="text-sm text-stone-500 font-light italic max-w-xl leading-relaxed">
-              "A boutique lifestyle concierge for life with your dog."
-            </p>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Usage Guidelines</span>
+            <h2 id="usage-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+              How to use the brand<span className="text-brand-orange">.</span>
+            </h2>
           </header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {VOICE.map((v) => (
-              <article key={v.label} className="rounded-2xl bg-white border border-stone-100 p-5 space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{v.label}</p>
-                <p className="text-sm text-charcoal/80 italic font-light leading-relaxed">{v.body}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { title: 'Clear Space', body: 'Maintain a minimum clear space equal to the height of the "H" in "Hey" around all logo variations.' },
+              { title: 'Minimum Size', body: 'The full wordmark should not be displayed smaller than 120px wide. The icon-only mark minimum is 32px.' },
+              { title: 'Background', body: 'Use the light variant on light backgrounds and the dark variant on dark backgrounds. Never place the logo on busy imagery — use the cream surface or a charcoal block instead.' },
+              { title: 'Modification', body: 'Do not stretch, rotate, recolor, or add effects to the logo. Use only the provided variations. The trailing period stays orange — always.' },
+            ].map((g) => (
+              <article key={g.title} className="rounded-2xl bg-white border border-stone-100 p-6 space-y-2">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{g.title}</h3>
+                <p className="text-sm text-stone-600 font-light leading-relaxed">{g.body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 05 — Concierges */}
+      {/* Concierges */}
       <section id="concierges" aria-labelledby="concierges-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
         <header className="mb-10 space-y-2 max-w-2xl">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">05 — Concierges</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Concierges</span>
           <h2 id="concierges-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four concierges<span className="text-brand-orange">.</span></h2>
           <p className="text-sm text-stone-500 font-light italic leading-relaxed">
-            Each concierge has a personality, a role and a full pose pack. Click any face to open their dedicated page.
+            Each concierge has a personality, a role and a full pose pack. Tap any face to open their dedicated page.
           </p>
         </header>
 
@@ -227,7 +208,6 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
               <div className="p-6 space-y-2">
                 <h3 className="text-2xl font-serif italic tracking-tight leading-none">{c.name}</h3>
                 <p className="text-[11px] text-stone-400 italic">{c.role}</p>
-                <p className="text-sm text-stone-500 font-light leading-snug pt-2 line-clamp-3">{c.tagline}</p>
                 <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-3">
                   Open page <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
                 </p>
@@ -237,20 +217,47 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         </div>
       </section>
 
-      {/* Footer of brand book */}
-      <section className="py-12 px-5 sm:px-6 bg-charcoal text-center">
-        <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.5em]">Hey Lola — Boutique Lifestyle Concierge</p>
+      {/* Footer back link */}
+      <section className="py-12 px-5 sm:px-6 text-center border-t border-stone-100">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
+        >
+          <ArrowLeft size={12} /> Back to Hey Lola
+        </button>
       </section>
     </main>
   );
 };
 
-function LogoCard({ label, surface, textTone }: { label: string; surface: string; textTone: 'charcoal' | 'white' }) {
+function LogoTile({ variant }: { variant: LogoVariant }) {
+  const isDark = variant.surface.includes('charcoal');
   return (
-    <div className={`rounded-2xl ${surface} border border-stone-100 p-8 flex flex-col items-center gap-5 aspect-square justify-center`}>
-      <BrandLogo size="2xl" variant={textTone === 'white' ? 'white' : undefined} />
-      <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${textTone === 'white' ? 'text-white/60' : 'text-stone-400'}`}>{label}</p>
-    </div>
+    <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-charcoal' : 'border-stone-100'} p-8 flex flex-col items-center gap-6 aspect-[4/3] justify-center relative overflow-hidden`}>
+      <BrandLogo
+        size={variant.mark ? 'xl' : '3xl'}
+        variant={variant.textTone}
+        mark={variant.mark}
+      />
+      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+        <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
+          {variant.label}
+        </span>
+        <a
+          href="/logo.svg"
+          download={`heylola-${variant.label.toLowerCase().replace(/[^a-z]+/g, '-')}.svg`}
+          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${
+            isDark
+              ? 'bg-white/10 text-white/70 hover:bg-white/20'
+              : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10'
+          }`}
+          aria-label={`Download ${variant.label} SVG`}
+        >
+          <Download size={9} /> SVG
+        </a>
+      </div>
+    </article>
   );
 }
 
@@ -274,7 +281,7 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
             className="inline-flex items-center gap-2 text-stone-500 hover:text-charcoal transition-colors text-[10px] font-black uppercase tracking-[0.3em]"
             aria-label="Back to Brand Book"
           >
-            <ArrowLeft size={12} /> Brand Book
+            <ArrowLeft size={12} /> Brand Kit
           </button>
 
           <motion.div

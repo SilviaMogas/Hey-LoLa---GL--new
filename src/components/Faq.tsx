@@ -3,7 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FAQ_CATEGORIES } from '../data/faq';
-import { usePageMeta, faqPageSchema } from '../lib/seo';
+import { SEO, faqPageSchema } from '../lib/seo';
+
+const FAQ_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'FAQ', item: '/faq' },
+];
 
 interface FaqProps {
   onBack: () => void;
@@ -11,16 +16,7 @@ interface FaqProps {
 
 export const Faq: React.FC<FaqProps> = ({ onBack }) => {
   const allQs = useMemo(() => FAQ_CATEGORIES.flatMap((c) => c.questions), []);
-  usePageMeta({
-    title: 'Hey Lola FAQ — Everything you need to know',
-    description: 'Frequently asked questions about Hey Lola, a boutique lifestyle concierge for dog parents. Memberships, partners, verification, cities and pet records.',
-    url: '/faq',
-    breadcrumbs: [
-      { name: 'Hey Lola', item: '/' },
-      { name: 'FAQ', item: '/faq' },
-    ],
-    jsonLd: faqPageSchema(allQs),
-  });
+  const faqSchema = useMemo(() => faqPageSchema(allQs), [allQs]);
   const [activeCategory, setActiveCategory] = useState<string>(FAQ_CATEGORIES[0].id);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -37,6 +33,13 @@ export const Faq: React.FC<FaqProps> = ({ onBack }) => {
 
   return (
     <div className="bg-white min-h-screen font-boutique">
+      <SEO
+        title="Hey Lola FAQ — Everything you need to know"
+        description="Frequently asked questions about Hey Lola, a boutique lifestyle concierge for dog parents. Memberships, partners, verification, cities and pet records."
+        url="/faq"
+        breadcrumbs={FAQ_BREADCRUMBS}
+        jsonLd={faqSchema}
+      />
       <section className="bg-stone-50 border-b border-stone-100 pt-12 pb-10 px-5 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <button

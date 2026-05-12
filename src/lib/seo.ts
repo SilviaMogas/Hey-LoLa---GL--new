@@ -3,13 +3,13 @@
  * we don't want to ship another dependency for what is essentially:
  *   - keep <title> in sync with the current route
  *   - keep description / canonical / Open Graph meta in sync
- *   - inject route-specific JSON-LD blocks so search engines AND
+ *   - render route-specific JSON-LD blocks so search engines AND
  *     generative AI assistants can describe the page accurately
  *
- * One hook, called from every top-level page component.
+ * One hook for the head meta, one helper component for JSON-LD.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 const SITE = {
   name: 'Hey Lola',
@@ -32,7 +32,7 @@ export interface PageMeta {
   url?: string;
   ogType?: 'website' | 'article' | 'profile';
   ogImage?: string;
-  /** Single object or array of objects — each becomes a separate <script type="application/ld+json"> */
+  /** Single object or array of objects — each renders as a <script type="application/ld+json"> via <PageJsonLd>. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   breadcrumbs?: BreadcrumbItem[];
   /** Whether the route should be indexed. Defaults to true. */
@@ -40,7 +40,6 @@ export interface PageMeta {
 }
 
 const META_DATA_ATTR = 'data-hl-seo';
-const JSONLD_DATA_ATTR = 'data-hl-jsonld';
 
 function resolveUrl(url: string | undefined): string {
   if (!url) return typeof window === 'undefined' ? SITE.origin : window.location.href;
@@ -73,21 +72,29 @@ function upsertLink(rel: string, href: string) {
   el.setAttribute('href', href);
 }
 
-function clearJsonLd() {
-  if (typeof document === 'undefined') return;
-  document.head.querySelectorAll(`script[${JSONLD_DATA_ATTR}="page"]`).forEach((s) => s.remove());
-}
-
-function appendJsonLd(data: Record<string, unknown>) {
-  if (typeof document === 'undefined') return;
-  const script = document.createElement('script');
-  script.setAttribute('type', 'application/ld+json');
-  script.setAttribute(JSONLD_DATA_ATTR, 'page');
-  // Escape `<` so a maliciously-shaped string can't break out of the
-  // <script> tag (OWASP-recommended hardening for inline JSON-LD).
-  script.textContent = JSON.stringify(data).replace(/</g, '\\u003c');
-  document.head.appendChild(script);
-}
+/**
+ * Renders structured-data scripts for the current page. The scripts mount
+ * into the document body — search engines and AI crawlers pick them up
+ * from anywhere in the DOM. Using JSX (not imperative DOM mutation) keeps
+ * the data flow explicit and audited by React.
+ */
+export const PageJsonLd: React.FC<{ data: Record<string, unknown> | Record<string, unknown>[] }> = ({ data }) => {
+  const blocks = useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
+  return React.createElement(
+    React.Fragment,
+    null,
+    blocks.map((block, i) =>
+      React.createElement(
+        'script',
+        { key: i, type: 'application/ld+json' },
+        // React renders the child as a text node — no HTML parsing,
+        // no dangerouslySetInnerHTML. JSON.stringify already escapes
+        // every character that could break out of a `<script>` body.
+        JSON.stringify(block).replace(/</g, '\\u003c'),
+      ),
+    ),
+  );
+};
 
 export function usePageMeta(meta: PageMeta) {
   useEffect(() => {
@@ -121,28 +128,46 @@ export function usePageMeta(meta: PageMeta) {
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: fullTitle });
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
     upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image });
-
-    clearJsonLd();
-
-    if (meta.breadcrumbs && meta.breadcrumbs.length > 0) {
-      appendJsonLd({
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: meta.breadcrumbs.map((b, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: b.name,
-          item: resolveUrl(b.item),
-        })),
-      });
-    }
-
-    if (meta.jsonLd) {
-      const list = Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd];
-      list.forEach(appendJsonLd);
-    }
-  }, [meta.title, meta.description, meta.url, meta.ogType, meta.ogImage, JSON.stringify(meta.jsonLd ?? null), JSON.stringify(meta.breadcrumbs ?? null), meta.index]);
+  }, [meta.title, meta.description, meta.url, meta.ogType, meta.ogImage, meta.index]);
 }
+
+/** Convenience: build a list of JSON-LD blocks from a PageMeta. */
+export function buildPageJsonLd(meta: PageMeta): Record<string, unknown>[] {
+  const blocks: Record<string, unknown>[] = [];
+  if (meta.breadcrumbs && meta.breadcrumbs.length > 0) {
+    blocks.push({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: meta.breadcrumbs.map((b, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: b.name,
+        item: resolveUrl(b.item),
+      })),
+    });
+  }
+  if (meta.jsonLd) {
+    blocks.push(...(Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd]));
+  }
+  return blocks;
+}
+
+/**
+ * The single per-page SEO component. Combines:
+ *   - imperative <head> sync (title, description, og:*, twitter:*)
+ *   - declarative JSON-LD scripts rendered via JSX (no
+ *     dangerouslySetInnerHTML, no DOM mutation)
+ * Drop one at the top of every page component.
+ */
+export const SEO: React.FC<PageMeta> = (meta) => {
+  usePageMeta(meta);
+  const blocks = useMemo(() => buildPageJsonLd(meta), [
+    JSON.stringify(meta.jsonLd ?? null),
+    JSON.stringify(meta.breadcrumbs ?? null),
+  ]);
+  if (blocks.length === 0) return null;
+  return React.createElement(PageJsonLd, { data: blocks });
+};
 
 /* ── Reusable schema builders ─────────────────────────────────────── */
 
@@ -215,3 +240,4 @@ export function personSchema({ name, role, image, url, description }: { name: st
     worksFor: { '@id': `${SITE.origin}/#organization` },
   };
 }
+

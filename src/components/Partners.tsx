@@ -4,20 +4,22 @@ import { ArrowLeft, ArrowRight, Store, CheckCircle, ShieldCheck, MapPin } from '
 import { useNavigate } from 'react-router-dom';
 import { paths } from '../lib/routes';
 import { cn } from '../lib/utils';
-import { usePageMeta } from '../lib/seo';
+import { SEO } from '../lib/seo';
+
+const PARTNERS_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Partner Network', item: '/partners' },
+];
 
 export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void; onClaimBusiness: () => void }> = ({ onBack, onJoinWaitlist, onClaimBusiness }) => {
-  usePageMeta({
-    title: 'Join the Boutique Dog-Friendly Network — Hey Lola Partners',
-    description: 'Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences. Be discovered, build trust with a Verified badge, reach a qualified lifestyle audience.',
-    url: '/partners',
-    breadcrumbs: [
-      { name: 'Hey Lola', item: '/' },
-      { name: 'Partner Network', item: '/partners' },
-    ],
-  });
   return (
     <div className="bg-bone min-h-screen font-boutique">
+      <SEO
+        title="Join the Boutique Dog-Friendly Network — Hey Lola Partners"
+        description="Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences. Be discovered, build trust with a Verified badge, reach a qualified lifestyle audience."
+        url="/partners"
+        breadcrumbs={PARTNERS_BREADCRUMBS}
+      />
       <section className="relative pt-12 pb-16 px-5 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(215,92,41,0.03),transparent_50%)]" />
         <div className="max-w-5xl mx-auto space-y-6 relative z-10">

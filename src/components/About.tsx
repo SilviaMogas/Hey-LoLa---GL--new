@@ -3,7 +3,12 @@ import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
-import { usePageMeta } from '../lib/seo';
+import { SEO } from '../lib/seo';
+
+const ABOUT_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'About', item: '/about' },
+];
 
 interface AboutProps {
   onBack?: () => void;
@@ -12,17 +17,15 @@ interface AboutProps {
 
 export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
   const { t } = useTranslation();
-  usePageMeta({
-    title: 'About Hey Lola — A boutique lifestyle concierge for dog parents',
-    description: "Hey Lola is a boutique lifestyle concierge for dog parents. Founded by Silvia Mogas after her dog Lola showed her that life with a dog deserves more thoughtful design.",
-    url: '/about',
-    ogType: 'article',
-    breadcrumbs: [
-      { name: 'Hey Lola', item: '/' },
-      { name: 'About', item: '/about' },
-    ],
-  });
   return (
+    <>
+    <SEO
+      title="About Hey Lola — A boutique lifestyle concierge for dog parents"
+      description="Hey Lola is a boutique lifestyle concierge for dog parents. Founded by Silvia Mogas after her dog Lola showed her that life with a dog deserves more thoughtful design."
+      url="/about"
+      ogType="article"
+      breadcrumbs={ABOUT_BREADCRUMBS}
+    />
     <div className="page-shell bg-stone-50/60 text-charcoal">
       {/* Hero Section */}
       <section className="relative py-10 sm:py-10 md:py-10 px-5 sm:px-6 overflow-hidden pt-28 sm:pt-32">
@@ -164,5 +167,6 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none grayscale" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/natural-paper.png")' }} />
       </section>
     </div>
+    </>
   );
 };

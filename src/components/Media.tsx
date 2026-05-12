@@ -3,7 +3,12 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Mail, Download, Newspaper, Quote, Building2, MapPin, Calendar } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { CONCIERGES, conciergePose } from '../data/concierges';
-import { usePageMeta } from '../lib/seo';
+import { SEO } from '../lib/seo';
+
+const MEDIA_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Press & Media', item: '/media' },
+];
 
 const PRESS_EMAIL = 'hey@heylola.co';
 
@@ -27,15 +32,6 @@ const DOWNLOADS = [
 const BRAND_STATEMENT = `Hey Lola is a boutique lifestyle concierge for dog parents. It brings together pet records, trusted dog-friendly places, verified partners and curated local perks in one elegant platform — launching first in Miami.`;
 
 export const Media: React.FC<MediaProps> = ({ onBack }) => {
-  usePageMeta({
-    title: 'Press & Media — Hey Lola',
-    description: 'Press kit for Hey Lola, a boutique lifestyle concierge for dog parents launching first in Miami. Fact sheet, brand statement, downloads and press contact.',
-    url: '/media',
-    breadcrumbs: [
-      { name: 'Hey Lola', item: '/' },
-      { name: 'Press & Media', item: '/media' },
-    ],
-  });
   const [copied, setCopied] = useState(false);
   const handleCopyEmail = async () => {
     try {
@@ -49,6 +45,12 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
 
   return (
     <main className="bg-white page-shell text-charcoal font-boutique" aria-labelledby="media-heading">
+      <SEO
+        title="Press & Media — Hey Lola"
+        description="Press kit for Hey Lola, a boutique lifestyle concierge for dog parents launching first in Miami. Fact sheet, brand statement, downloads and press contact."
+        url="/media"
+        breadcrumbs={MEDIA_BREADCRUMBS}
+      />
       {/* Hero */}
       <section className="relative bg-charcoal overflow-hidden pt-14 pb-12 px-5 sm:px-6" aria-labelledby="media-heading">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.04),transparent_60%)]" />

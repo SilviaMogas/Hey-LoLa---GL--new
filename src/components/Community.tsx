@@ -9,8 +9,11 @@ import {
   Heart,
   MessageSquare,
   Award,
+  Users,
+  Plus,
 } from 'lucide-react';
 import { CONCIERGES, conciergePose } from '../data/concierges';
+import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
 
 interface CommunityProps {
   petName?: string;
@@ -175,11 +178,20 @@ const SEED_FEED: FeedPost[] = [
   },
 ];
 
+type CategoryFilter = 'all' | GroupCategory;
+
 export const Community: React.FC<CommunityProps> = (_props) => {
   const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const sortedLeaderboard = useMemo(
     () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
     [],
+  );
+  const visibleGroups = useMemo(
+    () => activeCategory === 'all'
+      ? COMMUNITY_GROUPS
+      : COMMUNITY_GROUPS.filter((g) => g.category === activeCategory),
+    [activeCategory],
   );
 
   return (
@@ -209,6 +221,49 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           {COMMUNITY_CARDS.map((card, i) => (
             <CommunityCard key={card.id} card={card} delay={i * 0.08} />
           ))}
+        </section>
+
+        {/* Groups */}
+        <section aria-labelledby="groups-heading" className="pb-12">
+          <header className="flex items-end justify-between gap-4 mb-5">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
+                <Users size={11} /> Groups for you
+              </span>
+              <h2 id="groups-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
+                Find your pack<span className="text-brand-orange">.</span>
+              </h2>
+            </div>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
+            >
+              <Plus size={11} /> Suggest a group
+            </button>
+          </header>
+
+          {/* Category filter */}
+          <div className="flex gap-2 flex-wrap mb-5">
+            <CategoryPill
+              label="All"
+              active={activeCategory === 'all'}
+              onClick={() => setActiveCategory('all')}
+            />
+            {(Object.keys(CATEGORY_META) as GroupCategory[]).map((cat) => (
+              <CategoryPill
+                key={cat}
+                label={CATEGORY_META[cat].label}
+                active={activeCategory === cat}
+                onClick={() => setActiveCategory(cat)}
+              />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {visibleGroups.map((g, i) => (
+              <GroupCard key={g.id} group={g} delay={i * 0.04} />
+            ))}
+          </div>
         </section>
 
         {/* Tabs */}
@@ -414,5 +469,59 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
         </p>
       </div>
     </motion.li>
+  );
+}
+
+function CategoryPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.25em] border transition-all duration-300 ${
+        active
+          ? 'bg-charcoal text-white border-charcoal shadow-md'
+          : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
+  const meta = CATEGORY_META[group.category];
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay }}
+      className="rounded-2xl border border-stone-100 bg-white p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col gap-3"
+    >
+      <header className="flex items-start gap-3">
+        <div className={`w-11 h-11 rounded-2xl ${meta.color} flex items-center justify-center text-xl shrink-0`} aria-hidden>
+          {group.emoji}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-[9px] font-black uppercase tracking-[0.25em] ${meta.accent} mb-1`}>{meta.label}</p>
+          <h3 className="text-lg font-serif italic leading-tight">{group.name}</h3>
+        </div>
+      </header>
+      <p className="text-sm text-stone-500 font-light leading-relaxed">{group.description}</p>
+      <footer className="flex items-center justify-between pt-1 text-[10px] font-black uppercase tracking-[0.25em] text-stone-400">
+        <span className="inline-flex items-center gap-1.5">
+          <MapPin size={10} /> {group.city} · {group.cadence}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-charcoal">
+          <Users size={10} /> {group.members}
+        </span>
+      </footer>
+      <button
+        type="button"
+        className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors"
+      >
+        Join group <ArrowRight size={11} />
+      </button>
+    </motion.article>
   );
 }

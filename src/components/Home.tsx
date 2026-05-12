@@ -6,6 +6,7 @@ import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipPlansSection } from './MembershipPlansSection';
 import { CONCIERGES } from '../data/concierges';
+import { usePageMeta, organizationSchema, websiteSchema, serviceSchema } from '../lib/seo';
 
 interface HomeProps {
   onExplore: () => void;
@@ -19,6 +20,12 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge }) => {
   const { t } = useTranslation();
+  usePageMeta({
+    title: "Hey Lola | Your Dog's Lifestyle Concierge",
+    description: "Hey Lola is a boutique lifestyle concierge for dog parents. Organise your dog's essentials, discover trusted dog-friendly places, and access curated local perks. Launching first in Miami.",
+    url: '/',
+    jsonLd: [organizationSchema, websiteSchema, serviceSchema],
+  });
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);

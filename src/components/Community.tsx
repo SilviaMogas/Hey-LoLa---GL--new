@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
+import { usePageMeta } from '../lib/seo';
 
 interface CommunityProps {
   petName?: string;
@@ -181,6 +182,15 @@ const SEED_FEED: FeedPost[] = [
 type CategoryFilter = 'all' | GroupCategory;
 
 export const Community: React.FC<CommunityProps> = (_props) => {
+  usePageMeta({
+    title: 'Hey Lola Community — Find Your Pack',
+    description: 'Discover dog-friendly places, perks, and city packs with other dog parents. Join the Miami Pack, follow Lola\'s Picks, unlock partner perks and take on community challenges.',
+    url: '/community',
+    breadcrumbs: [
+      { name: 'Hey Lola', item: '/' },
+      { name: 'Community', item: '/community' },
+    ],
+  });
   const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const sortedLeaderboard = useMemo(

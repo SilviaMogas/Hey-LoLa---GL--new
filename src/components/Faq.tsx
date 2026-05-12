@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FAQ_CATEGORIES } from '../data/faq';
+import { usePageMeta, faqPageSchema } from '../lib/seo';
 
 interface FaqProps {
   onBack: () => void;
 }
 
 export const Faq: React.FC<FaqProps> = ({ onBack }) => {
+  const allQs = useMemo(() => FAQ_CATEGORIES.flatMap((c) => c.questions), []);
+  usePageMeta({
+    title: 'Hey Lola FAQ — Everything you need to know',
+    description: 'Frequently asked questions about Hey Lola, a boutique lifestyle concierge for dog parents. Memberships, partners, verification, cities and pet records.',
+    url: '/faq',
+    breadcrumbs: [
+      { name: 'Hey Lola', item: '/' },
+      { name: 'FAQ', item: '/faq' },
+    ],
+    jsonLd: faqPageSchema(allQs),
+  });
   const [activeCategory, setActiveCategory] = useState<string>(FAQ_CATEGORIES[0].id);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 

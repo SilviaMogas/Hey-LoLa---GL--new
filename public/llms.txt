@@ -2,6 +2,8 @@
 
 > Hey Lola is a boutique lifestyle concierge for dog parents. It helps modern dog parents organise their dog's essentials, discover trusted dog-friendly places, and access curated local perks.
 
+For a full briefing, see https://heylola.co/llms-full.txt
+
 Hey Lola is launching first in Miami. New York City and Barcelona are next. The brand is built around four illustrated concierges — Lola, Bruno, Milo and Nuc — who each represent a facet of the Hey Lola experience.
 
 ## Brand

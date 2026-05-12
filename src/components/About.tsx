@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
+import { usePageMeta } from '../lib/seo';
 
 interface AboutProps {
   onBack?: () => void;
@@ -11,6 +12,16 @@ interface AboutProps {
 
 export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
   const { t } = useTranslation();
+  usePageMeta({
+    title: 'About Hey Lola — A boutique lifestyle concierge for dog parents',
+    description: "Hey Lola is a boutique lifestyle concierge for dog parents. Founded by Silvia Mogas after her dog Lola showed her that life with a dog deserves more thoughtful design.",
+    url: '/about',
+    ogType: 'article',
+    breadcrumbs: [
+      { name: 'Hey Lola', item: '/' },
+      { name: 'About', item: '/about' },
+    ],
+  });
   return (
     <div className="page-shell bg-stone-50/60 text-charcoal">
       {/* Hero Section */}

@@ -4,8 +4,18 @@ import { ArrowLeft, ArrowRight, Store, CheckCircle, ShieldCheck, MapPin } from '
 import { useNavigate } from 'react-router-dom';
 import { paths } from '../lib/routes';
 import { cn } from '../lib/utils';
+import { usePageMeta } from '../lib/seo';
 
 export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void; onClaimBusiness: () => void }> = ({ onBack, onJoinWaitlist, onClaimBusiness }) => {
+  usePageMeta({
+    title: 'Join the Boutique Dog-Friendly Network — Hey Lola Partners',
+    description: 'Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences. Be discovered, build trust with a Verified badge, reach a qualified lifestyle audience.',
+    url: '/partners',
+    breadcrumbs: [
+      { name: 'Hey Lola', item: '/' },
+      { name: 'Partner Network', item: '/partners' },
+    ],
+  });
   return (
     <div className="bg-bone min-h-screen font-boutique">
       <section className="relative pt-12 pb-16 px-5 sm:px-6 overflow-hidden">

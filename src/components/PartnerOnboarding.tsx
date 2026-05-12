@@ -157,7 +157,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
   const isStepValid = useMemo(() => {
     if (step === 'Business')
       return form.businessName.trim().length > 1 && form.categories.length > 0 && (form.city !== 'other' || form.cityOther.trim().length > 1);
-    if (step === 'Contact') return form.contactName.trim().length > 1 && /.+@.+\..+/.test(form.email);
+    if (step === 'Contact') return form.contactName.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
     if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && !!form.perkType && form.perkDescription.trim().length > 3);
     if (step === 'Review') return form.agree;
     return false;

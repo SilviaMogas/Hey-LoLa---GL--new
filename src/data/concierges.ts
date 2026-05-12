@@ -55,7 +55,7 @@ export const CONCIERGES: ConciergeProfile[] = [
   {
     id: 'nuc',
     name: 'Nuc',
-    role: 'Adventure Guide',
+    role: 'Curious Explorer',
     tagline: 'Curious, adventurous, ready for anything.',
     personality: 'Restless, observant, lives one road trip ahead.',
     style: 'Explorer collar, always set for the next trip.',

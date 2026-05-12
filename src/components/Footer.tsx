@@ -57,7 +57,7 @@ export const Footer: React.FC = () => {
       heading: 'Brand',
       links: [
         { label: 'Brand Book', path: paths.brandBook },
-        { label: 'The Concierges', path: paths.brandBook },
+        { label: 'The Concierges', path: paths.concierges },
         { label: 'Press & Media', path: paths.media },
       ],
     },

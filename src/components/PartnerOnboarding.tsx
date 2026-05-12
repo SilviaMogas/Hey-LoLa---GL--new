@@ -22,6 +22,7 @@ interface PartnerOnboardingProps {
 }
 
 type Category =
+  // Places (physical venues)
   | 'restaurant'
   | 'cafe'
   | 'hotel'
@@ -31,27 +32,46 @@ type Category =
   | 'trainer'
   | 'pet_shop'
   | 'experience'
+  // E-commerce (sells physical products, often shipping worldwide)
+  | 'food_nutrition'
+  | 'apparel'
+  | 'accessories'
+  | 'toys_play'
+  | 'wellness_products'
+  | 'travel_gear'
+  | 'online_store'
   | 'other';
 
-const CATEGORIES: { id: Category; label: string; emoji: string }[] = [
-  { id: 'restaurant', label: 'Restaurant', emoji: '🍽️' },
-  { id: 'cafe', label: 'Café', emoji: '☕' },
-  { id: 'hotel', label: 'Hotel', emoji: '🛎️' },
-  { id: 'vet', label: 'Veterinary', emoji: '🩺' },
-  { id: 'groomer', label: 'Groomer', emoji: '✂️' },
-  { id: 'daycare', label: 'Daycare', emoji: '🏡' },
-  { id: 'trainer', label: 'Trainer', emoji: '🎓' },
-  { id: 'pet_shop', label: 'Pet Shop', emoji: '🛍️' },
-  { id: 'experience', label: 'Experience', emoji: '✨' },
-  { id: 'other', label: 'Other', emoji: '🐾' },
+const CATEGORIES: { id: Category; label: string; emoji: string; group: 'place' | 'ecommerce' }[] = [
+  // Places
+  { id: 'restaurant', label: 'Restaurant', emoji: '🍽️', group: 'place' },
+  { id: 'cafe', label: 'Café', emoji: '☕', group: 'place' },
+  { id: 'hotel', label: 'Hotel', emoji: '🛎️', group: 'place' },
+  { id: 'vet', label: 'Veterinary', emoji: '🩺', group: 'place' },
+  { id: 'groomer', label: 'Groomer', emoji: '✂️', group: 'place' },
+  { id: 'daycare', label: 'Daycare', emoji: '🏡', group: 'place' },
+  { id: 'trainer', label: 'Trainer', emoji: '🎓', group: 'place' },
+  { id: 'pet_shop', label: 'Pet Shop', emoji: '🛍️', group: 'place' },
+  { id: 'experience', label: 'Experience', emoji: '✨', group: 'place' },
+  // E-commerce
+  { id: 'food_nutrition', label: 'Food & Nutrition', emoji: '🥩', group: 'ecommerce' },
+  { id: 'apparel', label: 'Apparel & Clothing', emoji: '👕', group: 'ecommerce' },
+  { id: 'accessories', label: 'Accessories', emoji: '🎀', group: 'ecommerce' },
+  { id: 'toys_play', label: 'Toys & Play', emoji: '🧸', group: 'ecommerce' },
+  { id: 'wellness_products', label: 'Wellness & Supplements', emoji: '🌿', group: 'ecommerce' },
+  { id: 'travel_gear', label: 'Travel Gear', emoji: '🧳', group: 'ecommerce' },
+  { id: 'online_store', label: 'Online Store', emoji: '🛒', group: 'ecommerce' },
+  // Catch-all
+  { id: 'other', label: 'Other', emoji: '🐾', group: 'place' },
 ];
 
-type City = 'miami' | 'nyc' | 'barcelona' | 'other';
-const CITIES: { id: City; label: string; status: 'live' | 'soon' }[] = [
+type City = 'miami' | 'nyc' | 'barcelona' | 'global_online' | 'other';
+const CITIES: { id: City; label: string; status: 'live' | 'soon' | 'global' }[] = [
   { id: 'miami', label: 'Miami', status: 'live' },
   { id: 'nyc', label: 'New York City', status: 'soon' },
   { id: 'barcelona', label: 'Barcelona', status: 'soon' },
-  { id: 'other', label: 'Other / Waitlist', status: 'soon' },
+  { id: 'global_online', label: 'Global / Online', status: 'global' },
+  { id: 'other', label: 'Other city', status: 'soon' },
 ];
 
 type PerkType =
@@ -60,26 +80,65 @@ type PerkType =
   | 'priority_booking'
   | 'pet_friendly_experience'
   | 'loyalty_reward'
+  | 'free_shipping'
+  | 'welcome_bundle'
+  | 'early_access'
+  | 'free_consultation'
+  | 'sample'
   | 'other';
 
 const PERK_TYPES: { id: PerkType; label: string; description: string; emoji: string }[] = [
-  { id: 'discount', label: 'Discount', description: '10% off the bill, percentage on services, etc.', emoji: '🏷️' },
+  { id: 'discount', label: 'Discount', description: '10% off the bill, percentage on services or products.', emoji: '🏷️' },
   { id: 'free_item', label: 'Welcome treat', description: 'Free dog biscuit, water bowl, welcome drink.', emoji: '🎁' },
   { id: 'priority_booking', label: 'Priority booking', description: 'Reserved table, fast-lane check-in, member-only slot.', emoji: '⭐' },
   { id: 'pet_friendly_experience', label: 'Dog-friendly experience', description: 'A signature moment — dog brunch, paw spa, evening run club.', emoji: '🐶' },
+  { id: 'free_shipping', label: 'Free shipping', description: 'Complimentary shipping for Hey Lola members. Perfect for online stores.', emoji: '📦' },
+  { id: 'welcome_bundle', label: 'Welcome bundle', description: 'A small gift bundle or starter pack with the first order.', emoji: '🎀' },
+  { id: 'early_access', label: 'Early access', description: 'First look at new drops, launches or seasonal collections.', emoji: '⚡' },
+  { id: 'free_consultation', label: 'Free consultation', description: 'Vets, trainers, groomers — a free intro session for members.', emoji: '🩺' },
+  { id: 'sample', label: 'Free sample', description: 'A trial-size or sample with every order.', emoji: '🧪' },
   { id: 'loyalty_reward', label: 'Loyalty reward', description: 'Stamp card, 10th visit free, points on the house.', emoji: '💛' },
   { id: 'other', label: 'Other', description: 'Tell us what you would like to offer.', emoji: '✨' },
 ];
 
-const DOG_FRIENDLY_FEATURES = [
-  'Dogs allowed indoors',
-  'Outdoor terrace welcomes dogs',
-  'Water bowl on request',
-  'Dog menu / treats available',
-  'No weight limit',
-  'Dog beds / mats available',
-  'Off-leash area',
+interface FeatureGroup { label: string; items: string[] }
+
+const DOG_FRIENDLY_FEATURE_GROUPS: FeatureGroup[] = [
+  {
+    label: 'For everyone',
+    items: [
+      'Welcomes all dog sizes',
+      'No breed restrictions',
+      'Multi-pet friendly',
+      'Locally owned',
+      'Sustainable / eco-conscious',
+    ],
+  },
+  {
+    label: 'For places',
+    items: [
+      'Dogs allowed indoors',
+      'Outdoor terrace welcomes dogs',
+      'Water bowl on request',
+      'Dog menu / treats available',
+      'Dog beds / mats available',
+      'Off-leash area',
+    ],
+  },
+  {
+    label: 'For online & products',
+    items: [
+      'Ships worldwide',
+      'Free shipping option',
+      'Subscription available',
+      'Vet-recommended',
+      'Hypoallergenic / sensitive-stomach',
+      'Made specifically for dogs',
+    ],
+  },
 ];
+
+const DOG_FRIENDLY_FEATURES = DOG_FRIENDLY_FEATURE_GROUPS.flatMap((g) => g.items);
 
 interface FormState {
   businessName: string;
@@ -96,7 +155,7 @@ interface FormState {
   features: string[];
   notes: string;
   offersPerk: boolean | null;
-  perkType: PerkType | null;
+  perkTypes: PerkType[];
   perkDescription: string;
   perkConditions: string;
   perkAvailability: string;
@@ -132,7 +191,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     features: [],
     notes: '',
     offersPerk: null,
-    perkType: null,
+    perkTypes: [],
     perkDescription: '',
     perkConditions: '',
     perkAvailability: '',
@@ -158,7 +217,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     if (step === 'Business')
       return form.businessName.trim().length > 1 && form.categories.length > 0 && (form.city !== 'other' || form.cityOther.trim().length > 1);
     if (step === 'Contact') return form.contactName.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && !!form.perkType && form.perkDescription.trim().length > 3);
+    if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && form.perkTypes.length > 0 && form.perkDescription.trim().length > 3);
     if (step === 'Review') return form.agree;
     return false;
   }, [step, form]);
@@ -201,7 +260,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
         offersPerk: form.offersPerk,
         perk: form.offersPerk
           ? {
-              type: form.perkType,
+              types: form.perkTypes,
               description: form.perkDescription,
               conditions: form.perkConditions,
               availability: form.perkAvailability,
@@ -238,7 +297,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 text-left">
             {[
               { title: 'We review', body: 'Our team checks your details and dog-friendly status.' },
-              { title: 'You verify', body: 'We confirm your contact email and may visit your venue.' },
+              { title: 'You verify', body: 'We confirm your contact email and check your business credentials.' },
               { title: 'You go Verified', body: 'Your profile and perk go live on Hey Lola.' },
             ].map((step) => (
               <div key={step.title} className="rounded-2xl border border-stone-100 bg-stone-50 p-5 space-y-2">
@@ -263,7 +322,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     <main className="bg-white min-h-screen text-charcoal font-boutique" aria-labelledby="partner-onboarding-heading">
       <SEO
         title="Become a Hey Lola Partner — Self-Onboarding"
-        description="Self-onboard your dog-friendly business onto Hey Lola. Tell us about your venue, choose the perk you offer to members, and our team will verify within 5 business days."
+        description="Self-onboard your dog-friendly business onto Hey Lola. Tell us about your business, choose the perk you offer to members, and our team will verify within 5 business days."
         url="/partners/onboard"
         breadcrumbs={BREADCRUMBS}
       />
@@ -398,45 +457,72 @@ const inputClass = 'luxury-input h-12 w-full text-sm';
 function BusinessStep({ form, update, toggleCategory }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleCategory: (v: Category) => void }) {
   return (
     <>
-      <SectionLabel icon={<Building2 size={11} />} kicker="Step 1 — Business" title="Tell us about your venue" description="The basics so we can list you correctly." />
+      <SectionLabel icon={<Building2 size={11} />} kicker="Step 1 — Business" title="Tell us about your business" description="The basics so we can list you correctly — works for a venue, a shop or an online store." />
       <Field label="Business name">
         <input type="text" required value={form.businessName} onChange={(e) => update('businessName', e.target.value)} placeholder="The Watering Bowl" className={inputClass} />
       </Field>
       <Field label="Category — pick one or more">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = form.categories.includes(c.id);
+        <div className="space-y-3">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">Places</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.filter((c) => c.group === 'place').map((c) => {
+                const active = form.categories.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => toggleCategory(c.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                  >
+                    <span aria-hidden>{c.emoji}</span> {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">E-commerce</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.filter((c) => c.group === 'ecommerce').map((c) => {
+                const active = form.categories.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => toggleCategory(c.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                  >
+                    <span aria-hidden>{c.emoji}</span> {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </Field>
+      <Field label="City — or pick Global / Online if you ship worldwide">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          {CITIES.map((c) => {
+            const statusLabel =
+              c.status === 'live' ? 'Live' : c.status === 'global' ? 'Worldwide' : 'Coming soon';
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => toggleCategory(c.id)}
-                className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                onClick={() => update('city', c.id)}
+                className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
               >
-                <span aria-hidden>{c.emoji}</span> {c.label}
+                <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
+                <p className={`text-[9px] font-black uppercase tracking-[0.25em] mt-1 ${c.status === 'global' ? 'text-brand-orange' : 'text-stone-400'}`}>{statusLabel}</p>
               </button>
             );
           })}
         </div>
       </Field>
-      <Field label="City">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {CITIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => update('city', c.id)}
-              className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
-            >
-              <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
-              <p className="text-[9px] font-black uppercase tracking-[0.25em] mt-1 text-stone-400">{c.status === 'live' ? 'Live' : 'Coming soon'}</p>
-            </button>
-          ))}
-        </div>
-      </Field>
       {form.city === 'other' && (
         <Field label="Which city?">
-          <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles" className={inputClass} />
+          <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles, London, Lisbon…" className={inputClass} />
         </Field>
       )}
       <Field label="Address" optional>
@@ -457,7 +543,7 @@ function BusinessStep({ form, update, toggleCategory }: { form: FormState; updat
 function ContactStep({ form, update, toggleFeature }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleFeature: (v: string) => void }) {
   return (
     <>
-      <SectionLabel icon={<User size={11} />} kicker="Step 2 — Contact" title="Who's signing your venue up" description="We'll only use this to verify and reach you about your application." />
+      <SectionLabel icon={<User size={11} />} kicker="Step 2 — Contact" title="Who's signing your business up" description="We'll only use this to verify and reach you about your application." />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Your name">
           <input type="text" required value={form.contactName} onChange={(e) => update('contactName', e.target.value)} placeholder="Adriana Rubio" className={inputClass} />
@@ -475,24 +561,31 @@ function ContactStep({ form, update, toggleFeature }: { form: FormState; update:
         </Field>
       </div>
       <Field label="Dog-friendly features — pick all that apply" optional>
-        <div className="flex flex-wrap gap-2">
-          {DOG_FRIENDLY_FEATURES.map((feat) => {
-            const active = form.features.includes(feat);
-            return (
-              <button
-                key={feat}
-                type="button"
-                onClick={() => toggleFeature(feat)}
-                className={`px-3 py-1.5 rounded-full text-[11px] border transition-all ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
-              >
-                {feat}
-              </button>
-            );
-          })}
+        <div className="space-y-3">
+          {DOG_FRIENDLY_FEATURE_GROUPS.map((group) => (
+            <div key={group.label}>
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">{group.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {group.items.map((feat) => {
+                  const active = form.features.includes(feat);
+                  return (
+                    <button
+                      key={feat}
+                      type="button"
+                      onClick={() => toggleFeature(feat)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] border transition-all ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                    >
+                      {feat}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </Field>
       <Field label="Anything else we should know?" optional>
-        <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} placeholder="Peak hours, dog rules, suggested visit time…" className="luxury-input p-4 h-28 w-full text-sm resize-none" />
+        <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} placeholder="Peak hours, shipping notes, dog rules, what makes you different…" className="luxury-input p-4 h-28 w-full text-sm resize-none" />
       </Field>
     </>
   );
@@ -519,7 +612,7 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
         </button>
         <button
           type="button"
-          onClick={() => { update('offersPerk', false); update('perkType', null); }}
+          onClick={() => { update('offersPerk', false); update('perkTypes', []); }}
           className={`rounded-2xl border p-5 text-left transition-all ${form.offersPerk === false ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
         >
           <p className="text-sm font-serif italic text-charcoal">Not now, maybe later</p>
@@ -529,18 +622,28 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
 
       {form.offersPerk && (
         <>
-          <Field label="Perk type">
+          <Field label="Perk type — you can pick more than one">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PERK_TYPES.map((p) => {
-                const active = form.perkType === p.id;
+                const active = form.perkTypes.includes(p.id);
                 return (
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => update('perkType', p.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
+                    onClick={() => {
+                      const next = active
+                        ? form.perkTypes.filter((x) => x !== p.id)
+                        : [...form.perkTypes, p.id];
+                      update('perkTypes', next);
+                    }}
+                    className={`rounded-2xl border p-4 text-left transition-all relative ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
                   >
-                    <p className="text-sm font-serif italic text-charcoal inline-flex items-center gap-2">
+                    {active && (
+                      <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-charcoal text-white flex items-center justify-center" aria-hidden>
+                        <Check size={11} />
+                      </span>
+                    )}
+                    <p className="text-sm font-serif italic text-charcoal inline-flex items-center gap-2 pr-6">
                       <span aria-hidden>{p.emoji}</span> {p.label}
                     </p>
                     <p className="text-[11px] text-stone-500 font-light italic mt-1">{p.description}</p>
@@ -585,7 +688,9 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
 function ReviewStep({ form, update }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void }) {
   const cityLabel = form.city === 'other' ? form.cityOther : CITIES.find((c) => c.id === form.city)?.label ?? form.city;
   const categoryLabels = form.categories.map((id) => CATEGORIES.find((c) => c.id === id)?.label ?? id).join(' · ');
-  const perkLabel = form.perkType ? PERK_TYPES.find((p) => p.id === form.perkType)?.label : null;
+  const perkLabel = form.perkTypes.length > 0
+    ? form.perkTypes.map((id) => PERK_TYPES.find((p) => p.id === id)?.label ?? id).join(' · ')
+    : null;
 
   return (
     <>
@@ -606,7 +711,7 @@ function ReviewStep({ form, update }: { form: FormState; update: <K extends keyo
         {form.notes && <ReviewRow label="Notes" value={form.notes} />}
         <hr className="border-stone-200" />
         <ReviewRow label="Offers a perk" value={form.offersPerk ? 'Yes' : 'Not now'} />
-        {form.offersPerk && perkLabel && <ReviewRow label="Perk type" value={perkLabel} />}
+        {form.offersPerk && perkLabel && <ReviewRow label="Perk types" value={perkLabel} />}
         {form.offersPerk && form.perkDescription && <ReviewRow label="Perk description" value={form.perkDescription} />}
         {form.offersPerk && form.perkConditions && <ReviewRow label="Conditions" value={form.perkConditions} />}
         {form.offersPerk && form.perkAvailability && <ReviewRow label="Availability" value={form.perkAvailability} />}

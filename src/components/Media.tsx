@@ -19,7 +19,7 @@ interface MediaProps {
 const PRESS_FACTS = [
   { label: 'Founded', value: '2024', icon: Calendar },
   { label: 'Parent company', value: 'BMBWeb3 Global FZCO', icon: Building2 },
-  { label: 'Launch city', value: 'Miami · 2026', icon: MapPin },
+  { label: 'Launch city', value: 'Miami', icon: MapPin },
   { label: 'Coming next', value: 'New York City · Barcelona', icon: MapPin },
 ];
 
@@ -29,7 +29,7 @@ const DOWNLOADS = [
   { label: 'Open Graph (PNG)', href: '/og-image.png', desc: '1200×630 social preview.' },
 ];
 
-const BRAND_STATEMENT = `Hey Lola is a boutique lifestyle concierge for dog parents. It brings together pet records, trusted dog-friendly places, verified partners and curated local perks in one elegant platform — launching first in Miami.`;
+const BRAND_STATEMENT = `Hey Lola is a boutique lifestyle concierge for dog parents. It brings together pet records, trusted dog-friendly places, verified partners and curated local perks in one elegant platform.`;
 
 export const Media: React.FC<MediaProps> = ({ onBack }) => {
   const [copied, setCopied] = useState(false);
@@ -47,7 +47,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
     <main className="bg-white page-shell text-charcoal font-boutique" aria-labelledby="media-heading">
       <SEO
         title="Press & Media — Hey Lola"
-        description="Press kit for Hey Lola, a boutique lifestyle concierge for dog parents launching first in Miami. Fact sheet, brand statement, downloads and press contact."
+        description="Press kit for Hey Lola, a boutique lifestyle concierge for dog parents. Fact sheet, brand statement, downloads and press contact."
         url="/media"
         breadcrumbs={MEDIA_BREADCRUMBS}
       />

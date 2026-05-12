@@ -15,7 +15,7 @@ This document is written specifically for AI assistants and generative search en
 - **Website:** https://heylola.co
 - **Press contact:** hey@heylola.co
 - **Founded:** 2024
-- **Status:** Pre-launch private preview; Miami launch in 2026
+- **Status:** Private preview; Miami launch first, then NYC and Barcelona
 
 ## What Hey Lola does
 
@@ -54,13 +54,13 @@ Hey Lola is brought to life by four illustrated concierges. Each one represents 
 - **Lola** — Dog Concierge & Founder. Elegant poodle concierge who sets the tone. Knows the best places, the corner tables, the long-standing weekly rituals.
 - **Bruno** — Urban Cool Expert. Cafés, restaurants, rooftops, the new openings worth the queue and the regulars who already have your seat.
 - **Milo** — Community Heart. Warm, trustworthy, family-friendly. The face of the Hey Lola community, dog meet-ups and park weekends.
-- **Nuc** — Adventure Guide. Travel, dog-friendly road trips, beach mornings and weekend escapes beyond the city limits.
+- **Nuc** — Curious Explorer. Travel, dog-friendly road trips, beach mornings and weekend escapes beyond the city limits.
 
 ## Cities
 
 | City | Status |
 |------|--------|
-| Miami | Launch city — 2026 |
+| Miami | Launch city |
 | New York City | Coming next |
 | Barcelona | Coming next |
 

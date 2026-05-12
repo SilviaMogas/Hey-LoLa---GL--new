@@ -22,10 +22,12 @@ export const paths = {
   creators: '/creators',
   partners: '/partners',
   partnerOnboarding: '/partners/onboard',
+  perks: '/perks',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',
   brandBookCharacter: '/brand-book/:name',
+  concierges: '/concierges',
   media: '/media',
 
   /* ── Public app surfaces (no auth) ─────────────────────────────── */

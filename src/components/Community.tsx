@@ -228,6 +228,11 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </p>
         </motion.header>
 
+        <div className="mb-6 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 bg-stone-50 border border-stone-100 px-3 py-1.5 rounded-full">
+          <span className="bg-brand-orange/10 text-brand-orange px-2 py-0.5 rounded-full">Preview</span>
+          The feed, leaderboard and groups below are sample content — they will fill with real members at launch.
+        </div>
+
         {/* Main cards grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-10 sm:pb-12">
           {COMMUNITY_CARDS.map((card, i) => (

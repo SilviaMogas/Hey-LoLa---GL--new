@@ -337,48 +337,191 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-stone-50">
+                {/* Emergency Contacts (editable) */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-charcoal">
-                     <AlertCircle size={16} />
-                     <label className="text-[10px] font-black uppercase tracking-[0.2em]">Emergency Contacts</label>
+                  <div className="flex items-center justify-between text-charcoal">
+                     <div className="flex items-center gap-2">
+                       <AlertCircle size={16} />
+                       <label className="text-[10px] font-black uppercase tracking-[0.2em]">Emergency Contacts</label>
+                     </div>
+                     {isEditing && (
+                       <button
+                         type="button"
+                         onClick={() => setEditedData({ ...editedData, emergencyContacts: [...(editedData.emergencyContacts || []), { role: 'Contact', name: '', phone: '' }] })}
+                         className="text-[9px] font-black uppercase tracking-[0.25em] text-stone-500 hover:text-charcoal transition-colors"
+                       >
+                         + Add
+                       </button>
+                     )}
                   </div>
                   <div className="space-y-3">
-                     {[
-                       { role: 'Owner', name: 'Silvia Mogas', phone: '+34 600 000 000' },
-                       { role: 'Primary Vet', name: 'Dr. Barkson', phone: '+34 932 000 000' }
-                     ].map((contact, i) => (
-                       <div key={i} className="flex justify-between items-center p-4 bg-muted rounded-2xl">
-                          <div>
-                            <p className="text-[8px] font-black uppercase text-stone-400">{contact.role}</p>
-                            <p className="text-sm font-bold">{contact.name}</p>
-                          </div>
-                          <a href={`tel:${contact.phone}`} className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-charcoal shadow-sm hover:scale-110 transition-transform">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                          </a>
+                     {(isEditing ? (editedData.emergencyContacts ?? []) : (petData.emergencyContacts ?? [])).map((contact, i) => (
+                       <div key={i} className="p-4 bg-muted rounded-2xl space-y-2">
+                          {isEditing ? (
+                            <>
+                              <input
+                                value={contact.role}
+                                onChange={(e) => {
+                                  const list = [...(editedData.emergencyContacts ?? [])];
+                                  list[i] = { ...list[i], role: e.target.value };
+                                  setEditedData({ ...editedData, emergencyContacts: list });
+                                }}
+                                placeholder="Role (Owner, Primary Vet…)"
+                                className="w-full bg-white p-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] outline-none"
+                              />
+                              <input
+                                value={contact.name}
+                                onChange={(e) => {
+                                  const list = [...(editedData.emergencyContacts ?? [])];
+                                  list[i] = { ...list[i], name: e.target.value };
+                                  setEditedData({ ...editedData, emergencyContacts: list });
+                                }}
+                                placeholder="Name"
+                                className="w-full bg-white p-2 rounded-lg text-sm font-bold outline-none"
+                              />
+                              <div className="flex gap-2">
+                                <input
+                                  value={contact.phone}
+                                  onChange={(e) => {
+                                    const list = [...(editedData.emergencyContacts ?? [])];
+                                    list[i] = { ...list[i], phone: e.target.value };
+                                    setEditedData({ ...editedData, emergencyContacts: list });
+                                  }}
+                                  placeholder="+34 600 000 000"
+                                  className="flex-1 bg-white p-2 rounded-lg text-xs font-medium outline-none"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const list = (editedData.emergencyContacts ?? []).filter((_, idx) => idx !== i);
+                                    setEditedData({ ...editedData, emergencyContacts: list });
+                                  }}
+                                  className="px-3 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-50 transition-colors"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="text-[8px] font-black uppercase text-stone-400">{contact.role}</p>
+                                <p className="text-sm font-bold">{contact.name || '—'}</p>
+                              </div>
+                              {contact.phone && (
+                                <a href={`tel:${contact.phone}`} aria-label={`Call ${contact.name}`} className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-charcoal shadow-sm hover:scale-110 transition-transform">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                </a>
+                              )}
+                            </div>
+                          )}
                        </div>
                      ))}
+                     {!isEditing && (petData.emergencyContacts ?? []).length === 0 && (
+                       <p className="text-xs text-stone-400 italic p-4">No contacts yet. Tap Edit to add Owner, Primary Vet, sitter…</p>
+                     )}
                   </div>
                 </div>
 
+                {/* Health Timeline (editable) */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sage">
-                     <Calendar size={16} />
-                     <label className="text-[10px] font-black uppercase tracking-[0.2em]">Health Timeline</label>
+                  <div className="flex items-center justify-between text-sage">
+                     <div className="flex items-center gap-2">
+                       <Calendar size={16} />
+                       <label className="text-[10px] font-black uppercase tracking-[0.2em]">Health Timeline</label>
+                     </div>
+                     {isEditing && (
+                       <button
+                         type="button"
+                         onClick={() => setEditedData({ ...editedData, healthTimeline: [...(editedData.healthTimeline || []), { date: '', event: '', type: 'Clinical' }] })}
+                         className="text-[9px] font-black uppercase tracking-[0.25em] text-stone-500 hover:text-charcoal transition-colors"
+                       >
+                         + Add event
+                       </button>
+                     )}
                   </div>
-                  <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-100 pl-8">
-                     {[
-                       { date: 'Oct 2023', event: 'Rabies Booster', type: 'Clinical' },
-                       { date: 'Aug 2023', event: 'International Wellness Check', type: 'Travel' }
-                     ].map((item, i) => (
-                       <div key={i} className="relative">
-                          <div className="absolute -left-[26px] top-1.5 w-3 h-3 rounded-full bg-white border-2 border-sage" />
-                          <div>
-                            <p className="text-[8px] font-black uppercase text-stone-300">{item.date}</p>
-                            <p className="text-xs font-bold">{item.event}</p>
+                  {!isEditing ? (
+                    <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-100 pl-8">
+                       {(petData.healthTimeline ?? []).map((item, i) => (
+                         <div key={i} className="relative">
+                            <div className="absolute -left-[26px] top-1.5 w-3 h-3 rounded-full bg-white border-2 border-sage" />
+                            <div>
+                              <p className="text-[8px] font-black uppercase text-stone-300">{item.date}</p>
+                              <p className="text-xs font-bold">{item.event}</p>
+                              {item.notes && <p className="text-[10px] text-stone-400 italic mt-1">{item.notes}</p>}
+                            </div>
+                         </div>
+                       ))}
+                       {(petData.healthTimeline ?? []).length === 0 && (
+                         <p className="text-xs text-stone-400 italic">No health events yet.</p>
+                       )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {(editedData.healthTimeline ?? []).map((item, i) => (
+                        <div key={i} className="p-4 bg-muted rounded-2xl space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              value={item.date}
+                              onChange={(e) => {
+                                const list = [...(editedData.healthTimeline ?? [])];
+                                list[i] = { ...list[i], date: e.target.value };
+                                setEditedData({ ...editedData, healthTimeline: list });
+                              }}
+                              placeholder="Oct 2024"
+                              className="bg-white p-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] outline-none"
+                            />
+                            <select
+                              value={item.type}
+                              onChange={(e) => {
+                                const list = [...(editedData.healthTimeline ?? [])];
+                                list[i] = { ...list[i], type: e.target.value as 'Clinical' | 'Travel' | 'Wellness' | 'Other' };
+                                setEditedData({ ...editedData, healthTimeline: list });
+                              }}
+                              className="bg-white p-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] outline-none"
+                            >
+                              <option value="Clinical">Clinical</option>
+                              <option value="Travel">Travel</option>
+                              <option value="Wellness">Wellness</option>
+                              <option value="Other">Other</option>
+                            </select>
                           </div>
-                       </div>
-                     ))}
-                  </div>
+                          <input
+                            value={item.event}
+                            onChange={(e) => {
+                              const list = [...(editedData.healthTimeline ?? [])];
+                              list[i] = { ...list[i], event: e.target.value };
+                              setEditedData({ ...editedData, healthTimeline: list });
+                            }}
+                            placeholder="Rabies booster"
+                            className="w-full bg-white p-2 rounded-lg text-sm font-bold outline-none"
+                          />
+                          <div className="flex gap-2">
+                            <input
+                              value={item.notes ?? ''}
+                              onChange={(e) => {
+                                const list = [...(editedData.healthTimeline ?? [])];
+                                list[i] = { ...list[i], notes: e.target.value };
+                                setEditedData({ ...editedData, healthTimeline: list });
+                              }}
+                              placeholder="Notes (optional)"
+                              className="flex-1 bg-white p-2 rounded-lg text-xs font-medium outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = (editedData.healthTimeline ?? []).filter((_, idx) => idx !== i);
+                                setEditedData({ ...editedData, healthTimeline: list });
+                              }}
+                              className="px-3 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

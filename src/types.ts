@@ -34,6 +34,19 @@ export interface WeightRecord {
   unit?: WeightUnit;
 }
 
+export interface EmergencyContact {
+  role: string;
+  name: string;
+  phone: string;
+}
+
+export interface HealthEvent {
+  date: string;
+  event: string;
+  type: 'Clinical' | 'Travel' | 'Wellness' | 'Other';
+  notes?: string;
+}
+
 export interface PetData {
   id: string;
   userId: string;
@@ -62,6 +75,10 @@ export interface PetData {
   /** Admin override — hides the pet from the public site even if isPublic is true. */
   isHidden?: boolean;
   city?: string;
+  /** Emergency contacts — Owner, Primary Vet, etc. */
+  emergencyContacts?: EmergencyContact[];
+  /** Health timeline events shown on the passport. */
+  healthTimeline?: HealthEvent[];
   updatedAt?: string;
 }
 

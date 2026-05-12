@@ -79,6 +79,10 @@ export const Perks: React.FC<PerksProps> = ({ onBack, onJoinClub, onOpenVenue, o
           <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-2xl mx-auto">
             Discounts, welcome treats, priority booking and free shipping — curated by Hey Lola, redeemable in-app, interconnected with the city map.
           </p>
+          <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 bg-stone-50 border border-stone-100 px-3 py-1.5 rounded-full">
+            <span className="bg-brand-orange/10 text-brand-orange px-2 py-0.5 rounded-full">Preview</span>
+            Sample perks — real verified partners go live as they onboard.
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 pt-2">
             <span className="inline-flex items-center gap-2">
               <Sparkles size={12} className="text-brand-orange" /> Curated by Hey Lola

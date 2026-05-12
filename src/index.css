@@ -21,7 +21,15 @@
        blob, off-canvas drawer or rogue translate can ever cause the
        page to scroll sideways on mobile. */
     overflow-x: hidden;
+    overscroll-behavior-x: none;
     max-width: 100vw;
+    width: 100%;
+  }
+
+  /* Disable horizontal touch panning so iOS Safari can't scroll
+     sideways even if a child briefly overflows. */
+  body {
+    touch-action: pan-y;
   }
 
   html {
@@ -34,11 +42,15 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
   }
 
-  /* Prevent any element from breaking the viewport horizontally */
+  /* Prevent any element from breaking the viewport horizontally.
+     overflow-x:hidden is more compatible than `clip` across browsers. */
   #root {
-    overflow-x: clip;
+    overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
   }
 
   h1, h2, h3, h4, h5, h6 {

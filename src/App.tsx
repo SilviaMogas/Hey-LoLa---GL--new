@@ -61,6 +61,7 @@ const BrandBookCharacter = lazy(() => import('./components/BrandBook').then(m =>
 const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Media })));
 const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
 const Concierges = lazy(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
+const Perks = lazy(() => import('./components/Perks').then(m => ({ default: m.Perks })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -367,6 +368,17 @@ function AppContent() {
                 <Concierges
                   onBack={() => navigate(paths.home)}
                   onOpenCharacter={(name) => navigate(buildPath.brandBookCharacter(name))}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.perks} element={
+              <FadeIn>
+                <Perks
+                  onBack={() => navigate(paths.home)}
+                  onJoinClub={() => navigate(paths.club)}
+                  onOpenVenue={(slug) => navigate(buildPath.venue(slug))}
+                  onExploreMap={() => navigate(paths.explore)}
+                  memberTier={(profile?.memberPlan as 'free' | 'local' | 'plus' | 'black' | undefined) ?? 'free'}
                 />
               </FadeIn>
             } />

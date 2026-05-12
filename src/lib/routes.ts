@@ -22,6 +22,7 @@ export const paths = {
   creators: '/creators',
   partners: '/partners',
   partnerOnboarding: '/partners/onboard',
+  perks: '/perks',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',

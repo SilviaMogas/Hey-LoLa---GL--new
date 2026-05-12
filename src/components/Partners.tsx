@@ -82,7 +82,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
                 <ShieldCheck size={20} />
               </div>
               <h3 className="text-lg font-bold italic text-charcoal">Build trust with a Verified badge</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">Claim your profile and pass our manual review to earn the Verified badge that tells dog parents your venue genuinely welcomes them.</p>
+              <p className="text-sm text-stone-500 leading-relaxed">Claim your profile and pass our manual review to earn the Verified badge that tells dog parents your business genuinely welcomes them — in person or online.</p>
             </div>
             <div className="space-y-4">
               <div className="w-12 h-12 bg-stone-50 inline-flex items-center justify-center rounded-full text-charcoal mb-2">

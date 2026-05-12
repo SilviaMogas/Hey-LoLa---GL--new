@@ -15,15 +15,22 @@ const CENTER_COMPANIONS = [
   { x:  0.95, y:  0.85, rotate:  24 },
 ];
 
+// Spread points across the full viewport so the paws never overlap
+// the central mark. Each point sits in its own quadrant zone with at
+// least 15% margin between siblings.
 const SCATTERED_COMPANIONS = [
-  { top: '15%', left: '10%', rotate: -15, delay: 0 },
-  { top: '25%', right: '15%', rotate: 25, delay: 0.4 },
-  { bottom: '20%', left: '15%', rotate: 10, delay: 0.8 },
-  { bottom: '30%', right: '10%', rotate: -20, delay: 1.2 },
-  { top: '50%', left: '5%', rotate: -45, delay: 0.2 },
-  { top: '45%', right: '5%', rotate: 45, delay: 0.6 },
-  { bottom: '10%', left: '45%', rotate: -10, delay: 1.0 },
-  { top: '10%', right: '45%', rotate: 15, delay: 1.4 },
+  { top: '8%',  left: '8%',   rotate: -18, delay: 0 },
+  { top: '14%', right: '12%', rotate: 22,  delay: 0.4 },
+  { top: '32%', left: '4%',   rotate: -40, delay: 0.2 },
+  { top: '36%', right: '6%',  rotate: 38,  delay: 0.6 },
+  { bottom: '34%', left: '10%', rotate: 12,  delay: 0.8 },
+  { bottom: '30%', right: '12%', rotate: -22, delay: 1.0 },
+  { bottom: '12%', left: '22%', rotate: -10, delay: 1.2 },
+  { bottom: '8%',  right: '24%', rotate: 18,  delay: 1.4 },
+  { top: '20%', left: '38%',  rotate: 30,  delay: 0.3 },
+  { bottom: '22%', left: '46%', rotate: -28, delay: 0.9 },
+  { top: '60%', left: '14%',  rotate: 8,   delay: 1.6 },
+  { top: '64%', right: '16%', rotate: -8,  delay: 0.7 },
 ];
 
 export const PawLoader: React.FC<PawLoaderProps> = ({ size = 44, className, variant = 'center' }) => {
@@ -32,7 +39,12 @@ export const PawLoader: React.FC<PawLoaderProps> = ({ size = 44, className, vari
 
   if (variant === 'scattered') {
     return (
-      <div className={`relative w-full h-full min-h-[400px] flex items-center justify-center ${className || ''}`} style={{ color: 'var(--brand-orange, #E07A30)' }}>
+      <div
+        className={`relative w-full min-h-screen h-full flex items-center justify-center overflow-hidden ${className || ''}`}
+        style={{ color: 'var(--brand-orange, #E07A30)' }}
+        aria-label="Loading"
+        role="status"
+      >
         {/* Main central paw */}
         <motion.div
           animate={{ scale: [1, 1.05, 1], rotate: [-4, 4, -4] }}

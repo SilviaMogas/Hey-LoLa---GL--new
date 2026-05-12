@@ -219,8 +219,8 @@ function AppContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <PawLoader size={48} className="text-brand-orange" />
+      <div className="min-h-screen bg-white">
+        <PawLoader size={48} className="text-brand-orange" variant="scattered" />
       </div>
     );
   }

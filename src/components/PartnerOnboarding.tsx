@@ -155,7 +155,7 @@ interface FormState {
   features: string[];
   notes: string;
   offersPerk: boolean | null;
-  perkType: PerkType | null;
+  perkTypes: PerkType[];
   perkDescription: string;
   perkConditions: string;
   perkAvailability: string;
@@ -191,7 +191,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     features: [],
     notes: '',
     offersPerk: null,
-    perkType: null,
+    perkTypes: [],
     perkDescription: '',
     perkConditions: '',
     perkAvailability: '',
@@ -217,7 +217,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     if (step === 'Business')
       return form.businessName.trim().length > 1 && form.categories.length > 0 && (form.city !== 'other' || form.cityOther.trim().length > 1);
     if (step === 'Contact') return form.contactName.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && !!form.perkType && form.perkDescription.trim().length > 3);
+    if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && form.perkTypes.length > 0 && form.perkDescription.trim().length > 3);
     if (step === 'Review') return form.agree;
     return false;
   }, [step, form]);
@@ -260,7 +260,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
         offersPerk: form.offersPerk,
         perk: form.offersPerk
           ? {
-              type: form.perkType,
+              types: form.perkTypes,
               description: form.perkDescription,
               conditions: form.perkConditions,
               availability: form.perkAvailability,
@@ -612,7 +612,7 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
         </button>
         <button
           type="button"
-          onClick={() => { update('offersPerk', false); update('perkType', null); }}
+          onClick={() => { update('offersPerk', false); update('perkTypes', []); }}
           className={`rounded-2xl border p-5 text-left transition-all ${form.offersPerk === false ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
         >
           <p className="text-sm font-serif italic text-charcoal">Not now, maybe later</p>
@@ -622,18 +622,28 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
 
       {form.offersPerk && (
         <>
-          <Field label="Perk type">
+          <Field label="Perk type — you can pick more than one">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PERK_TYPES.map((p) => {
-                const active = form.perkType === p.id;
+                const active = form.perkTypes.includes(p.id);
                 return (
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => update('perkType', p.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
+                    onClick={() => {
+                      const next = active
+                        ? form.perkTypes.filter((x) => x !== p.id)
+                        : [...form.perkTypes, p.id];
+                      update('perkTypes', next);
+                    }}
+                    className={`rounded-2xl border p-4 text-left transition-all relative ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
                   >
-                    <p className="text-sm font-serif italic text-charcoal inline-flex items-center gap-2">
+                    {active && (
+                      <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-charcoal text-white flex items-center justify-center" aria-hidden>
+                        <Check size={11} />
+                      </span>
+                    )}
+                    <p className="text-sm font-serif italic text-charcoal inline-flex items-center gap-2 pr-6">
                       <span aria-hidden>{p.emoji}</span> {p.label}
                     </p>
                     <p className="text-[11px] text-stone-500 font-light italic mt-1">{p.description}</p>
@@ -678,7 +688,9 @@ function PerkStep({ form, update }: { form: FormState; update: <K extends keyof 
 function ReviewStep({ form, update }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void }) {
   const cityLabel = form.city === 'other' ? form.cityOther : CITIES.find((c) => c.id === form.city)?.label ?? form.city;
   const categoryLabels = form.categories.map((id) => CATEGORIES.find((c) => c.id === id)?.label ?? id).join(' · ');
-  const perkLabel = form.perkType ? PERK_TYPES.find((p) => p.id === form.perkType)?.label : null;
+  const perkLabel = form.perkTypes.length > 0
+    ? form.perkTypes.map((id) => PERK_TYPES.find((p) => p.id === id)?.label ?? id).join(' · ')
+    : null;
 
   return (
     <>
@@ -699,7 +711,7 @@ function ReviewStep({ form, update }: { form: FormState; update: <K extends keyo
         {form.notes && <ReviewRow label="Notes" value={form.notes} />}
         <hr className="border-stone-200" />
         <ReviewRow label="Offers a perk" value={form.offersPerk ? 'Yes' : 'Not now'} />
-        {form.offersPerk && perkLabel && <ReviewRow label="Perk type" value={perkLabel} />}
+        {form.offersPerk && perkLabel && <ReviewRow label="Perk types" value={perkLabel} />}
         {form.offersPerk && form.perkDescription && <ReviewRow label="Perk description" value={form.perkDescription} />}
         {form.offersPerk && form.perkConditions && <ReviewRow label="Conditions" value={form.perkConditions} />}
         {form.offersPerk && form.perkAvailability && <ReviewRow label="Availability" value={form.perkAvailability} />}

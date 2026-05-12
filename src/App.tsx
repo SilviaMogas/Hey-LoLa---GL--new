@@ -59,6 +59,7 @@ const Start = lazy(() => import('./components/Start').then(m => ({ default: m.St
 const BrandBook = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBook })));
 const BrandBookCharacter = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBookCharacter })));
 const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Media })));
+const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -339,8 +340,15 @@ function AppContent() {
               <FadeIn>
                 <Partners
                   onBack={() => navigate(paths.home)}
-                  onJoinWaitlist={() => openWaitlist('partner')}
-                  onClaimBusiness={() => openWaitlist('partner')}
+                  onJoinWaitlist={() => navigate(paths.partnerOnboarding)}
+                  onClaimBusiness={() => navigate(paths.partnerOnboarding)}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.partnerOnboarding} element={
+              <FadeIn>
+                <PartnerOnboarding
+                  onBack={() => navigate(paths.partners)}
                 />
               </FadeIn>
             } />

@@ -3,6 +3,12 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { CONCIERGES, POSE_COUNT, conciergePose, type ConciergeProfile } from '../data/concierges';
+import { SEO, personSchema } from '../lib/seo';
+
+const BRAND_BOOK_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Brand Book', item: '/brand-book' },
+];
 
 interface BrandBookProps {
   onBack: () => void;
@@ -39,6 +45,12 @@ const ICON_VARIANTS: LogoVariant[] = [
 export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby="brandbook-heading">
+      <SEO
+        title="Hey Lola Brand Kit — Logos, Colours, Typography & Concierges"
+        description="Official brand assets and usage guidelines for Hey Lola, a boutique lifestyle concierge for dog parents. Download the logo, browse the palette and meet the four concierges."
+        url="/brand-book"
+        breadcrumbs={BRAND_BOOK_BREADCRUMBS}
+      />
       {/* Hero */}
       <section className="relative bg-charcoal overflow-hidden pt-14 pb-12 px-5 sm:px-6" aria-labelledby="brandbook-heading">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.04),transparent_60%)]" />
@@ -270,9 +282,30 @@ interface BrandBookCharacterProps {
 export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBack, onOther }) => {
   const c = CONCIERGES.find((x) => x.id === id) ?? CONCIERGES[0];
   const others = CONCIERGES.filter((x) => x.id !== c.id);
+  const characterBreadcrumbs = [
+    { name: 'Hey Lola', item: '/' },
+    { name: 'Brand Book', item: '/brand-book' },
+    { name: c.name, item: `/brand-book/${c.id}` },
+  ];
+  const characterJsonLd = personSchema({
+    name: c.name,
+    role: c.role,
+    image: `/${c.id}.png`,
+    url: `/brand-book/${c.id}`,
+    description: c.bio,
+  });
 
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby={`concierge-${c.id}-heading`}>
+      <SEO
+        title={`${c.name} — ${c.role} | Hey Lola Concierges`}
+        description={`${c.name} is one of the four Hey Lola concierges — ${c.role}. ${c.bio}`}
+        url={`/brand-book/${c.id}`}
+        ogType="profile"
+        ogImage={`https://heylola.co/${c.id}.png`}
+        breadcrumbs={characterBreadcrumbs}
+        jsonLd={characterJsonLd}
+      />
       <section className={`${c.color} relative overflow-hidden pt-14 pb-10 px-5 sm:px-6`}>
         <div className="max-w-6xl mx-auto relative z-10 space-y-6">
           <button

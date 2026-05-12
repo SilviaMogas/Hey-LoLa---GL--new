@@ -6,6 +6,7 @@ import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipPlansSection } from './MembershipPlansSection';
 import { CONCIERGES } from '../data/concierges';
+import { SEO, organizationSchema, websiteSchema, serviceSchema } from '../lib/seo';
 
 interface HomeProps {
   onExplore: () => void;
@@ -56,6 +57,12 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
   return (
     <div className="bg-white min-h-screen text-charcoal font-boutique selection:bg-stone-200 overflow-x-hidden">
+      <SEO
+        title="Hey Lola | Your Dog's Lifestyle Concierge"
+        description="Hey Lola is a boutique lifestyle concierge for dog parents. Organise your dog's essentials, discover trusted dog-friendly places, and access curated local perks. Launching first in Miami."
+        url="/"
+        jsonLd={[organizationSchema, websiteSchema, serviceSchema]}
+      />
       {/* Hero Section — content sits a touch above center so there's no dead air below the navbar */}
       <section className="relative min-h-[44vh] sm:min-h-[52vh] flex flex-col items-center justify-start px-5 sm:px-6 overflow-hidden pt-28 sm:pt-32 md:pt-36 pb-10">
         <div className="max-w-5xl mx-auto text-center space-y-5 sm:space-y-7 md:space-y-9 relative z-10 w-full">

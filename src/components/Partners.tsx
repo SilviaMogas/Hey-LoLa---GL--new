@@ -4,10 +4,22 @@ import { ArrowLeft, ArrowRight, Store, CheckCircle, ShieldCheck, MapPin } from '
 import { useNavigate } from 'react-router-dom';
 import { paths } from '../lib/routes';
 import { cn } from '../lib/utils';
+import { SEO } from '../lib/seo';
+
+const PARTNERS_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Partner Network', item: '/partners' },
+];
 
 export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void; onClaimBusiness: () => void }> = ({ onBack, onJoinWaitlist, onClaimBusiness }) => {
   return (
     <div className="bg-bone min-h-screen font-boutique">
+      <SEO
+        title="Join the Boutique Dog-Friendly Network — Hey Lola Partners"
+        description="Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences. Be discovered, build trust with a Verified badge, reach a qualified lifestyle audience."
+        url="/partners"
+        breadcrumbs={PARTNERS_BREADCRUMBS}
+      />
       <section className="relative pt-12 pb-16 px-5 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(215,92,41,0.03),transparent_50%)]" />
         <div className="max-w-5xl mx-auto space-y-6 relative z-10">
@@ -37,10 +49,10 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button onClick={onClaimBusiness} className="luxury-button bg-charcoal text-white h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2">
-                Claim Your Business
+                Become a Partner <ArrowRight size={14} />
               </button>
               <button onClick={onJoinWaitlist} className="luxury-button bg-white text-charcoal border border-stone-200 h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:border-charcoal hover:bg-stone-50 transition-all flex items-center justify-center">
-                Join Partner Waitlist
+                Self-onboarding — 4 steps
               </button>
             </div>
           </motion.div>
@@ -193,7 +205,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
           </p>
           <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
             <button onClick={onClaimBusiness} className="luxury-button bg-white text-charcoal h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-100 transition-all flex items-center justify-center gap-2">
-              Claim Your Business <ArrowRight size={14} />
+              Become a Partner <ArrowRight size={14} />
             </button>
           </div>
         </div>

@@ -14,6 +14,12 @@ import {
 } from 'lucide-react';
 import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
+import { SEO } from '../lib/seo';
+
+const COMMUNITY_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Community', item: '/community' },
+];
 
 interface CommunityProps {
   petName?: string;
@@ -196,6 +202,12 @@ export const Community: React.FC<CommunityProps> = (_props) => {
 
   return (
     <div className="bg-white text-charcoal font-boutique min-h-screen">
+      <SEO
+        title="Hey Lola Community — Find Your Pack"
+        description="Discover dog-friendly places, perks, and city packs with other dog parents. Join the Miami Pack, follow Lola's Picks, unlock partner perks and take on community challenges."
+        url="/community"
+        breadcrumbs={COMMUNITY_BREADCRUMBS}
+      />
       <div className="max-w-6xl mx-auto px-5 sm:px-6">
         {/* Header */}
         <motion.header

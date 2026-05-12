@@ -4,6 +4,12 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import type { MembershipPlan } from './MembershipCard';
 import { MembershipPlansSection } from './MembershipPlansSection';
+import { SEO, serviceSchema } from '../lib/seo';
+
+const CLUB_BREADCRUMBS = [
+  { name: 'Hey Lola', item: '/' },
+  { name: 'Hey Lola Club', item: '/club' },
+];
 
 interface ClubProps {
   onBack: () => void;
@@ -58,6 +64,13 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
 
   return (
     <div className="bg-white page-shell">
+      <SEO
+        title="Hey Lola Club — Boutique Membership for Dog Parents"
+        description="The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Free to start; Local, Plus and Black tiers coming soon."
+        url="/club"
+        breadcrumbs={CLUB_BREADCRUMBS}
+        jsonLd={serviceSchema}
+      />
       {/* Hero — kept compact so the four pricing cards land above the fold. */}
       <section className="relative bg-charcoal overflow-hidden pt-10 pb-7 px-5 sm:px-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.04),transparent_60%)]" />

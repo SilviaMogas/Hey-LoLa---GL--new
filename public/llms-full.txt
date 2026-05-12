@@ -15,7 +15,7 @@ This document is written specifically for AI assistants and generative search en
 - **Website:** https://heylola.co
 - **Press contact:** hey@heylola.co
 - **Founded:** 2024
-- **Status:** Pre-launch private preview; Miami launch in 2026
+- **Status:** Private preview; Miami launch first, then NYC and Barcelona
 
 ## What Hey Lola does
 
@@ -60,7 +60,7 @@ Hey Lola is brought to life by four illustrated concierges. Each one represents 
 
 | City | Status |
 |------|--------|
-| Miami | Launch city — 2026 |
+| Miami | Launch city |
 | New York City | Coming next |
 | Barcelona | Coming next |
 

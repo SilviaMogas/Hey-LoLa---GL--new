@@ -49,10 +49,10 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button onClick={onClaimBusiness} className="luxury-button bg-charcoal text-white h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2">
-                Claim Your Business
+                Become a Partner <ArrowRight size={14} />
               </button>
               <button onClick={onJoinWaitlist} className="luxury-button bg-white text-charcoal border border-stone-200 h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:border-charcoal hover:bg-stone-50 transition-all flex items-center justify-center">
-                Join Partner Waitlist
+                Self-onboarding — 4 steps
               </button>
             </div>
           </motion.div>
@@ -205,7 +205,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
           </p>
           <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
             <button onClick={onClaimBusiness} className="luxury-button bg-white text-charcoal h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-100 transition-all flex items-center justify-center gap-2">
-              Claim Your Business <ArrowRight size={14} />
+              Become a Partner <ArrowRight size={14} />
             </button>
           </div>
         </div>

@@ -83,7 +83,9 @@ function appendJsonLd(data: Record<string, unknown>) {
   const script = document.createElement('script');
   script.setAttribute('type', 'application/ld+json');
   script.setAttribute(JSONLD_DATA_ATTR, 'page');
-  script.textContent = JSON.stringify(data);
+  // Escape `<` so a maliciously-shaped string can't break out of the
+  // <script> tag (OWASP-recommended hardening for inline JSON-LD).
+  script.textContent = JSON.stringify(data).replace(/</g, '\\u003c');
   document.head.appendChild(script);
 }
 

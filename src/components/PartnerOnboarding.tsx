@@ -22,6 +22,7 @@ interface PartnerOnboardingProps {
 }
 
 type Category =
+  // Places (physical venues)
   | 'restaurant'
   | 'cafe'
   | 'hotel'
@@ -31,27 +32,46 @@ type Category =
   | 'trainer'
   | 'pet_shop'
   | 'experience'
+  // E-commerce (sells physical products, often shipping worldwide)
+  | 'food_nutrition'
+  | 'apparel'
+  | 'accessories'
+  | 'toys_play'
+  | 'wellness_products'
+  | 'travel_gear'
+  | 'online_store'
   | 'other';
 
-const CATEGORIES: { id: Category; label: string; emoji: string }[] = [
-  { id: 'restaurant', label: 'Restaurant', emoji: '🍽️' },
-  { id: 'cafe', label: 'Café', emoji: '☕' },
-  { id: 'hotel', label: 'Hotel', emoji: '🛎️' },
-  { id: 'vet', label: 'Veterinary', emoji: '🩺' },
-  { id: 'groomer', label: 'Groomer', emoji: '✂️' },
-  { id: 'daycare', label: 'Daycare', emoji: '🏡' },
-  { id: 'trainer', label: 'Trainer', emoji: '🎓' },
-  { id: 'pet_shop', label: 'Pet Shop', emoji: '🛍️' },
-  { id: 'experience', label: 'Experience', emoji: '✨' },
-  { id: 'other', label: 'Other', emoji: '🐾' },
+const CATEGORIES: { id: Category; label: string; emoji: string; group: 'place' | 'ecommerce' }[] = [
+  // Places
+  { id: 'restaurant', label: 'Restaurant', emoji: '🍽️', group: 'place' },
+  { id: 'cafe', label: 'Café', emoji: '☕', group: 'place' },
+  { id: 'hotel', label: 'Hotel', emoji: '🛎️', group: 'place' },
+  { id: 'vet', label: 'Veterinary', emoji: '🩺', group: 'place' },
+  { id: 'groomer', label: 'Groomer', emoji: '✂️', group: 'place' },
+  { id: 'daycare', label: 'Daycare', emoji: '🏡', group: 'place' },
+  { id: 'trainer', label: 'Trainer', emoji: '🎓', group: 'place' },
+  { id: 'pet_shop', label: 'Pet Shop', emoji: '🛍️', group: 'place' },
+  { id: 'experience', label: 'Experience', emoji: '✨', group: 'place' },
+  // E-commerce
+  { id: 'food_nutrition', label: 'Food & Nutrition', emoji: '🥩', group: 'ecommerce' },
+  { id: 'apparel', label: 'Apparel & Clothing', emoji: '👕', group: 'ecommerce' },
+  { id: 'accessories', label: 'Accessories', emoji: '🎀', group: 'ecommerce' },
+  { id: 'toys_play', label: 'Toys & Play', emoji: '🧸', group: 'ecommerce' },
+  { id: 'wellness_products', label: 'Wellness & Supplements', emoji: '🌿', group: 'ecommerce' },
+  { id: 'travel_gear', label: 'Travel Gear', emoji: '🧳', group: 'ecommerce' },
+  { id: 'online_store', label: 'Online Store', emoji: '🛒', group: 'ecommerce' },
+  // Catch-all
+  { id: 'other', label: 'Other', emoji: '🐾', group: 'place' },
 ];
 
-type City = 'miami' | 'nyc' | 'barcelona' | 'other';
-const CITIES: { id: City; label: string; status: 'live' | 'soon' }[] = [
+type City = 'miami' | 'nyc' | 'barcelona' | 'global_online' | 'other';
+const CITIES: { id: City; label: string; status: 'live' | 'soon' | 'global' }[] = [
   { id: 'miami', label: 'Miami', status: 'live' },
   { id: 'nyc', label: 'New York City', status: 'soon' },
   { id: 'barcelona', label: 'Barcelona', status: 'soon' },
-  { id: 'other', label: 'Other / Waitlist', status: 'soon' },
+  { id: 'global_online', label: 'Global / Online', status: 'global' },
+  { id: 'other', label: 'Other city', status: 'soon' },
 ];
 
 type PerkType =
@@ -403,40 +423,67 @@ function BusinessStep({ form, update, toggleCategory }: { form: FormState; updat
         <input type="text" required value={form.businessName} onChange={(e) => update('businessName', e.target.value)} placeholder="The Watering Bowl" className={inputClass} />
       </Field>
       <Field label="Category — pick one or more">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = form.categories.includes(c.id);
+        <div className="space-y-3">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">Places</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.filter((c) => c.group === 'place').map((c) => {
+                const active = form.categories.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => toggleCategory(c.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                  >
+                    <span aria-hidden>{c.emoji}</span> {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">E-commerce</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.filter((c) => c.group === 'ecommerce').map((c) => {
+                const active = form.categories.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => toggleCategory(c.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                  >
+                    <span aria-hidden>{c.emoji}</span> {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </Field>
+      <Field label="City — or pick Global / Online if you ship worldwide">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          {CITIES.map((c) => {
+            const statusLabel =
+              c.status === 'live' ? 'Live' : c.status === 'global' ? 'Worldwide' : 'Coming soon';
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => toggleCategory(c.id)}
-                className={`px-3 py-1.5 rounded-full text-[11px] border transition-all inline-flex items-center gap-1.5 ${active ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'}`}
+                onClick={() => update('city', c.id)}
+                className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
               >
-                <span aria-hidden>{c.emoji}</span> {c.label}
+                <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
+                <p className={`text-[9px] font-black uppercase tracking-[0.25em] mt-1 ${c.status === 'global' ? 'text-brand-orange' : 'text-stone-400'}`}>{statusLabel}</p>
               </button>
             );
           })}
         </div>
       </Field>
-      <Field label="City">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {CITIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => update('city', c.id)}
-              className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
-            >
-              <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
-              <p className="text-[9px] font-black uppercase tracking-[0.25em] mt-1 text-stone-400">{c.status === 'live' ? 'Live' : 'Coming soon'}</p>
-            </button>
-          ))}
-        </div>
-      </Field>
       {form.city === 'other' && (
         <Field label="Which city?">
-          <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles" className={inputClass} />
+          <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles, London, Lisbon…" className={inputClass} />
         </Field>
       )}
       <Field label="Address" optional>

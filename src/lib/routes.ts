@@ -26,6 +26,7 @@ export const paths = {
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',
   brandBookCharacter: '/brand-book/:name',
+  concierges: '/concierges',
   media: '/media',
 
   /* ── Public app surfaces (no auth) ─────────────────────────────── */

@@ -306,46 +306,61 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
         breadcrumbs={characterBreadcrumbs}
         jsonLd={characterJsonLd}
       />
-      <section className={`${c.color} relative overflow-hidden pt-14 pb-10 px-5 sm:px-6`}>
-        <div className="max-w-6xl mx-auto relative z-10 space-y-6">
+      {/* Ficha — poster-style: name + role centered, 10 poses below */}
+      <section className={`${c.color} relative overflow-hidden pt-10 pb-14 px-5 sm:px-6`}>
+        <div className="max-w-6xl mx-auto relative z-10">
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-stone-500 hover:text-charcoal transition-colors text-[10px] font-black uppercase tracking-[0.3em]"
-            aria-label="Back to Brand Book"
+            className="inline-flex items-center gap-2 text-stone-500 hover:text-charcoal transition-colors text-[10px] font-black uppercase tracking-[0.3em] mb-10"
+            aria-label="Back to The Concierges"
           >
-            <ArrowLeft size={12} /> Brand Kit
+            <ArrowLeft size={12} /> Concierges
           </button>
 
-          <motion.div
+          <motion.header
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center"
+            className="text-center space-y-2 mb-10 sm:mb-14"
           >
-            <div className="space-y-5">
-              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] ${c.badgeColor}`}>
-                {c.role}
-              </span>
-              <h1 id={`concierge-${c.id}-heading`} className="text-5xl sm:text-6xl md:text-7xl font-serif italic tracking-tight leading-[0.9]">
-                {c.name}<span style={{ color: c.accent }}>.</span>
-              </h1>
-              <p className="text-lg sm:text-xl font-light italic text-stone-600 leading-snug max-w-md">{c.tagline}</p>
-              <p className="text-sm text-stone-500 font-light leading-relaxed max-w-md">{c.bio}</p>
-            </div>
-            <div className="flex justify-center">
-              <img
-                src={conciergePose(c.id, 1)}
-                alt={`${c.name} concierge illustration`}
-                className="w-full max-w-md object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.08)]"
-              />
-            </div>
-          </motion.div>
+            <h1 id={`concierge-${c.id}-heading`} className="text-6xl sm:text-7xl md:text-8xl font-serif italic tracking-tight leading-none">
+              {c.name}<span style={{ color: c.accent }}>.</span>
+            </h1>
+            <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.5em] text-stone-400">
+              {c.role}
+            </p>
+          </motion.header>
+
+          {/* 5×2 poses grid */}
+          <div className="grid grid-cols-5 grid-rows-2 gap-2 sm:gap-4 max-w-5xl mx-auto">
+            {Array.from({ length: POSE_COUNT }, (_, i) => i + 1).map((pose) => (
+              <motion.div
+                key={pose}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: pose * 0.04 }}
+                className="aspect-square flex items-center justify-center"
+              >
+                <img
+                  src={conciergePose(c.id, pose)}
+                  alt={`${c.name} pose ${pose}`}
+                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="py-12 px-5 sm:px-6 max-w-5xl mx-auto" aria-label={`${c.name} character traits`}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Supporting details */}
+      <section className="py-12 px-5 sm:px-6 max-w-5xl mx-auto space-y-8" aria-label={`${c.name} character details`}>
+        <p className="text-base sm:text-lg font-light italic text-stone-600 leading-snug max-w-2xl mx-auto text-center">{c.tagline}</p>
+        <p className="text-sm sm:text-base text-stone-500 font-light leading-relaxed max-w-2xl mx-auto text-center">{c.bio}</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
           {[
             { label: 'Personality', value: c.personality },
             { label: 'Style', value: c.style },
@@ -356,38 +371,6 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
               <p className="text-sm text-stone-600 font-light leading-relaxed italic">{value}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="py-10 px-5 sm:px-6 bg-stone-50 border-y border-stone-100" aria-labelledby={`pose-pack-${c.id}-heading`}>
-        <div className="max-w-7xl mx-auto space-y-8">
-          <header className="text-center space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Pose Pack</span>
-            <h2 id={`pose-pack-${c.id}-heading`} className="text-3xl sm:text-4xl font-serif italic tracking-tight">{c.name}'s 10 poses<span style={{ color: c.accent }}>.</span></h2>
-            <p className="text-sm text-stone-400 font-light italic max-w-md mx-auto">
-              All ten illustrations of {c.name}, ready to use across Hey Lola.
-            </p>
-          </header>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {Array.from({ length: POSE_COUNT }, (_, i) => i + 1).map((pose) => (
-              <motion.div
-                key={pose}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: pose * 0.04 }}
-                className={`aspect-square rounded-[1.25rem] ${c.color} border border-stone-100 flex items-center justify-center p-3 group hover:shadow-xl transition-all duration-500`}
-              >
-                <img
-                  src={conciergePose(c.id, pose)}
-                  alt={`${c.name} pose ${pose}`}
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 

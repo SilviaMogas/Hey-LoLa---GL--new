@@ -11,6 +11,9 @@ import {
   User,
   Gift,
   FileCheck,
+  MapPin,
+  Globe,
+  Layers,
 } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -140,12 +143,38 @@ const DOG_FRIENDLY_FEATURE_GROUPS: FeatureGroup[] = [
 
 const DOG_FRIENDLY_FEATURES = DOG_FRIENDLY_FEATURE_GROUPS.flatMap((g) => g.items);
 
+type PartnerType = 'local' | 'online' | 'both';
+
+const PARTNER_TYPE_OPTIONS: { id: PartnerType; label: string; description: string; icon: React.ComponentType<{ size?: number }> }[] = [
+  {
+    id: 'local',
+    label: 'Local Partner',
+    description: 'A physical venue in a Hey Lola city — café, restaurant, hotel, vet, groomer, daycare. Pins to the city map.',
+    icon: MapPin,
+  },
+  {
+    id: 'online',
+    label: 'Online Partner',
+    description: 'E-commerce or services that ship / operate worldwide — pet food, apparel, accessories, online classes.',
+    icon: Globe,
+  },
+  {
+    id: 'both',
+    label: 'Local + Online',
+    description: 'You have a venue in a city AND you ship or operate online. Listed in both directories.',
+    icon: Layers,
+  },
+];
+
 interface FormState {
+  partnerType: PartnerType | null;
   businessName: string;
   categories: Category[];
   city: City;
   cityOther: string;
   address: string;
+  shipsTo: string;
+  storeUrl: string;
   website: string;
   instagram: string;
   contactName: string;
@@ -162,7 +191,7 @@ interface FormState {
   agree: boolean;
 }
 
-const STEPS = ['Business', 'Contact', 'Perk', 'Review'] as const;
+const STEPS = ['Type', 'Business', 'Contact', 'Perk', 'Review'] as const;
 type Step = typeof STEPS[number];
 
 const BREADCRUMBS = [
@@ -172,16 +201,19 @@ const BREADCRUMBS = [
 ];
 
 export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, onComplete }) => {
-  const [step, setStep] = useState<Step>('Business');
+  const [step, setStep] = useState<Step>('Type');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>({
+    partnerType: null,
     businessName: '',
     categories: [],
     city: 'miami',
     cityOther: '',
     address: '',
+    shipsTo: '',
+    storeUrl: '',
     website: '',
     instagram: '',
     contactName: '',
@@ -213,14 +245,22 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
   const stepIndex = STEPS.indexOf(step);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
 
+  const needsCity = form.partnerType === 'local' || form.partnerType === 'both';
+  const needsOnline = form.partnerType === 'online' || form.partnerType === 'both';
+
   const isStepValid = useMemo(() => {
-    if (step === 'Business')
-      return form.businessName.trim().length > 1 && form.categories.length > 0 && (form.city !== 'other' || form.cityOther.trim().length > 1);
+    if (step === 'Type') return form.partnerType !== null;
+    if (step === 'Business') {
+      const baseOk = form.businessName.trim().length > 1 && form.categories.length > 0;
+      const cityOk = !needsCity || (form.city !== 'other' || form.cityOther.trim().length > 1);
+      const onlineOk = !needsOnline || form.storeUrl.trim().length > 4;
+      return baseOk && cityOk && onlineOk;
+    }
     if (step === 'Contact') return form.contactName.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
     if (step === 'Perk') return form.offersPerk === false || (form.offersPerk === true && form.perkTypes.length > 0 && form.perkDescription.trim().length > 3);
     if (step === 'Review') return form.agree;
     return false;
-  }, [step, form]);
+  }, [step, form, needsCity, needsOnline]);
 
   const goNext = () => {
     setError(null);
@@ -245,10 +285,16 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     setError(null);
     try {
       await addDoc(collection(db, 'partner_applications'), {
+        partnerType: form.partnerType,
         businessName: form.businessName,
         categories: form.categories,
-        city: form.city === 'other' ? form.cityOther : form.city,
-        address: form.address,
+        // Local
+        city: needsCity ? (form.city === 'other' ? form.cityOther : form.city) : null,
+        address: needsCity ? form.address : null,
+        // Online
+        storeUrl: needsOnline ? form.storeUrl : null,
+        shipsTo: needsOnline ? form.shipsTo : null,
+        // Common
         website: form.website,
         instagram: form.instagram,
         contactName: form.contactName,
@@ -342,7 +388,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
               Become a Hey Lola Partner<span className="text-brand-orange">.</span>
             </h1>
             <p className="text-sm sm:text-base text-stone-500 font-light italic leading-snug max-w-xl">
-              Four short steps. Free to join. Verification takes up to 5 business days.
+              Five short steps. Free to join. Verification takes up to 5 business days.
             </p>
           </div>
 
@@ -355,7 +401,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
                 transition={{ duration: 0.4 }}
               />
             </div>
-            <ol className="grid grid-cols-4 gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-stone-400">
+            <ol className="grid grid-cols-5 gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-stone-400">
               {STEPS.map((s, i) => (
                 <li key={s} className={`flex items-center gap-1.5 ${i <= stepIndex ? 'text-charcoal' : ''}`}>
                   <span className={`w-4 h-4 rounded-full border ${i < stepIndex ? 'bg-charcoal border-charcoal text-white' : i === stepIndex ? 'border-charcoal' : 'border-stone-200'} flex items-center justify-center text-[8px]`}>
@@ -379,11 +425,12 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
             transition={{ duration: 0.3 }}
             className="space-y-8"
           >
+            {step === 'Type' && <TypeStep form={form} update={update} />}
             {step === 'Business' && (
-              <BusinessStep form={form} update={update} toggleCategory={(v) => toggleArray('categories', v)} />
+              <BusinessStep form={form} update={update} toggleCategory={(v) => toggleArray('categories', v)} needsCity={needsCity} needsOnline={needsOnline} />
             )}
             {step === 'Contact' && (
-              <ContactStep form={form} update={update} toggleFeature={(v) => toggleArray('features', v)} />
+              <ContactStep form={form} update={update} toggleFeature={(v) => toggleArray('features', v)} needsCity={needsCity} />
             )}
             {step === 'Perk' && <PerkStep form={form} update={update} />}
             {step === 'Review' && <ReviewStep form={form} update={update} />}
@@ -454,10 +501,52 @@ function Field({ label, optional, children }: { label: string; optional?: boolea
 
 const inputClass = 'luxury-input h-12 w-full text-sm';
 
-function BusinessStep({ form, update, toggleCategory }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleCategory: (v: Category) => void }) {
+function TypeStep({ form, update }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void }) {
   return (
     <>
-      <SectionLabel icon={<Building2 size={11} />} kicker="Step 1 — Business" title="Tell us about your business" description="The basics so we can list you correctly — works for a venue, a shop or an online store." />
+      <SectionLabel
+        icon={<Layers size={11} />}
+        kicker="Step 1 — Partner type"
+        title="How do dog parents meet you?"
+        description="A single partner can be in both directories. Pick the option that matches your business."
+      />
+      <div className="space-y-3">
+        {PARTNER_TYPE_OPTIONS.map((opt) => {
+          const active = form.partnerType === opt.id;
+          const Icon = opt.icon;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => update('partnerType', opt.id)}
+              className={`w-full rounded-2xl border p-5 text-left flex items-start gap-4 transition-all ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
+            >
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${active ? 'bg-charcoal text-white' : 'bg-stone-50 text-stone-400'}`}>
+                <Icon size={16} />
+              </div>
+              <div className="space-y-1 flex-1">
+                <p className="text-sm sm:text-base font-serif italic text-charcoal">{opt.label}</p>
+                <p className="text-[12px] text-stone-500 font-light italic leading-relaxed">{opt.description}</p>
+              </div>
+              {active && <Check size={14} className="text-charcoal mt-2 shrink-0" />}
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+function BusinessStep({ form, update, toggleCategory, needsCity, needsOnline }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleCategory: (v: Category) => void; needsCity: boolean; needsOnline: boolean }) {
+  const kicker = needsCity && needsOnline ? 'Step 2 — Business' : needsOnline ? 'Step 2 — Online business' : 'Step 2 — Local business';
+  return (
+    <>
+      <SectionLabel
+        icon={<Building2 size={11} />}
+        kicker={kicker}
+        title="Tell us about your business"
+        description={needsCity && needsOnline ? 'We will list you in both the city directory and the online directory.' : needsOnline ? 'Stocked, shipped or served online. We will list you in the online perks directory.' : 'A physical venue in a Hey Lola city. We will pin you to the city map.'}
+      />
       <Field label="Business name">
         <input type="text" required value={form.businessName} onChange={(e) => update('businessName', e.target.value)} placeholder="The Watering Bowl" className={inputClass} />
       </Field>
@@ -501,33 +590,46 @@ function BusinessStep({ form, update, toggleCategory }: { form: FormState; updat
           </div>
         </div>
       </Field>
-      <Field label="City — or pick Global / Online if you ship worldwide">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {CITIES.map((c) => {
-            const statusLabel =
-              c.status === 'live' ? 'Live' : c.status === 'global' ? 'Worldwide' : 'Coming soon';
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => update('city', c.id)}
-                className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
-              >
-                <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
-                <p className={`text-[9px] font-black uppercase tracking-[0.25em] mt-1 ${c.status === 'global' ? 'text-brand-orange' : 'text-stone-400'}`}>{statusLabel}</p>
-              </button>
-            );
-          })}
-        </div>
-      </Field>
-      {form.city === 'other' && (
-        <Field label="Which city?">
-          <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles, London, Lisbon…" className={inputClass} />
-        </Field>
+      {needsCity && (
+        <>
+          <Field label="City">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+              {CITIES.filter((c) => c.id !== 'global_online').map((c) => {
+                const statusLabel = c.status === 'live' ? 'Live' : 'Coming soon';
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => update('city', c.id)}
+                    className={`rounded-xl border p-3 text-left transition-all ${form.city === c.id ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
+                  >
+                    <p className="text-sm font-serif italic text-charcoal">{c.label}</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.25em] mt-1 text-stone-400">{statusLabel}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+          {form.city === 'other' && (
+            <Field label="Which city?">
+              <input type="text" required value={form.cityOther} onChange={(e) => update('cityOther', e.target.value)} placeholder="Los Angeles, London, Lisbon…" className={inputClass} />
+            </Field>
+          )}
+          <Field label="Address" optional>
+            <input type="text" value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="200 SE 1st St, Miami, FL" className={inputClass} />
+          </Field>
+        </>
       )}
-      <Field label="Address" optional>
-        <input type="text" value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="200 SE 1st St, Miami, FL" className={inputClass} />
-      </Field>
+      {needsOnline && (
+        <>
+          <Field label="Online store / service URL">
+            <input type="url" required value={form.storeUrl} onChange={(e) => update('storeUrl', e.target.value)} placeholder="https://wildbowl.co/shop" className={inputClass} />
+          </Field>
+          <Field label="Ships / serves" optional>
+            <input type="text" value={form.shipsTo} onChange={(e) => update('shipsTo', e.target.value)} placeholder="Worldwide · US & EU · Europe only…" className={inputClass} />
+          </Field>
+        </>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Website" optional>
           <input type="url" value={form.website} onChange={(e) => update('website', e.target.value)} placeholder="https://thewateringbowl.co" className={inputClass} />
@@ -540,10 +642,11 @@ function BusinessStep({ form, update, toggleCategory }: { form: FormState; updat
   );
 }
 
-function ContactStep({ form, update, toggleFeature }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleFeature: (v: string) => void }) {
+function ContactStep({ form, update, toggleFeature, needsCity }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void; toggleFeature: (v: string) => void; needsCity: boolean }) {
+  const visibleGroups = needsCity ? DOG_FRIENDLY_FEATURE_GROUPS : DOG_FRIENDLY_FEATURE_GROUPS.filter((g) => g.label !== 'For places');
   return (
     <>
-      <SectionLabel icon={<User size={11} />} kicker="Step 2 — Contact" title="Who's signing your business up" description="We'll only use this to verify and reach you about your application." />
+      <SectionLabel icon={<User size={11} />} kicker="Step 3 — Contact" title="Who's signing your business up" description="We'll only use this to verify and reach you about your application." />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Your name">
           <input type="text" required value={form.contactName} onChange={(e) => update('contactName', e.target.value)} placeholder="Adriana Rubio" className={inputClass} />
@@ -562,7 +665,7 @@ function ContactStep({ form, update, toggleFeature }: { form: FormState; update:
       </div>
       <Field label="Dog-friendly features — pick all that apply" optional>
         <div className="space-y-3">
-          {DOG_FRIENDLY_FEATURE_GROUPS.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.label}>
               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">{group.label}</p>
               <div className="flex flex-wrap gap-2">

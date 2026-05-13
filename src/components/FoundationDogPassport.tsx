@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowLeft,
@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
 import {
@@ -39,10 +39,37 @@ function findDogBySlug(slug: string): FoundationDog | undefined {
 }
 
 export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ slug, onBack, onNotFound }) => {
-  const dog = useMemo(() => findDogBySlug(slug), [slug]);
+  const seedDog = useMemo(() => findDogBySlug(slug), [slug]);
+  const [liveDog, setLiveDog] = useState<FoundationDog | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showInterest, setShowInterest] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Prefer the live Firestore record when it exists; fall back to seed.
+  useEffect(() => {
+    const q = query(collection(db, 'foundationDogs'), where('passport.slug', '==', slug));
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const first = snap.docs[0];
+        if (first) {
+          setLiveDog({ id: first.id, ...(first.data() as Omit<FoundationDog, 'id'>) });
+        } else {
+          setLiveDog(null);
+        }
+        setLoading(false);
+      },
+      () => { setLiveDog(null); setLoading(false); },
+    );
+    return () => unsubscribe();
+  }, [slug]);
+
+  const dog = liveDog ?? seedDog;
+
+  if (loading && !seedDog) {
+    return <main className="bg-white min-h-screen" aria-busy="true" />;
+  }
 
   if (!dog) {
     return <NotFound onBack={onBack} onContinue={onNotFound} />;

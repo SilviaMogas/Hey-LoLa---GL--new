@@ -257,7 +257,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
       {/* Ecosystem Section */}
       <section className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto border-t border-stone-100">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-8 lg:gap-6">
-          <FeatureCard 
+          <FeatureCard
             icon={<MapPin size={24} />}
             title={t.home.featureMapTitle}
             description={t.home.featureMapDesc}
@@ -392,6 +392,43 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               </button>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* How Hey Lola works — three audiences */}
+      <section id="how-it-works" aria-labelledby="how-heading" className="py-12 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto border-t border-stone-100">
+        <header className="text-center space-y-3 mb-10 max-w-2xl mx-auto">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">How it works</span>
+          <h2 id="how-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95]">
+            One trusted space, three audiences<span className="text-brand-orange">.</span>
+          </h2>
+          <p className="text-base text-stone-500 font-light italic leading-snug">
+            Hey Lola helps modern dog parents organise their pet's life, foundations welcome new homes, and verified partners build trust with the community.
+          </p>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4622D]">For pet parents</p>
+            <h3 className="text-xl font-serif italic leading-tight">Your pet's trusted life companion.</h3>
+            <p className="text-sm text-stone-500 font-light leading-relaxed">
+              Keep vaccines, microchip, vet contacts and emergency notes in one elegant pet passport. Discover trusted dog-friendly places and unlock curated local perks from verified partners.
+            </p>
+          </article>
+          <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6E8C5D]">For foundations</p>
+            <h3 className="text-xl font-serif italic leading-tight">Every rescue dog gets a Hey Lola passport.</h3>
+            <p className="text-sm text-stone-500 font-light leading-relaxed">
+              Foundation partners — like Animal Haven — get a public rescue-passport page per dog, with verified-by-Hey-Lola trust layer, QR code and a warm interest flow that hands off to the partner's official process.
+            </p>
+          </article>
+          <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5D848C]">For partners</p>
+            <h3 className="text-xl font-serif italic leading-tight">Be discovered. Build trust.</h3>
+            <p className="text-sm text-stone-500 font-light leading-relaxed">
+              Dog-friendly cafés, hotels, vets, groomers, online stores. Self-onboard, earn the Verified badge, offer member perks, get priority placement in the curated city guide.
+            </p>
+          </article>
         </div>
       </section>
 

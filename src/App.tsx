@@ -27,6 +27,7 @@ import { motion } from 'motion/react';
 import { LanguageProvider } from './lib/LanguageContext';
 import { CookieBanner } from './components/CookieBanner';
 import { ComingSoon, hasAccess } from './components/ComingSoon';
+import { LandbotChat } from './components/LandbotChat';
 
 import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 
@@ -561,6 +562,7 @@ function AppContent() {
       />
       <Analytics />
       <CookieBanner onNavigatePrivacy={() => navigate(paths.privacy)} />
+      <LandbotChat />
       <WaitlistModal
         isOpen={waitlistOpen}
         onClose={() => setWaitlistOpen(false)}

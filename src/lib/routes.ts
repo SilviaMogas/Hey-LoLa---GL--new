@@ -23,6 +23,7 @@ export const paths = {
   partners: '/partners',
   partnerOnboarding: '/partners/onboard',
   perks: '/perks',
+  foundation: '/foundation',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',

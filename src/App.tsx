@@ -63,6 +63,7 @@ const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Me
 const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
 const Concierges = lazy(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
 const Perks = lazy(() => import('./components/Perks').then(m => ({ default: m.Perks })));
+const Foundation = lazy(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -380,6 +381,15 @@ function AppContent() {
                   onOpenVenue={(slug) => navigate(buildPath.venue(slug))}
                   onExploreMap={() => navigate(paths.explore)}
                   memberTier={(profile?.memberPlan as 'free' | 'local' | 'plus' | 'black' | undefined) ?? 'free'}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.foundation} element={
+              <FadeIn>
+                <Foundation
+                  onBack={() => navigate(paths.home)}
+                  onPartners={() => navigate(paths.partners)}
+                  onJoin={() => navigate(paths.signup)}
                 />
               </FadeIn>
             } />

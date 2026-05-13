@@ -15,6 +15,7 @@ import {
 import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
+import { ScrollChips } from './ScrollChips';
 
 const COMMUNITY_BREADCRUMBS = [
   { name: 'Hey Lola', item: '/' },
@@ -260,20 +261,22 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </header>
 
           {/* Category filter */}
-          <div className="flex gap-2 flex-wrap mb-5">
-            <CategoryPill
-              label="All"
-              active={activeCategory === 'all'}
-              onClick={() => setActiveCategory('all')}
-            />
-            {(Object.keys(CATEGORY_META) as GroupCategory[]).map((cat) => (
+          <div className="mb-5">
+            <ScrollChips ariaLabel="Group categories">
               <CategoryPill
-                key={cat}
-                label={CATEGORY_META[cat].label}
-                active={activeCategory === cat}
-                onClick={() => setActiveCategory(cat)}
+                label="All"
+                active={activeCategory === 'all'}
+                onClick={() => setActiveCategory('all')}
               />
-            ))}
+              {(Object.keys(CATEGORY_META) as GroupCategory[]).map((cat) => (
+                <CategoryPill
+                  key={cat}
+                  label={CATEGORY_META[cat].label}
+                  active={activeCategory === cat}
+                  onClick={() => setActiveCategory(cat)}
+                />
+              ))}
+            </ScrollChips>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

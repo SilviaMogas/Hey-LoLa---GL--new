@@ -6,8 +6,45 @@ import { BrandLogo } from './BrandLogo';
 const ACCESS_CODE = 'HelloMiami';
 const STORAGE_KEY = 'hl_access_granted';
 
+/**
+ * Known indexer / generative-AI crawlers. Matched case-insensitively
+ * against navigator.userAgent. We let them through the Coming Soon
+ * gate so Hey Lola is properly discoverable on Google, ChatGPT,
+ * Claude, Perplexity and Bing while we keep the gate up for humans.
+ */
+const CRAWLER_PATTERNS = [
+  'googlebot',
+  'google-extended',
+  'bingbot',
+  'duckduckbot',
+  'baiduspider',
+  'yandex',
+  'applebot',
+  'gptbot',
+  'oai-searchbot',
+  'chatgpt-user',
+  'claudebot',
+  'claude-web',
+  'anthropic-ai',
+  'perplexitybot',
+  'ccbot',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'slackbot',
+  'whatsapp',
+  'discordbot',
+];
+
+function isCrawler(): boolean {
+  if (typeof navigator === 'undefined' || !navigator.userAgent) return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return CRAWLER_PATTERNS.some((p) => ua.includes(p));
+}
+
 export function hasAccess(): boolean {
   if (typeof window === 'undefined') return false;
+  if (isCrawler()) return true;
   try {
     return window.localStorage.getItem(STORAGE_KEY) === '1';
   } catch {

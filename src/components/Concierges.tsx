@@ -18,7 +18,7 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby="concierges-heading">
       <SEO
-        title="The Hey Lola Concierges — Lola, Bruno, Milo & Nuc"
+        title="The Hey Lola Concierges — Lola, Taco, Nuc & Toby"
         description="Meet the four Hey Lola concierges. Each one represents a facet of the boutique lifestyle concierge for dog parents — from corner-table brunches to weekend road trips."
         url="/concierges"
         breadcrumbs={BREADCRUMBS}

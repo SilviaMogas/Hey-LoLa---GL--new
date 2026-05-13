@@ -300,7 +300,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                 <label className="text-[10px] font-black uppercase tracking-widest text-stone-300">{t.onboarding.petNamePlaceholder}</label>
                 <input 
                   type="text" 
-                  placeholder="Lola, Bruno, etc." 
+                  placeholder="Lola, Taco, etc."
                   value={petData.name}
                   onChange={(e) => setPetData({...petData, name: e.target.value})}
                   className="w-full bg-transparent border-b-4 border-stone-100 text-3xl sm:text-3xl text-center font-black tracking-tighter outline-none p-4 focus:border-charcoal transition-colors"

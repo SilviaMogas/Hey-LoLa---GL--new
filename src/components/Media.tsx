@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Mail, Download, Newspaper, Quote, Building2, MapPin, Calendar } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { CONCIERGES, conciergePose } from '../data/concierges';
+import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO } from '../lib/seo';
 
 const MEDIA_BREADCRUMBS = [
@@ -200,10 +201,12 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
                 aria-label={`Download ${c.name} concierge image`}
               >
                 <div className="aspect-square w-full flex items-center justify-center">
-                  <img
-                    src={conciergePose(c.id, 1)}
+                  <ConciergeAvatar
+                    id={c.id}
+                    poseIndex={1}
+                    rounded="none"
                     alt={`${c.name} — ${c.role}`}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                    className="w-full h-full !object-contain group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <p className="text-sm font-serif italic mt-2">{c.name}</p>

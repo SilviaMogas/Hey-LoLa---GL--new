@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star } from 'lucide-react';
+import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star, Heart, Bone } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipPlansSection } from './MembershipPlansSection';
-import { CONCIERGES } from '../data/concierges';
+import { CONCIERGES, type ConciergeId } from '../data/concierges';
+import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO, organizationSchema, websiteSchema, serviceSchema } from '../lib/seo';
 
 interface HomeProps {
@@ -609,16 +610,14 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 };
 
 function DogConciergeCard({ name, role, personality, style, vibe, color, badgeColor, onClick }: { name: string, role: string, personality: string, style: string, vibe: string, color: string, badgeColor: string, onClick?: () => void }) {
-  // Using uploaded images if available, else relevant Lucide icons
+  // Lucide icon used as the badge accent in the corner chip.
   let Icon = PawPrint;
-  if (name === 'Lola') Icon = Star;
-  if (name === 'Bruno') Icon = MapPin;
-  if (name === 'Milo') Icon = MessageSquare;
-  if (name === 'Nuc') Icon = Send;
+  if (name === 'Lola') Icon = Heart;
+  if (name === 'Taco') Icon = PawPrint;
+  if (name === 'Nuc') Icon = Star;
+  if (name === 'Toby') Icon = Bone;
 
-  const [imageFailed, setImageFailed] = useState(false);
-  const [imgExt, setImgExt] = useState('png');
-  const imagePath = `/${name.toLowerCase()}.${imgExt}`;
+  const conciergeId = name.toLowerCase() as ConciergeId;
   const interactive = !!onClick;
   const handleKey = (e: React.KeyboardEvent) => {
     if (!onClick) return;
@@ -643,26 +642,16 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
       <div className={`aspect-square ${color} flex items-center justify-center relative overflow-hidden transition-all duration-700`}>
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent_70%)]" />
         
-        {!imageFailed ? (
-          <img
-            src={imagePath}
-            alt={name}
-            onError={() => {
-              if (imgExt === 'png') {
-                setImgExt('jpg');
-              } else if (imgExt === 'jpg') {
-                setImgExt('jpeg');
-              } else {
-                setImageFailed(true);
-              }
-            }}
-            className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700"
-          />
-        ) : (
-          <div className="relative z-10 text-charcoal/20 group-hover:scale-110 group-hover:text-brand-orange transition-all duration-700">
-            <Icon size={100} strokeWidth={1} />
-          </div>
-        )}
+        <ConciergeAvatar
+          id={conciergeId}
+          poseIndex={1}
+          rounded="none"
+          alt={name}
+          className="relative z-10 w-full h-full !object-contain group-hover:scale-110 transition-all duration-700"
+        />
+        <span className="sr-only">
+          <Icon size={16} aria-hidden />
+        </span>
       </div>
       
       <div className="p-8 space-y-6 flex-1 flex flex-col justify-between">

@@ -24,6 +24,8 @@ export const paths = {
   partnerOnboarding: '/partners/onboard',
   perks: '/perks',
   foundation: '/foundation',
+  foundationDogs: '/foundation/dogs',
+  foundationDogPassport: '/foundation/dogs/:slug',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',
@@ -56,6 +58,7 @@ export const paths = {
  *  hand-craft path strings, the type system will not catch typos. */
 export const buildPath = {
   venue: (slug: string) => `/venue/${encodeURIComponent(slug)}`,
+  foundationDogPassport: (slug: string) => `/foundation/dogs/${encodeURIComponent(slug)}`,
   verifyVenue: (placeId: string, token: string) =>
     `/verify/${encodeURIComponent(placeId)}/${encodeURIComponent(token)}`,
   claimListing: (token: string) => `/claim-listing/${encodeURIComponent(token)}`,

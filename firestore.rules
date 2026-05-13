@@ -176,6 +176,63 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ────────── FOUNDATION DOGS (public rescue passports) ──────────
+    // Public can read passports of dogs that are visible & available; admins
+    // manage the catalogue. Writes from outside Admin go through the Admin
+    // SDK on the server, which bypasses these rules.
+    match /foundationDogs/{dogId} {
+      allow get:    if (resource.data.passport.visibility == 'public'
+                       && resource.data.status == 'available')
+                       || isAdmin();
+      // Listing must be allowed for the public directory page; client must
+      // filter on visibility/status. Admin can list everything.
+      allow list:   if true;
+      allow write:  if isAdmin();
+    }
+
+    // ────────── FOUNDATION INTEREST SUBMISSIONS ──────────
+    // Visitors express interest in a rescue dog. Public create with a
+    // strict payload contract; only admin can read or update afterwards.
+    // The user can submit anonymously OR signed in — when signed in we
+    // store their uid so they can later see their own interests.
+    match /foundation_interests/{interestId} {
+      allow create: if request.resource.data.source == 'rescue_passport'
+                       && request.resource.data.status == 'new'
+                       && request.resource.data.keys().hasAll(['dogId', 'dogSlug', 'partnerId', 'contact'])
+                       && request.resource.data.contact.email is string
+                       && request.resource.data.contact.email.size() > 4
+                       && (
+                         !request.resource.data.keys().hasAny(['userId']) ||
+                         request.resource.data.userId == request.auth.uid
+                       );
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── PARTNER APPLICATIONS (self-onboarding) ──────────
+    // Public submissions from /partners/onboard. Strict payload contract:
+    // only the source we own + initial 'pending' status. Admin verifies.
+    match /partner_applications/{applicationId} {
+      allow create: if request.resource.data.source == 'self_onboarding'
+                       && request.resource.data.status == 'pending'
+                       && request.resource.data.businessName is string
+                       && request.resource.data.email is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── WAITLIST (member + partner waitlist signups) ──────────
+    match /waitlist/{entryId} {
+      allow create: if request.resource.data.email is string
+                       && request.resource.data.email.size() > 4;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────── CITY REQUESTS ──────────
+    match /city_requests/{requestId} {
+      allow create: if request.resource.data.email is string
+                       && request.resource.data.city is string;
+      allow read, update, delete: if isAdmin();
+    }
+
     // ────────── DM THREADS (member ↔ member) ──────────
     // Thread doc id is the two participant UIDs sorted alphabetically and
     // joined with "_". The parent doc holds participants + last message

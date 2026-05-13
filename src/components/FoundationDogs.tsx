@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, MapPin, ShieldCheck } from 'lucide-react';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
 import { SEO } from '../lib/seo';
 
@@ -15,11 +17,33 @@ const BREADCRUMBS = [
   { name: 'Rescue Dogs', item: '/foundation/dogs' },
 ];
 
-const VISIBLE = FOUNDATION_DOGS.filter(
+const SEED_VISIBLE = FOUNDATION_DOGS.filter(
   (d) => d.passport.visibility === 'public' && d.status === 'available',
 );
 
 export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPassport }) => {
+  const [live, setLive] = useState<FoundationDog[] | null>(null);
+
+  // Subscribe to the live Firestore collection. If it has any verified
+  // public dogs we use them; otherwise we fall back to the seed sample.
+  useEffect(() => {
+    const q = query(collection(db, 'foundationDogs'), where('status', '==', 'available'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const dogs = snap.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<FoundationDog, 'id'>) }))
+          .filter((d) => d.passport?.visibility === 'public');
+        setLive(dogs);
+      },
+      () => setLive([]),
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const visible: FoundationDog[] = live && live.length > 0 ? live : SEED_VISIBLE;
+  const usingSeed = !live || live.length === 0;
+
   return (
     <main className="bg-white min-h-screen text-charcoal font-boutique" aria-labelledby="dogs-heading">
       <SEO
@@ -55,21 +79,23 @@ export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPa
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug">
               Every dog here is part of a verified rescue partner. Their passport lives on Hey Lola so animal lovers can discover them, express interest, and continue through the official adoption process.
             </p>
-            <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/60 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
-              <span className="bg-brand-orange/30 text-brand-orange px-2 py-0.5 rounded-full">Preview</span>
-              Sample passports — real Animal Haven dogs sync in.
-            </p>
+            {usingSeed && (
+              <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/60 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full">
+                <span className="bg-brand-orange/30 text-brand-orange px-2 py-0.5 rounded-full">Preview</span>
+                Sample passports — real Animal Haven dogs sync in.
+              </p>
+            )}
           </motion.div>
         </div>
       </section>
 
       <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {VISIBLE.map((dog, i) => (
+          {visible.map((dog, i) => (
             <DogCard key={dog.id} dog={dog} delay={i * 0.06} onClick={() => onOpenPassport(dog.passport.slug)} />
           ))}
         </div>
-        {VISIBLE.length === 0 && (
+        {visible.length === 0 && (
           <p className="text-center text-stone-400 italic font-light py-16">
             No rescue dogs available right now. Check back soon — new passports go live as partners sync.
           </p>

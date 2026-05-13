@@ -398,7 +398,13 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const valid = name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && agree;
+  const trimmedEmail = email.trim();
+  const valid =
+    name.trim().length > 1 &&
+    trimmedEmail.length > 3 &&
+    trimmedEmail.includes('@') &&
+    trimmedEmail.indexOf('.', trimmedEmail.indexOf('@')) > -1 &&
+    agree;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

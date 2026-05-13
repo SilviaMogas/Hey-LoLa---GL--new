@@ -50,10 +50,12 @@ export function buildPassport(name: string, partnerId: string, status: DogStatus
 function slugify(s: string): string {
   return s
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .normalize('NFD')
+    .split('')
+    .filter((c) => c.charCodeAt(0) < 0x300 || c.charCodeAt(0) > 0x36f)
+    .join('')
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .replace(/^-+|-+$/g, '');
 }
 
 /* ── Seed data ────────────────────────────────────────────────────────

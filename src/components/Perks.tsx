@@ -12,6 +12,7 @@ import {
   type PerkTier,
 } from '../data/partnerPerks';
 import { SEO } from '../lib/seo';
+import { ScrollChips } from './ScrollChips';
 
 interface PerksProps {
   onBack: () => void;
@@ -96,17 +97,19 @@ export const Perks: React.FC<PerksProps> = ({ onBack, onJoinClub, onOpenVenue, o
 
       {/* Category nav */}
       <nav aria-label="Filter perks by category" className="border-y border-stone-100 bg-white sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 py-3 flex gap-2 overflow-x-auto scrollbar-thin">
-          <CategoryTab label="All" count={countByCategory.all} active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} />
-          {PERK_CATEGORIES.map((c) => (
-            <CategoryTab
-              key={c.id}
-              label={`${c.emoji} ${c.label}`}
-              count={countByCategory[c.id] ?? 0}
-              active={activeCategory === c.id}
-              onClick={() => setActiveCategory(c.id)}
-            />
-          ))}
+        <div className="max-w-7xl mx-auto py-3">
+          <ScrollChips ariaLabel="Perk categories">
+            <CategoryTab label="All" count={countByCategory.all} active={activeCategory === 'all'} onClick={() => setActiveCategory('all')} />
+            {PERK_CATEGORIES.map((c) => (
+              <CategoryTab
+                key={c.id}
+                label={`${c.emoji} ${c.label}`}
+                count={countByCategory[c.id] ?? 0}
+                active={activeCategory === c.id}
+                onClick={() => setActiveCategory(c.id)}
+              />
+            ))}
+          </ScrollChips>
         </div>
       </nav>
 

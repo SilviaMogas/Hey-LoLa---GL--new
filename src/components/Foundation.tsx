@@ -6,7 +6,6 @@ import {
   Heart,
   Sprout,
   ShieldCheck,
-  HandHeart,
   PawPrint,
   Mail,
   Globe,
@@ -256,7 +255,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
         <div className="max-w-5xl mx-auto rounded-[2rem] bg-charcoal text-white p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 inline-flex items-center gap-2">
-              <HandHeart size={11} /> Get involved
+              <Heart size={11} /> Get involved
             </span>
             <h2 id="involve-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
               For shelters, partners and humans who love dogs<span className="text-brand-orange">.</span>

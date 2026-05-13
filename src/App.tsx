@@ -27,6 +27,7 @@ import { motion } from 'motion/react';
 import { LanguageProvider } from './lib/LanguageContext';
 import { CookieBanner } from './components/CookieBanner';
 import { ComingSoon, hasAccess } from './components/ComingSoon';
+import { LandbotChat } from './components/LandbotChat';
 
 import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 
@@ -62,6 +63,7 @@ const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Me
 const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
 const Concierges = lazy(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
 const Perks = lazy(() => import('./components/Perks').then(m => ({ default: m.Perks })));
+const Foundation = lazy(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -382,6 +384,15 @@ function AppContent() {
                 />
               </FadeIn>
             } />
+            <Route path={paths.foundation} element={
+              <FadeIn>
+                <Foundation
+                  onBack={() => navigate(paths.home)}
+                  onPartners={() => navigate(paths.partners)}
+                  onJoin={() => navigate(paths.signup)}
+                />
+              </FadeIn>
+            } />
             <Route path={paths.media} element={
               <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
             } />
@@ -561,6 +572,7 @@ function AppContent() {
       />
       <Analytics />
       <CookieBanner onNavigatePrivacy={() => navigate(paths.privacy)} />
+      <LandbotChat />
       <WaitlistModal
         isOpen={waitlistOpen}
         onClose={() => setWaitlistOpen(false)}

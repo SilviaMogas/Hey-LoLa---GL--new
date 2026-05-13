@@ -245,29 +245,88 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
 
 function LogoTile({ variant }: { variant: LogoVariant }) {
   const isDark = variant.surface.includes('charcoal');
+  const logoRef = React.useRef<HTMLDivElement | null>(null);
+  const filenameBase = `heylola-${variant.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+  const downloadPng = async () => {
+    const node = logoRef.current?.querySelector('svg');
+    if (!node) return;
+    const clone = node.cloneNode(true) as SVGSVGElement;
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const xml = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      // Target 2048px on the longest side for retina sharpness
+      const target = 2048;
+      const ratio = img.width / img.height;
+      const w = ratio >= 1 ? target : target * ratio;
+      const h = ratio >= 1 ? target / ratio : target;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(w);
+      canvas.height = Math.round(h);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { URL.revokeObjectURL(url); return; }
+      if (isDark) {
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((pngBlob) => {
+        if (!pngBlob) { URL.revokeObjectURL(url); return; }
+        const pngUrl = URL.createObjectURL(pngBlob);
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = `${filenameBase}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(pngUrl);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); };
+    img.src = url;
+  };
+
+  const pillClass = isDark
+    ? 'bg-white/10 text-white/70 hover:bg-white/20'
+    : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10';
+
   return (
     <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-charcoal' : 'border-stone-100'} p-8 flex flex-col items-center gap-6 aspect-[4/3] justify-center relative overflow-hidden`}>
-      <BrandLogo
-        size={variant.mark ? 'xl' : '3xl'}
-        variant={variant.textTone}
-        mark={variant.mark}
-      />
+      <div ref={logoRef}>
+        <BrandLogo
+          size={variant.mark ? 'xl' : '3xl'}
+          variant={variant.textTone}
+          mark={variant.mark}
+        />
+      </div>
       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
         <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
           {variant.label}
         </span>
-        <a
-          href="/logo.svg"
-          download={`heylola-${variant.label.toLowerCase().replace(/[^a-z]+/g, '-')}.svg`}
-          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${
-            isDark
-              ? 'bg-white/10 text-white/70 hover:bg-white/20'
-              : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10'
-          }`}
-          aria-label={`Download ${variant.label} SVG`}
-        >
-          <Download size={9} /> SVG
-        </a>
+        <div className="flex items-center gap-1.5">
+          <a
+            href="/logo.svg"
+            download={`${filenameBase}.svg`}
+            className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${pillClass}`}
+            aria-label={`Download ${variant.label} SVG`}
+          >
+            <Download size={9} /> SVG
+          </a>
+          <button
+            type="button"
+            onClick={downloadPng}
+            className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${pillClass}`}
+            aria-label={`Download ${variant.label} PNG`}
+          >
+            <Download size={9} /> PNG
+          </button>
+        </div>
       </div>
     </article>
   );

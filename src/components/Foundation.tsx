@@ -18,6 +18,7 @@ interface FoundationProps {
   onBack: () => void;
   onPartners: () => void;
   onJoin: () => void;
+  onSeeDogs?: () => void;
 }
 
 const BREADCRUMBS = [
@@ -88,7 +89,7 @@ const PROGRAMS = [
   },
 ];
 
-export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJoin }) => {
+export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJoin, onSeeDogs }) => {
   return (
     <main className="bg-white min-h-screen text-charcoal font-boutique" aria-labelledby="foundation-heading">
       <SEO
@@ -249,6 +250,34 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
           </div>
         </div>
       </section>
+
+      {/* Rescue dogs entry */}
+      {onSeeDogs && (
+        <section className="py-14 sm:py-16 px-5 sm:px-6" aria-labelledby="dogs-entry-heading">
+          <div className="max-w-5xl mx-auto rounded-[2rem] bg-stone-50 border border-stone-100 p-8 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            <div className="space-y-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
+                <PawPrint size={11} /> Rescue dogs
+              </span>
+              <h2 id="dogs-entry-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+                Meet dogs looking for a home<span className="text-brand-orange">.</span>
+              </h2>
+              <p className="text-sm sm:text-base text-stone-500 font-light italic leading-relaxed max-w-md">
+                Every rescue partner dog has a Hey Lola passport — a warm, trustworthy way to discover them, express interest and continue through the official adoption process.
+              </p>
+            </div>
+            <div className="flex lg:justify-end">
+              <button
+                type="button"
+                onClick={onSeeDogs}
+                className="luxury-button bg-charcoal text-white h-12 px-8 text-[11px] font-black tracking-[0.25em] uppercase hover:bg-charcoal/80 inline-flex items-center gap-2"
+              >
+                See rescue passports <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Get involved */}
       <section className="py-14 sm:py-16 px-5 sm:px-6" aria-labelledby="involve-heading">

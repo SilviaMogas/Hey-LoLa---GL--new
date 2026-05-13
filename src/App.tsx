@@ -64,6 +64,8 @@ const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').th
 const Concierges = lazy(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
 const Perks = lazy(() => import('./components/Perks').then(m => ({ default: m.Perks })));
 const Foundation = lazy(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
+const FoundationDogs = lazy(() => import('./components/FoundationDogs').then(m => ({ default: m.FoundationDogs })));
+const FoundationDogPassport = lazy(() => import('./components/FoundationDogPassport').then(m => ({ default: m.FoundationDogPassport })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -390,9 +392,19 @@ function AppContent() {
                   onBack={() => navigate(paths.home)}
                   onPartners={() => navigate(paths.partners)}
                   onJoin={() => navigate(paths.signup)}
+                  onSeeDogs={() => navigate(paths.foundationDogs)}
                 />
               </FadeIn>
             } />
+            <Route path={paths.foundationDogs} element={
+              <FadeIn>
+                <FoundationDogs
+                  onBack={() => navigate(paths.foundation)}
+                  onOpenPassport={(slug) => navigate(buildPath.foundationDogPassport(slug))}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.foundationDogPassport} element={<FoundationDogPassportRoute />} />
             <Route path={paths.media} element={
               <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
             } />
@@ -706,6 +718,21 @@ function BrandBookCharacterRoute() {
         id={id as 'lola' | 'bruno' | 'milo' | 'nuc'}
         onBack={() => navigate(paths.brandBook)}
         onOther={(other) => navigate(buildPath.brandBookCharacter(other))}
+      />
+    </FadeIn>
+  );
+}
+
+function FoundationDogPassportRoute() {
+  const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+  if (!slug) return <Navigate to={paths.foundationDogs} replace />;
+  return (
+    <FadeIn>
+      <FoundationDogPassport
+        slug={slug}
+        onBack={() => navigate(paths.foundationDogs)}
+        onNotFound={() => navigate(paths.foundationDogs)}
       />
     </FadeIn>
   );

@@ -7,6 +7,8 @@ import { curatedPlaces } from '../data/curatedPlaces';
 import { cn } from '../lib/utils';
 import { OnboardingAdminPanel } from './OnboardingAdminPanel';
 import { VenueOutreachPanel } from './VenueOutreachPanel';
+import { AdminFoundation } from './AdminFoundation';
+import { AdminFeatureFlags } from './AdminFeatureFlags';
 
 const PLACE_CATEGORIES: PlaceCategory[] = [
   'Parks / green areas',
@@ -34,7 +36,7 @@ const PLACE_STATUSES: PlaceStatus[] = [
 const RESERVATION_PROVIDERS: ReservationProvider[] = ['None', 'OpenTable', 'Direct', 'Other'];
 const BOOKING_STATUSES: BookingStatus[] = ['Not available', 'Pending', 'Active'];
 
-type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach';
+type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'features';
 
 interface AdminProps {
   onBack?: () => void;
@@ -417,6 +419,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
             <div className="flex flex-wrap gap-2">
               {([
                 ['places', 'Places'],
+                ['foundation', 'Foundation'],
                 ['outreach', 'Outreach'],
                 ['claims', stats.pendingClaims > 0 ? `Claims (${stats.pendingClaims})` : 'Claims'],
                 ['applications', 'Partner Apps'],
@@ -425,6 +428,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                 ['posts', 'Community'],
                 ['users', stats.totalUsers > 0 ? `Users (${stats.totalUsers})` : 'Users'],
                 ['creators', 'Creators'],
+                ['features', 'Features'],
               ] as [AdminTab, string][]).map(([tabId, label]) => (
                 <button
                   key={tabId}
@@ -591,6 +595,11 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         </div>
       )}
 
+      {activeTab === 'foundation' ? (
+        <AdminFoundation />
+      ) : activeTab === 'features' ? (
+        <AdminFeatureFlags />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          {loading ? (
            <div className="col-span-full py-10 flex flex-col items-center gap-4">
@@ -1120,6 +1129,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
            </div>
          ))}
       </div>
+      )}
     </div>
   );
 };

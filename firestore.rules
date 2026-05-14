@@ -235,6 +235,15 @@ service cloud.firestore {
       allow write:  if isAdmin();
     }
 
+    // ────────── CRM LEADS (admin-only sales pipeline) ──────────
+    // The internal CRM that drives venue + ecommerce outreach. Every
+    // document is created from /admin or auto-ingested via the
+    // notify-partner-application endpoint (Admin SDK, bypasses rules).
+    // No public surface ever needs to touch this collection directly.
+    match /crm_leads/{leadId} {
+      allow read, write: if isAdmin();
+    }
+
     // ────────── CITY REQUESTS ──────────
     match /city_requests/{requestId} {
       allow create: if request.resource.data.email is string

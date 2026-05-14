@@ -221,28 +221,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white border-4 border-stone-100 p-6 md:p-6 rounded-3xl shadow-xl relative overflow-hidden"
+            className="bg-white border-4 border-stone-100 p-4 md:p-5 rounded-3xl shadow-xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-80 h-80 bg-stone-50/40 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="relative z-10 space-y-6">
-              <div className="space-y-2">
+            <div className="relative z-10 space-y-4">
+              <div className="space-y-1">
                 <span className="text-stone-400 text-[10px] font-black uppercase tracking-[0.4em]">Profile Curation</span>
-                <h3 className="text-3xl md:text-4xl font-serif italic tracking-tight text-charcoal/90">{t.dashboard.ownerDetails}</h3>
-                <p className="text-base text-stone-400 font-light italic">{t.dashboard.completeProfileDesc}</p>
+                <h3 className="text-2xl md:text-3xl font-serif italic tracking-tight text-charcoal/90 leading-tight">{t.dashboard.ownerDetails}</h3>
+                <p className="text-sm text-stone-400 font-light italic">{t.dashboard.completeProfileDesc}</p>
               </div>
 
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
-                <div className="flex items-center gap-6">
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="flex items-center gap-4">
                   <button
                     type="button"
                     onClick={() => photoInputRef.current?.click()}
-                    className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl bg-stone-100 group flex items-center justify-center"
+                    className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl bg-stone-100 group flex items-center justify-center shrink-0"
                     aria-label="Upload profile photo"
                   >
                     {newPhotoURL ? (
                       <img src={newPhotoURL} alt="Profile preview" className="w-full h-full object-cover" />
                     ) : (
-                      <UserIcon size={36} className="text-stone-300" />
+                      <UserIcon size={28} className="text-stone-300" />
                     )}
                     <span className="absolute inset-0 bg-black/40 text-white text-[9px] font-black uppercase tracking-[0.2em] flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Camera size={18} /> Change
@@ -270,43 +270,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboard.firstName}</label>
                     <input
                       type="text"
                       value={newFirstName}
                       onChange={(e) => setNewFirstName(e.target.value)}
                       placeholder="e.g. Silvia"
-                      className="luxury-input h-12 w-full text-base font-medium"
+                      className="luxury-input h-11 w-full text-sm font-medium"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboard.lastName}</label>
                     <input
                       type="text"
                       value={newLastName}
                       onChange={(e) => setNewLastName(e.target.value)}
                       placeholder="e.g. Mogas"
-                      className="luxury-input h-12 w-full text-base font-medium"
+                      className="luxury-input h-11 w-full text-sm font-medium"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboard.homeCityLabel}</label>
                   <input
                     type="text"
                     value={newCity}
                     onChange={(e) => setNewCity(e.target.value)}
                     placeholder="e.g. Barcelona"
-                    className="luxury-input h-12 w-full text-base font-medium"
+                    className="luxury-input h-11 w-full text-sm font-medium"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboard.aboutMe}</label>
                   <textarea
                     value={newBio}

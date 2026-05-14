@@ -297,16 +297,16 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         <div className="w-10" />
       </div>
 
-      <div className="flex-1 flex items-start sm:items-center justify-center px-5 sm:px-8 pb-8 pt-2">
-        <div className="w-full max-w-[420px] space-y-5 animate-fade-in">
-          <div className="space-y-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-charcoal">
+      <div className="flex-1 flex items-start sm:items-center justify-center px-5 sm:px-8 pb-4 pt-1">
+        <div className="w-full max-w-[420px] space-y-3 animate-fade-in">
+          <div className="space-y-0.5 text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-charcoal leading-tight">
               {headline}<span className="text-brand-orange">.</span>
             </h1>
-            <p className="text-[13px] text-stone-500 leading-snug">{sub}</p>
+            <p className="text-[12px] text-stone-500 leading-snug">{sub}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-2.5" noValidate>
             {resetSent ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -383,7 +383,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                 )}
 
                 {mode === 'signup' && userType === 'Business' && (
-                  <div className="space-y-4">
+                  <div className="space-y-2.5">
                     <Field label="Business name">
                       <input
                         type="text"
@@ -418,7 +418,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         value={businessReason}
                         onChange={(e) => setBusinessReason(e.target.value)}
                         placeholder="Tell us about your venue and what you're hoping for"
-                        className="apple-input resize-none h-24 py-3"
+                        className="apple-input resize-none h-16 py-2.5"
                       />
                     </Field>
                   </div>
@@ -650,7 +650,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className="flex items-center justify-between px-1">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{label}</label>
         {extra}

@@ -17,9 +17,11 @@ interface HomeProps {
   onCreators?: () => void;
   onCommunity?: () => void;
   onConcierge?: (name: string) => void;
+  /** City-specific shortcut used by the three CityCards. */
+  onExploreCity?: (city: 'miami' | 'nyc' | 'barcelona') => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge }) => {
+export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge, onExploreCity }) => {
   const { t } = useTranslation();
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
@@ -141,13 +143,13 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-            <CityCard name="Miami" status="Live" image="https://images.unsplash.com/photo-1514214246283-d427a95c5d2f?auto=format&fit=crop&w=800" />
+            <CityCard name="Miami" status="Live" image="https://images.unsplash.com/photo-1514214246283-d427a95c5d2f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('miami')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-            <CityCard name="New York" status="Launching soon" image="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800" />
+            <CityCard name="New York" status="Launching soon" image="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('nyc')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-            <CityCard name="Barcelona" status="Launching soon" image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" />
+            <CityCard name="Barcelona" status="Launching soon" image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('barcelona')} />
           </motion.div>
         </div>
 
@@ -681,10 +683,15 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
   );
 }
 
-function CityCard({ name, status, image }: { name: string, status: string, image: string }) {
+function CityCard({ name, status, image, onClick }: { name: string, status: string, image: string, onClick?: () => void }) {
   const isLive = status === 'Live';
   return (
-    <div className="group relative aspect-square sm:aspect-[5/6] rounded-[1.75rem] sm:rounded-2xl md:rounded-3xl overflow-hidden bg-stone-100 border border-stone-100 shadow-[0_15px_40px_rgba(0,0,0,0.08)] md:shadow-[0_20px_60px_rgba(0,0,0,0.08)] hover:shadow-2xl transition-all duration-1000">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Open ${name} on the map`}
+      className="group relative aspect-square sm:aspect-[5/6] rounded-[1.75rem] sm:rounded-2xl md:rounded-3xl overflow-hidden bg-stone-100 border border-stone-100 shadow-[0_15px_40px_rgba(0,0,0,0.08)] md:shadow-[0_20px_60px_rgba(0,0,0,0.08)] hover:shadow-2xl transition-all duration-1000 w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
+    >
       <img src={image} alt={name} loading="lazy" className={`w-full h-full object-cover ${isLive ? 'grayscale-[0.2] group-hover:grayscale-0' : 'grayscale-[0.7]'} group-hover:scale-110 transition-all duration-1000`} />
       <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-700" />
       <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 md:p-8 flex flex-col items-center text-center space-y-2 sm:space-y-3">
@@ -694,7 +701,7 @@ function CityCard({ name, status, image }: { name: string, status: string, image
           <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-white/40'}`} /> {status}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

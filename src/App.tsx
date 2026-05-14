@@ -55,6 +55,7 @@ const Faq = lazy(() => import('./components/Faq').then(m => ({ default: m.Faq })
 const Privacy = lazy(() => import('./components/Privacy').then(m => ({ default: m.Privacy })));
 const Terms = lazy(() => import('./components/Terms').then(m => ({ default: m.Terms })));
 const FounderDeals = lazy(() => import('./components/FounderDeals').then(m => ({ default: m.FounderDeals })));
+const WhatsOn = lazy(() => import('./components/WhatsOn').then(m => ({ default: m.WhatsOn })));
 const Club = lazy(() => import('./components/Club').then(m => ({ default: m.Club })));
 const Creators = lazy(() => import('./components/Creators').then(m => ({ default: m.Creators })));
 const Partners = lazy(() => import('./components/Partners').then(m => ({ default: m.Partners })));
@@ -307,6 +308,7 @@ function AppContent() {
                   onCreators={() => navigate(paths.creators)}
                   onCommunity={() => navigate(paths.community)}
                   onConcierge={(name) => navigate(buildPath.brandBookCharacter(name))}
+                  onExploreCity={(city) => navigate(`${paths.explore}?city=${city}`)}
                 />
               </FadeIn>
             } />
@@ -416,6 +418,9 @@ function AppContent() {
             <Route path={paths.foundationDogPassport} element={<FoundationDogPassportRoute />} />
             <Route path={paths.media} element={
               <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.whatsOn} element={
+              <FadeIn><WhatsOn onBack={() => navigate(paths.home)} /></FadeIn>
             } />
 
             {/* ── Public app surfaces ───────────────────────────────── */}

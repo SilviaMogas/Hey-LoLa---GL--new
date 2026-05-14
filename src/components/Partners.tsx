@@ -11,7 +11,7 @@ const PARTNERS_BREADCRUMBS = [
   { name: 'Partner Network', item: '/partners' },
 ];
 
-export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void; onClaimBusiness: () => void }> = ({ onBack, onJoinWaitlist, onClaimBusiness }) => {
+export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void; onClaimBusiness: () => void; onSearchListing?: () => void }> = ({ onBack, onJoinWaitlist, onClaimBusiness, onSearchListing }) => {
   return (
     <div className="bg-bone min-h-screen font-boutique">
       <SEO
@@ -47,12 +47,35 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
               Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button onClick={onClaimBusiness} className="luxury-button bg-charcoal text-white h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2">
-                Become a Partner <ArrowRight size={14} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-5 max-w-2xl">
+              {/* New business — create from scratch */}
+              <button
+                onClick={onClaimBusiness}
+                className="group text-left p-5 rounded-2xl bg-charcoal text-white hover:bg-stone-800 transition-all flex flex-col gap-2"
+              >
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/50">New to Hey Lola</span>
+                <span className="text-base font-bold italic">Create a new partner profile</span>
+                <span className="text-xs text-white/60 font-light leading-snug">
+                  Your business is not yet on the map. Onboard from scratch with our 4-step wizard.
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] pt-1">
+                  Start onboarding <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </span>
               </button>
-              <button onClick={onJoinWaitlist} className="luxury-button bg-white text-charcoal border border-stone-200 h-12 px-8 uppercase tracking-[0.25em] text-[10px] font-black hover:border-charcoal hover:bg-stone-50 transition-all flex items-center justify-center">
-                Self-onboarding — 4 steps
+
+              {/* Existing listing — verify / claim */}
+              <button
+                onClick={onSearchListing ?? onJoinWaitlist}
+                className="group text-left p-5 rounded-2xl bg-white text-charcoal border border-stone-200 hover:border-charcoal hover:bg-stone-50 transition-all flex flex-col gap-2"
+              >
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-400">Already on the map</span>
+                <span className="text-base font-bold italic">Verify your existing listing</span>
+                <span className="text-xs text-stone-500 font-light leading-snug">
+                  Your business is already on Hey Lola. Find it, claim ownership and unlock the partner dashboard.
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] pt-1">
+                  Search the map <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </span>
               </button>
             </div>
           </motion.div>

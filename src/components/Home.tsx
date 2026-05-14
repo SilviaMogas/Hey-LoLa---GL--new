@@ -80,9 +80,6 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
             <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-stone-500 font-light max-w-2xl mx-auto leading-relaxed italic px-4 sm:px-6 md:px-8">
               {t.home.heroSubtitle}
-              <span className="opacity-50 text-[10px] sm:text-[11px] md:text-xs block mt-3 sm:mt-4 font-sans uppercase font-black tracking-[0.25em] not-italic text-stone-400">
-                {t.home.heroDescription}
-              </span>
             </p>
           </motion.div>
 

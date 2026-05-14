@@ -238,11 +238,11 @@ function ReservationBlock({ spot }: { spot: Place }) {
     return (
       <div className="bg-bone border border-stone-line rounded-2xl px-4 py-3 text-center">
         <p className="text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold">
-          Reservation coming soon
+          {spot.phone ? 'Book by phone' : 'Walk-ins welcome'}
         </p>
         {spot.phone && (
           <p className="text-[10px] text-stone-400 mt-1">
-            Or <a href={`tel:${spot.phone}`} className="underline">contact venue</a>
+            <a href={`tel:${spot.phone}`} className="underline">Call venue</a>
           </p>
         )}
       </div>

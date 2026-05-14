@@ -19,7 +19,7 @@ const STORAGE_KEY = 'hl_access_granted';
  * Override via env: set `VITE_LAUNCH_MODE=open` to flip without a code
  * change (helpful for the same build serving staging vs prod).
  */
-const LAUNCH_MODE_OPEN = false;
+const LAUNCH_MODE_OPEN = true;
 
 function readLaunchMode(): boolean {
   if (LAUNCH_MODE_OPEN) return true;

@@ -11,6 +11,7 @@ import { detectCity } from './lib/geo';
 import { canSavePlaces } from './lib/membership';
 import { paths, buildPath } from './lib/routes';
 import { ProtectedRoute, AdminRoute, GuestOnlyRoute } from './lib/guards';
+import { DraftRoute } from './components/DraftRoute';
 import { UpgradeModal } from './components/UpgradeModal';
 import { PetData } from './types';
 import { db, auth } from './lib/firebase';
@@ -53,6 +54,7 @@ const ClubWelcome = lazy(() => import('./components/ClubWelcome').then(m => ({ d
 const Faq = lazy(() => import('./components/Faq').then(m => ({ default: m.Faq })));
 const Privacy = lazy(() => import('./components/Privacy').then(m => ({ default: m.Privacy })));
 const Terms = lazy(() => import('./components/Terms').then(m => ({ default: m.Terms })));
+const FounderDeals = lazy(() => import('./components/FounderDeals').then(m => ({ default: m.FounderDeals })));
 const Club = lazy(() => import('./components/Club').then(m => ({ default: m.Club })));
 const Creators = lazy(() => import('./components/Creators').then(m => ({ default: m.Creators })));
 const Partners = lazy(() => import('./components/Partners').then(m => ({ default: m.Partners })));
@@ -385,6 +387,13 @@ function AppContent() {
                   memberTier={(profile?.memberPlan as 'free' | 'local' | 'plus' | 'black' | undefined) ?? 'free'}
                 />
               </FadeIn>
+            } />
+            <Route path={paths.founderDeals} element={
+              <DraftRoute flag="founderDeals" fallbackTo={paths.perks}>
+                <FadeIn>
+                  <FounderDeals onBack={() => navigate(paths.perks)} />
+                </FadeIn>
+              </DraftRoute>
             } />
             <Route path={paths.foundation} element={
               <FadeIn>

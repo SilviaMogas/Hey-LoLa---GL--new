@@ -177,6 +177,24 @@ function AppContent() {
     }
   }, [user]);
 
+  // Global verify-email gate. A signed-in but unverified user can only see
+  // /verify-email and the auth pages. Public marketing pages (/, /about,
+  // /explore, /perks, etc.) ALSO redirect to /verify-email — otherwise
+  // a fresh signup lands on the homepage and never sees the verification
+  // step. Verified users are free to roam.
+  useEffect(() => {
+    if (!user) return;
+    if (user.emailVerified) return;
+    const allowedUnverifiedPaths = new Set<string>([
+      paths.verifyEmail,
+      paths.login,
+      paths.signup,
+    ]);
+    if (!allowedUnverifiedPaths.has(location.pathname)) {
+      navigate(paths.verifyEmail, { replace: true });
+    }
+  }, [user, location.pathname, navigate]);
+
   // Bounce signed-out users off authenticated routes
   const authenticatedPaths = useRef<Set<string>>(new Set([
     paths.dashboard, paths.passport, paths.admin, paths.saved, paths.onboarding,
@@ -274,7 +292,7 @@ function AppContent() {
           </div>
           <div className="absolute top-32 right-6 2xl:right-12 hidden xl:block pointer-events-none z-0 select-none">
             <span className="vertical-text text-[10px] font-black uppercase tracking-[0.4em] text-charcoal/15">
-              EST. 2024 — BCN Hub
+              EST. 2026
             </span>
           </div>
         </>
@@ -350,6 +368,7 @@ function AppContent() {
                   onBack={() => navigate(paths.home)}
                   onJoinWaitlist={() => navigate(paths.partnerOnboarding)}
                   onClaimBusiness={() => navigate(paths.partnerOnboarding)}
+                  onSearchListing={() => navigate(paths.explore)}
                 />
               </FadeIn>
             } />

@@ -7,6 +7,32 @@ const ACCESS_CODE = 'HelloMiami';
 const STORAGE_KEY = 'hl_access_granted';
 
 /**
+ * SOFT-LAUNCH MASTER SWITCH.
+ *
+ * - `false` → the Coming Soon gate is active for humans (default state for
+ *   pre-launch). Bots, admins-with-localStorage and ?access=... still get
+ *   through.
+ * - `true`  → the gate is bypassed for EVERYONE. Use this on the day Miami
+ *   goes live publicly. Keeping it as a single flipped constant means we
+ *   can revert in one PR if anything blows up.
+ *
+ * Override via env: set `VITE_LAUNCH_MODE=open` to flip without a code
+ * change (helpful for the same build serving staging vs prod).
+ */
+const LAUNCH_MODE_OPEN = false;
+
+function readLaunchMode(): boolean {
+  if (LAUNCH_MODE_OPEN) return true;
+  try {
+    // @ts-ignore — import.meta only exists in module context
+    const v = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LAUNCH_MODE) || '';
+    return String(v).toLowerCase() === 'open';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Known indexer / generative-AI crawlers. Matched case-insensitively
  * against navigator.userAgent. We let them through the Coming Soon
  * gate so Hey Lola is properly discoverable on Google, ChatGPT,
@@ -44,6 +70,7 @@ function isCrawler(): boolean {
 
 export function hasAccess(): boolean {
   if (typeof window === 'undefined') return false;
+  if (readLaunchMode()) return true;
   if (isCrawler()) return true;
   try {
     return window.localStorage.getItem(STORAGE_KEY) === '1';

@@ -36,7 +36,7 @@ export const VenuePage: React.FC<VenuePageProps> = ({ slug, onClaim, onBackToApp
         setPlace(found);
         setNotFound(!found);
       } catch (err) {
-        console.error('VenuePage load error', err);
+        console.warn('VenuePage load error', err);
         if (!active) return;
         setPlace(fromSeed ? ({ ...fromSeed, id: `seed-${slug}` } as Place) : null);
         setNotFound(!fromSeed);

@@ -124,8 +124,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
             }
           } catch (err) {
             // Reading other users may be forbidden by Firestore rules — keep
-            // a silent fallback but log so we notice unexpected errors.
-            console.debug('Could not read owner profile', uid, err);
+            // a silent fallback. Don't log the uid — it leaks identity in
+            // shared browser sessions / screenshots.
+            void err;
           }
         }));
         setPetOwners(owners);

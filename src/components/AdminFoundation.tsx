@@ -55,6 +55,15 @@ export const AdminFoundation: React.FC = () => {
     return () => { unsubDogs(); unsubInterests(); };
   }, []);
 
+  // Auto-clear the "Copied" affordance after a short delay. Effect-based
+  // (not a setTimeout inside the click handler) so the timer is tied to
+  // component lifecycle — no setState-on-unmounted-component risk.
+  useEffect(() => {
+    if (!copiedDogId) return;
+    const t = window.setTimeout(() => setCopiedDogId(null), 2200);
+    return () => window.clearTimeout(t);
+  }, [copiedDogId]);
+
   const toggleVisibility = async (dog: FoundationDog) => {
     const next = dog.passport.visibility === 'public' ? 'hidden' : 'public';
     await updateDoc(doc(db, 'foundationDogs', dog.id), {
@@ -68,7 +77,6 @@ export const AdminFoundation: React.FC = () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedDogId(dog.id);
-      window.setTimeout(() => setCopiedDogId((cur) => (cur === dog.id ? null : cur)), 2200);
     } catch {
       window.prompt('Copy this passport link', url);
     }

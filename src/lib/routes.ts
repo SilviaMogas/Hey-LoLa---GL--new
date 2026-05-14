@@ -23,6 +23,8 @@ export const paths = {
   partners: '/partners',
   partnerOnboarding: '/partners/onboard',
   perks: '/perks',
+  /** Founder Deals dashboard — stealth / admin-only until promoted live. */
+  founderDeals: '/perks/deals',
   foundation: '/foundation',
   foundationDogs: '/foundation/dogs',
   foundationDogPassport: '/foundation/dogs/:slug',

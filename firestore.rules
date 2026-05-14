@@ -226,6 +226,15 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ────────── FEATURE FLAGS ──────────
+    // Runtime overrides for the code-baseline feature registry in
+    // src/lib/featureFlags.ts. Doc id = feature key. Everyone can read so
+    // the useFeature hook works for every viewer; only admins can write.
+    match /feature_flags/{flagKey} {
+      allow read:   if true;
+      allow write:  if isAdmin();
+    }
+
     // ────────── CITY REQUESTS ──────────
     match /city_requests/{requestId} {
       allow create: if request.resource.data.email is string

@@ -381,7 +381,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
       />
 
       <header className="border-b border-stone-100 bg-stone-50/60">
-        <div className="max-w-3xl mx-auto px-5 sm:px-6 py-6 space-y-4">
+        <div className="max-w-3xl mx-auto px-5 sm:px-6 py-3 sm:py-4 space-y-2.5">
           <button
             type="button"
             onClick={goBack}
@@ -389,17 +389,17 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           >
             <ChevronLeft size={12} /> {stepIndex === 0 ? 'Back to Partners' : 'Previous'}
           </button>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Partner Network</span>
-            <h1 id="partner-onboarding-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
+            <h1 id="partner-onboarding-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none">
               Become a Hey Lola Partner<span className="text-brand-orange">.</span>
             </h1>
-            <p className="text-sm sm:text-base text-stone-500 font-light italic leading-snug max-w-xl">
+            <p className="text-xs sm:text-sm text-stone-500 font-light italic leading-snug max-w-xl">
               Five short steps. Free to join. Verification takes up to 5 business days.
             </p>
           </div>
 
-          <div aria-label="Onboarding progress" className="space-y-2 pt-2">
+          <div aria-label="Onboarding progress" className="space-y-1.5 pt-1">
             <div className="h-1 bg-stone-200 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-charcoal"
@@ -422,7 +422,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-5 sm:px-6 py-10">
+      <div className="max-w-3xl mx-auto px-5 sm:px-6 py-5 sm:py-6">
         <AnimatePresence mode="wait">
           <motion.section
             key={step}
@@ -430,7 +430,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3 }}
-            className="space-y-8"
+            className="space-y-5"
           >
             {step === 'Type' && <TypeStep form={form} update={update} />}
             {step === 'Business' && (
@@ -446,7 +446,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
 
         {error && <p className="text-sm text-red-500 mt-6 text-center">{error}</p>}
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-10 border-t border-stone-100 mt-10">
+        <div className="flex flex-col sm:flex-row gap-3 pt-5 border-t border-stone-100 mt-6">
           <button
             type="button"
             onClick={goBack}
@@ -486,10 +486,10 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
 
 function SectionLabel({ icon, kicker, title, description }: { icon: React.ReactNode; kicker: string; title: string; description?: string }) {
   return (
-    <header className="space-y-2">
+    <header className="space-y-1">
       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">{icon}{kicker}</span>
-      <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none">{title}<span className="text-brand-orange">.</span></h2>
-      {description && <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-xl">{description}</p>}
+      <h2 className="text-xl sm:text-2xl font-serif italic tracking-tight leading-tight">{title}<span className="text-brand-orange">.</span></h2>
+      {description && <p className="text-xs sm:text-sm text-stone-500 font-light italic leading-snug max-w-xl">{description}</p>}
     </header>
   );
 }
@@ -517,7 +517,7 @@ function TypeStep({ form, update }: { form: FormState; update: <K extends keyof 
         title="How do dog parents meet you?"
         description="A single partner can be in both directories. Pick the option that matches your business."
       />
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {PARTNER_TYPE_OPTIONS.map((opt) => {
           const active = form.partnerType === opt.id;
           const Icon = opt.icon;
@@ -526,16 +526,16 @@ function TypeStep({ form, update }: { form: FormState; update: <K extends keyof 
               key={opt.id}
               type="button"
               onClick={() => update('partnerType', opt.id)}
-              className={`w-full rounded-2xl border p-5 text-left flex items-start gap-4 transition-all ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
+              className={`rounded-2xl border p-4 text-left flex items-start gap-3 transition-all ${active ? 'border-charcoal bg-stone-50' : 'border-stone-200 hover:border-charcoal'}`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${active ? 'bg-charcoal text-white' : 'bg-stone-50 text-stone-400'}`}>
-                <Icon size={16} />
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${active ? 'bg-charcoal text-white' : 'bg-stone-50 text-stone-400'}`}>
+                <Icon size={15} />
               </div>
-              <div className="space-y-1 flex-1">
-                <p className="text-sm sm:text-base font-serif italic text-charcoal">{opt.label}</p>
-                <p className="text-[12px] text-stone-500 font-light italic leading-relaxed">{opt.description}</p>
+              <div className="space-y-0.5 flex-1 min-w-0">
+                <p className="text-sm font-serif italic text-charcoal">{opt.label}</p>
+                <p className="text-[11px] text-stone-500 font-light italic leading-snug">{opt.description}</p>
               </div>
-              {active && <Check size={14} className="text-charcoal mt-2 shrink-0" />}
+              {active && <Check size={13} className="text-charcoal mt-1 shrink-0" />}
             </button>
           );
         })}

@@ -367,8 +367,8 @@ function LeadCard({
         )}
         {lead.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
-            {lead.tags.slice(0, 3).map((t) => (
-              <span key={t} className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-full">
+            {lead.tags.slice(0, 3).map((t, i) => (
+              <span key={`${lead.id}-tag-${i}-${t}`} className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-full">
                 {t}
               </span>
             ))}
@@ -475,8 +475,8 @@ function LeadDetail({
               <Tag size={11} /> Tags
             </h4>
             <div className="flex flex-wrap gap-1.5">
-              {lead.tags.map((t) => (
-                <span key={t} className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500 bg-stone-100 px-2 py-1 rounded-full">{t}</span>
+              {lead.tags.map((t, i) => (
+                <span key={`${i}-${t}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500 bg-stone-100 px-2 py-1 rounded-full">{t}</span>
               ))}
             </div>
           </section>

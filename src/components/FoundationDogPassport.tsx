@@ -439,7 +439,7 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
     setSubmitting(true);
     setError(null);
     try {
-      await addDoc(collection(db, 'foundation_interests'), {
+      const docRef = await addDoc(collection(db, 'foundation_interests'), {
         dogId: dog.id,
         dogName: dog.name,
         dogSlug: dog.passport.slug,
@@ -451,6 +451,13 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
         status: 'new',
         createdAt: serverTimestamp(),
       });
+      // Fire-and-forget notification (confirmation to submitter + admin alert).
+      // The endpoint re-reads the doc via the Admin SDK so it cannot be spoofed.
+      void fetch('/api/notify-foundation-interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interestId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       setSubmitted(true);
     } catch (err) {
       setError((err as Error).message || 'Something went wrong. Please try again.');

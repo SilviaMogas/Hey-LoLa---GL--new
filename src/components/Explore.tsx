@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -547,11 +548,35 @@ function PlaceDetail({ spot, onClose, isFavorite, onToggleFavorite }: { spot: Pl
 
 export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequireAuth, initialCity, canSave = true, onRequireUpgrade }) => {
   const { t } = useTranslation();
-  const startCity: CityId = (initialCity ?? null) ?? 'barcelona';
+  const [searchParams, setSearchParams] = useSearchParams();
+  // ?city=miami|nyc|barcelona overrides the geo-detected city. Used by the
+  // homepage CityCard links so a click lands on the right city.
+  const cityParam = (() => {
+    const raw = searchParams.get('city')?.toLowerCase();
+    if (raw === 'miami' || raw === 'nyc' || raw === 'barcelona') return raw;
+    if (raw === 'newyork' || raw === 'new-york') return 'nyc';
+    return null;
+  })();
+  const startCity: CityId = cityParam ?? (initialCity ?? null) ?? 'barcelona';
   const [activeCity, setActiveCity] = useState<CityId>(startCity);
   const [activeContinent, setActiveContinent] = useState<ContinentId>(CITIES[startCity].continent);
-  const [hasSyncedDetected, setHasSyncedDetected] = useState(false);
-  const personaliseHeadline = initialCity !== null;
+  const [hasSyncedDetected, setHasSyncedDetected] = useState<boolean>(cityParam !== null);
+  const personaliseHeadline = initialCity !== null || cityParam !== null;
+
+  // If the URL ?city= changes (e.g. user clicks a different CityCard while
+  // already on /explore), reflect it in state and then strip the param so
+  // it does not stay sticky after manual city changes.
+  useEffect(() => {
+    if (!cityParam) return;
+    if (cityParam !== activeCity) {
+      setActiveCity(cityParam);
+      setActiveContinent(CITIES[cityParam].continent);
+    }
+    setHasSyncedDetected(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('city');
+    setSearchParams(next, { replace: true });
+  }, [cityParam, activeCity, searchParams, setSearchParams]);
 
   // The detected city arrives asynchronously (IP geolocation lookup), so we
   // promote it once it lands — but only if the user hasn't manually picked a

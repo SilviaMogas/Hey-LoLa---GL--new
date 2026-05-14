@@ -34,6 +34,7 @@ export const paths = {
   brandBookCharacter: '/brand-book/:name',
   concierges: '/concierges',
   media: '/media',
+  whatsOn: '/whats-on',
 
   /* ── Public app surfaces (no auth) ─────────────────────────────── */
   explore: '/explore',

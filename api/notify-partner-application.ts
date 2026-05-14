@@ -62,5 +62,43 @@ export default async function handler(req: any, res: any) {
     applicationId,
   });
 
+  // Auto-ingest into the CRM pipeline. Best-effort — if it fails we still
+  // return success so the email step is not reverted. The CRM doc is
+  // created via the Admin SDK (bypasses Firestore rules).
+  try {
+    const tier: 1 | 2 | 3 = (() => {
+      const cat = String(data.category || '').toLowerCase();
+      if (cat === 'hotel' || cat === 'restaurant' || cat === 'beach_club') return 1;
+      if (cat === 'service' || cat === 'vet' || cat === 'groomer') return 2;
+      return 3;
+    })();
+    const now = Date.now();
+    await db.collection('crm_leads').add({
+      businessName: String(data.businessName || 'New partner'),
+      category: typeof data.category === 'string' ? data.category : 'other',
+      tier,
+      city: typeof data.city === 'string' ? data.city : '',
+      contact: {
+        name: typeof data.contactName === 'string' ? data.contactName : '',
+        role: typeof data.contactRole === 'string' ? data.contactRole : '',
+        email: String(data.email || ''),
+        phone: typeof data.phone === 'string' ? data.phone : '',
+        ig: '',
+      },
+      source: 'inbound_form',
+      stage: 'replied',
+      tags: ['self_onboarding'],
+      notes: [],
+      linkedPartnerApplicationId: applicationId,
+      createdAt: now,
+      updatedAt: now,
+      lastTouchAt: now,
+      lastTouchBy: 'self_onboarding',
+      createdBy: 'self_onboarding',
+    });
+  } catch (err) {
+    console.warn('notify-partner-application: CRM auto-ingest failed', err);
+  }
+
   res.status(200).json({ success: true, ...result });
 }

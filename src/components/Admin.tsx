@@ -9,6 +9,7 @@ import { OnboardingAdminPanel } from './OnboardingAdminPanel';
 import { VenueOutreachPanel } from './VenueOutreachPanel';
 import { AdminFoundation } from './AdminFoundation';
 import { AdminFeatureFlags } from './AdminFeatureFlags';
+import { AdminCRM } from './AdminCRM';
 
 const PLACE_CATEGORIES: PlaceCategory[] = [
   'Parks / green areas',
@@ -36,7 +37,7 @@ const PLACE_STATUSES: PlaceStatus[] = [
 const RESERVATION_PROVIDERS: ReservationProvider[] = ['None', 'OpenTable', 'Direct', 'Other'];
 const BOOKING_STATUSES: BookingStatus[] = ['Not available', 'Pending', 'Active'];
 
-type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'features';
+type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'features' | 'crm';
 
 interface AdminProps {
   onBack?: () => void;
@@ -420,6 +421,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
               {([
                 ['places', 'Places'],
                 ['foundation', 'Foundation'],
+                ['crm', 'CRM'],
                 ['outreach', 'Outreach'],
                 ['claims', stats.pendingClaims > 0 ? `Claims (${stats.pendingClaims})` : 'Claims'],
                 ['applications', 'Partner Apps'],
@@ -599,6 +601,8 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         <AdminFoundation />
       ) : activeTab === 'features' ? (
         <AdminFeatureFlags />
+      ) : activeTab === 'crm' ? (
+        <AdminCRM />
       ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          {loading ? (

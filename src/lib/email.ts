@@ -151,6 +151,235 @@ function renderInviteHtml({ venueName, claimUrl }: SendVenueInviteOptions): stri
   </div>`;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Transactional notifications (Partner applications, Foundation interests)
+ *
+ * Each flow sends TWO emails: a confirmation to the submitter (trust signal)
+ * and a heads-up to the team inbox so we can act quickly. Both no-op
+ * gracefully when RESEND_API_KEY is missing.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const ADMIN_INBOX = 'hey@heylola.co';
+
+interface SendResult {
+  delivered: boolean;
+  skippedReason?: string;
+}
+
+async function sendOne(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+): Promise<SendResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { delivered: false, skippedReason: 'RESEND_API_KEY is not configured.' };
+  const resend = new Resend(apiKey);
+  const from = process.env.EMAIL_FROM || DEFAULT_FROM;
+  const replyTo = process.env.EMAIL_REPLY_TO || DEFAULT_REPLY_TO;
+  try {
+    const r = await resend.emails.send({
+      from, to, subject, html, text, replyTo,
+      headers: {
+        'List-Unsubscribe': `<mailto:${replyTo}?subject=Unsubscribe>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    });
+    if ((r as any)?.error) {
+      return { delivered: false, skippedReason: `Provider error: ${(r as any).error.message || 'unknown'}` };
+    }
+    return { delivered: true };
+  } catch (err: any) {
+    return { delivered: false, skippedReason: `Provider error: ${err?.message || 'unknown'}` };
+  }
+}
+
+export interface PartnerApplicationEmailOpts {
+  businessName: string;
+  contactName: string;
+  contactEmail: string;
+  contactRole?: string;
+  city?: string;
+  applicationId: string;
+}
+
+export async function sendPartnerApplicationEmails(opts: PartnerApplicationEmailOpts): Promise<{ confirmation: SendResult; alert: SendResult }> {
+  const confirmation = await sendOne(
+    opts.contactEmail,
+    'Welcome to the Hey Lola Partner Network',
+    renderPartnerConfirmationHtml(opts),
+    renderPartnerConfirmationText(opts),
+  );
+  const alert = await sendOne(
+    ADMIN_INBOX,
+    `New partner application — ${opts.businessName}`,
+    renderPartnerAdminHtml(opts),
+    renderPartnerAdminText(opts),
+  );
+  return { confirmation, alert };
+}
+
+function renderPartnerConfirmationText(o: PartnerApplicationEmailOpts): string {
+  return [
+    `Hi ${o.contactName},`,
+    '',
+    `Thank you for applying to join the Hey Lola Partner Network as ${o.businessName}.`,
+    '',
+    'Our team will review your application within 1–2 business days. Once verified,',
+    "your venue will be featured on Hey Lola's curated city guide and your perk",
+    'will be available to our members.',
+    '',
+    'In the meantime, you can reach us anytime at hey@heylola.co.',
+    '',
+    'Welcome aboard,',
+    'The Hey Lola Team',
+  ].join('\n');
+}
+
+function renderPartnerConfirmationHtml(o: PartnerApplicationEmailOpts): string {
+  const safeName = escapeHtml(o.contactName);
+  const safeBiz = escapeHtml(o.businessName);
+  return `
+  <div style="font-family: -apple-system, system-ui, sans-serif; color: #1a1a1a; max-width: 560px; margin: 0 auto; padding: 32px 16px; line-height: 1.55;">
+    <h1 style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 24px;">Welcome to the Hey Lola Partner Network</h1>
+    <p>Hi <strong>${safeName}</strong>,</p>
+    <p>Thank you for applying to join the Hey Lola Partner Network as <strong>${safeBiz}</strong>.</p>
+    <p>Our team will review your application within <strong>1&ndash;2 business days</strong>. Once verified, your venue will be featured on Hey Lola's curated city guide and your perk will be available to our members.</p>
+    <p>In the meantime, reach us anytime at <a href="mailto:hey@heylola.co" style="color:#1a1a1a;">hey@heylola.co</a>.</p>
+    <p style="margin-top: 32px;">Welcome aboard,<br/>The Hey Lola Team</p>
+  </div>`;
+}
+
+function renderPartnerAdminText(o: PartnerApplicationEmailOpts): string {
+  return [
+    'New partner application received.',
+    '',
+    `Business: ${o.businessName}`,
+    `Contact: ${o.contactName}${o.contactRole ? ` (${o.contactRole})` : ''}`,
+    `Email: ${o.contactEmail}`,
+    o.city ? `City: ${o.city}` : '',
+    `Application ID: ${o.applicationId}`,
+    '',
+    'Open the Admin -> Partner Apps tab to review.',
+  ].filter(Boolean).join('\n');
+}
+
+function renderPartnerAdminHtml(o: PartnerApplicationEmailOpts): string {
+  return `
+  <div style="font-family: -apple-system, system-ui, sans-serif; color: #1a1a1a; max-width: 560px; margin: 0 auto; padding: 24px 16px; line-height: 1.6;">
+    <h2 style="font-size: 18px; font-weight: 700; margin: 0 0 16px;">New partner application</h2>
+    <table style="width:100%; font-size: 14px; border-collapse: collapse;">
+      <tr><td style="padding: 6px 0; color: #777; width: 130px;">Business</td><td><strong>${escapeHtml(o.businessName)}</strong></td></tr>
+      <tr><td style="padding: 6px 0; color: #777;">Contact</td><td>${escapeHtml(o.contactName)}${o.contactRole ? ` <span style="color:#777;">(${escapeHtml(o.contactRole)})</span>` : ''}</td></tr>
+      <tr><td style="padding: 6px 0; color: #777;">Email</td><td><a href="mailto:${escapeHtml(o.contactEmail)}" style="color:#1a1a1a;">${escapeHtml(o.contactEmail)}</a></td></tr>
+      ${o.city ? `<tr><td style="padding: 6px 0; color: #777;">City</td><td>${escapeHtml(o.city)}</td></tr>` : ''}
+      <tr><td style="padding: 6px 0; color: #777;">App ID</td><td style="font-family: ui-monospace, monospace; font-size: 12px;">${escapeHtml(o.applicationId)}</td></tr>
+    </table>
+    <p style="margin-top: 20px; font-size: 13px; color: #555;">Open Admin &rarr; Partner Apps to review.</p>
+  </div>`;
+}
+
+export interface FoundationInterestEmailOpts {
+  dogName: string;
+  dogSlug: string;
+  partnerName?: string;
+  contactName?: string;
+  contactEmail: string;
+  contactPhone?: string;
+  message?: string;
+  interestId: string;
+  passportUrl: string;
+}
+
+export async function sendFoundationInterestEmails(opts: FoundationInterestEmailOpts): Promise<{ confirmation: SendResult; alert: SendResult }> {
+  const confirmation = await sendOne(
+    opts.contactEmail,
+    `Hey Lola — Your interest in ${opts.dogName}`,
+    renderInterestConfirmationHtml(opts),
+    renderInterestConfirmationText(opts),
+  );
+  const alert = await sendOne(
+    ADMIN_INBOX,
+    `New interest — ${opts.dogName}${opts.partnerName ? ` (${opts.partnerName})` : ''}`,
+    renderInterestAdminHtml(opts),
+    renderInterestAdminText(opts),
+  );
+  return { confirmation, alert };
+}
+
+function renderInterestConfirmationText(o: FoundationInterestEmailOpts): string {
+  const name = o.contactName || 'there';
+  return [
+    `Hi ${name},`,
+    '',
+    `Thank you for expressing interest in ${o.dogName} through the Hey Lola Foundation.`,
+    '',
+    'This is not an adoption application — it is a warm signal that connects you',
+    `with ${o.partnerName || 'the rescue partner'} so they can guide you through their official process.`,
+    '',
+    'We have forwarded your details to the partner and to our team. Someone will',
+    'be in touch within 1–2 business days.',
+    '',
+    'In the meantime, you can review the full passport here:',
+    o.passportUrl,
+    '',
+    'With love,',
+    'The Hey Lola Foundation',
+  ].join('\n');
+}
+
+function renderInterestConfirmationHtml(o: FoundationInterestEmailOpts): string {
+  const name = escapeHtml(o.contactName || 'there');
+  const dog = escapeHtml(o.dogName);
+  const partner = escapeHtml(o.partnerName || 'the rescue partner');
+  const url = escapeHtml(o.passportUrl);
+  return `
+  <div style="font-family: -apple-system, system-ui, sans-serif; color: #1a1a1a; max-width: 560px; margin: 0 auto; padding: 32px 16px; line-height: 1.55;">
+    <h1 style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 24px;">Thank you for showing interest in ${dog}</h1>
+    <p>Hi <strong>${name}</strong>,</p>
+    <p>Thank you for expressing interest in <strong>${dog}</strong> through the Hey Lola Foundation.</p>
+    <p style="background:#FDF6EE; padding: 16px 18px; border-radius: 12px; font-size: 14px; color: #6B4421;">
+      <strong>This is not an adoption application.</strong> It is a warm signal that connects you with ${partner} so they can guide you through their official process.
+    </p>
+    <p>We have forwarded your details to the partner and to our team. Someone will be in touch within <strong>1&ndash;2 business days</strong>.</p>
+    <p style="margin: 28px 0;">
+      <a href="${url}" style="display: inline-block; background: #C4622D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 999px; font-weight: 700; font-size: 14px; letter-spacing: 0.02em;">View ${dog}'s passport &rarr;</a>
+    </p>
+    <p style="margin-top: 32px;">With love,<br/>The Hey Lola Foundation</p>
+  </div>`;
+}
+
+function renderInterestAdminText(o: FoundationInterestEmailOpts): string {
+  return [
+    'New rescue passport interest.',
+    '',
+    `Dog: ${o.dogName}${o.partnerName ? ` (${o.partnerName})` : ''}`,
+    `Passport: ${o.passportUrl}`,
+    '',
+    `From: ${o.contactName || '—'} <${o.contactEmail}>`,
+    o.contactPhone ? `Phone: ${o.contactPhone}` : '',
+    '',
+    o.message ? `Message:\n${o.message}` : '',
+    '',
+    `Interest ID: ${o.interestId}`,
+  ].filter(Boolean).join('\n');
+}
+
+function renderInterestAdminHtml(o: FoundationInterestEmailOpts): string {
+  return `
+  <div style="font-family: -apple-system, system-ui, sans-serif; color: #1a1a1a; max-width: 560px; margin: 0 auto; padding: 24px 16px; line-height: 1.6;">
+    <h2 style="font-size: 18px; font-weight: 700; margin: 0 0 16px;">New rescue passport interest</h2>
+    <table style="width:100%; font-size: 14px; border-collapse: collapse;">
+      <tr><td style="padding: 6px 0; color: #777; width: 110px;">Dog</td><td><strong>${escapeHtml(o.dogName)}</strong>${o.partnerName ? ` <span style="color:#777;">(${escapeHtml(o.partnerName)})</span>` : ''}</td></tr>
+      <tr><td style="padding: 6px 0; color: #777;">Passport</td><td><a href="${escapeHtml(o.passportUrl)}" style="color:#1a1a1a;">${escapeHtml(o.passportUrl)}</a></td></tr>
+      <tr><td style="padding: 6px 0; color: #777;">From</td><td>${escapeHtml(o.contactName || '—')} &lt;<a href="mailto:${escapeHtml(o.contactEmail)}" style="color:#1a1a1a;">${escapeHtml(o.contactEmail)}</a>&gt;</td></tr>
+      ${o.contactPhone ? `<tr><td style="padding: 6px 0; color: #777;">Phone</td><td>${escapeHtml(o.contactPhone)}</td></tr>` : ''}
+    </table>
+    ${o.message ? `<p style="background:#F7F5F2; padding: 14px 16px; border-radius: 10px; font-size: 14px; margin-top: 16px; font-style: italic; color: #444;">"${escapeHtml(o.message)}"</p>` : ''}
+    <p style="margin-top: 20px; font-size: 13px; color: #555;">Open Admin &rarr; Foundation &rarr; Interest inbox to manage status.</p>
+  </div>`;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')

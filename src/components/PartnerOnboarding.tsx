@@ -284,7 +284,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     setSubmitting(true);
     setError(null);
     try {
-      await addDoc(collection(db, 'partner_applications'), {
+      const docRef = await addDoc(collection(db, 'partner_applications'), {
         partnerType: form.partnerType,
         businessName: form.businessName,
         categories: form.categories,
@@ -316,6 +316,13 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
         status: 'pending',
         createdAt: serverTimestamp(),
       });
+      // Fire-and-forget notification (confirmation to applicant + admin alert).
+      // The endpoint re-reads the doc via the Admin SDK so it cannot be spoofed.
+      void fetch('/api/notify-partner-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       setSubmitted(true);
       onComplete?.();
     } catch (err) {

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Mail, Download, Newspaper, Quote, Building2, MapPin, Calendar } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
-import { CONCIERGES, conciergePose } from '../data/concierges';
+import { CONCIERGES } from '../data/concierges';
+import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO } from '../lib/seo';
 
 const MEDIA_BREADCRUMBS = [
@@ -194,16 +195,18 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
             {CONCIERGES.map((c) => (
               <a
                 key={c.id}
-                href={conciergePose(c.id, 1)}
+                href={c.imageUrl}
                 download={`heylola-concierge-${c.id}.png`}
                 className={`group rounded-2xl ${c.color} border border-stone-100 p-3 flex flex-col items-center hover:shadow-xl transition-shadow duration-500`}
                 aria-label={`Download ${c.name} concierge image`}
               >
                 <div className="aspect-square w-full flex items-center justify-center">
-                  <img
-                    src={conciergePose(c.id, 1)}
+                  <ConciergeAvatar
+                    id={c.id}
+                    poseIndex={1}
+                    rounded="none"
                     alt={`${c.name} — ${c.role}`}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                    className="w-full h-full !object-contain group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <p className="text-sm font-serif italic mt-2">{c.name}</p>

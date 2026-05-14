@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
-import { CONCIERGES, POSE_COUNT, conciergePose, type ConciergeProfile } from '../data/concierges';
+import { CONCIERGES, POSE_COUNT, type ConciergeProfile } from '../data/concierges';
+import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO, personSchema } from '../lib/seo';
 
 const BRAND_BOOK_BREADCRUMBS = [
@@ -211,10 +212,12 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
               aria-label={`Open ${c.name}'s page — ${c.role}`}
             >
               <div className={`aspect-square ${c.color} flex items-center justify-center relative overflow-hidden`}>
-                <img
-                  src={conciergePose(c.id, 1)}
+                <ConciergeAvatar
+                  id={c.id}
+                  poseIndex={1}
+                  rounded="none"
                   alt={`${c.name} — ${c.role}`}
-                  className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700"
+                  className="relative z-10 w-full h-full !object-contain group-hover:scale-110 transition-all duration-700"
                 />
               </div>
               <div className="p-6 space-y-2">
@@ -402,10 +405,12 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
                 transition={{ delay: pose * 0.04 }}
                 className="aspect-square flex items-center justify-center"
               >
-                <img
-                  src={conciergePose(c.id, pose)}
+                <ConciergeAvatar
+                  id={c.id}
+                  poseIndex={pose}
+                  rounded="none"
                   alt={`${c.name} pose ${pose}`}
-                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full !object-contain hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
               </motion.div>
@@ -448,7 +453,7 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
               aria-label={`Open ${o.name}'s page`}
             >
               <div className={`aspect-square w-full rounded-[1.5rem] ${o.color} border border-stone-100 overflow-hidden flex items-center justify-center transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1`}>
-                <img src={conciergePose(o.id, 1)} alt={o.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                <ConciergeAvatar id={o.id} poseIndex={1} rounded="none" alt={o.name} className="w-full h-full !object-contain group-hover:scale-110 transition-transform duration-500" />
               </div>
               <p className="text-sm font-serif italic">{o.name}</p>
             </button>

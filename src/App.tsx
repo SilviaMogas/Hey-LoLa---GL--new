@@ -709,13 +709,13 @@ function ClaimListingRoute() {
 function BrandBookCharacterRoute() {
   const navigate = useNavigate();
   const { name } = useParams<{ name: string }>();
-  const allowed = new Set(['lola', 'bruno', 'milo', 'nuc']);
+  const allowed = new Set(['lola', 'taco', 'nuc', 'toby']);
   const id = (name || '').toLowerCase();
   if (!allowed.has(id)) return <Navigate to={paths.brandBook} replace />;
   return (
     <FadeIn>
       <BrandBookCharacter
-        id={id as 'lola' | 'bruno' | 'milo' | 'nuc'}
+        id={id as 'lola' | 'taco' | 'nuc' | 'toby'}
         onBack={() => navigate(paths.brandBook)}
         onOther={(other) => navigate(buildPath.brandBookCharacter(other))}
       />

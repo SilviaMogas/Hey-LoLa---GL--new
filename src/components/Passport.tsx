@@ -113,9 +113,9 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-8">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-4">
-        <div className="space-y-2">
+    <div className="max-w-6xl mx-auto space-y-4 animate-fade-in pb-4">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 px-4">
+        <div className="space-y-1">
           <div className="flex items-center gap-3">
             <span className="text-[10px] text-stone-300 font-black uppercase tracking-[0.2em]">Health & Vaccination Registry</span>
             {(() => {
@@ -131,7 +131,7 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
               );
             })()}
           </div>
-          <h2 className="text-4xl md:text-4xl font-black tracking-tighter">Wellness Hub</h2>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter leading-tight">Wellness Hub</h2>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
            {isEditing ? (
@@ -169,8 +169,8 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 md:gap-8 px-4">
-        <div className="lg:col-span-1 space-y-8 flex flex-col items-center lg:items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 px-4">
+        <div className="lg:col-span-1 space-y-4 flex flex-col items-center lg:items-start">
           <motion.div 
             layout
             className="bg-white p-2 rounded-3xl shadow-2xl border border-stone-100 relative w-full max-w-[280px]"
@@ -210,7 +210,7 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
              </div>
           </motion.div>
           
-          <div className="w-full p-8 bg-muted rounded-2xl border border-stone-50 space-y-4">
+          <div className="w-full p-5 bg-muted rounded-2xl border border-stone-50 space-y-4">
              <div className="flex items-center gap-3 text-charcoal mb-4">
                 <ShieldCheck size={20} />
                 <h4 className="font-black uppercase text-[10px] tracking-widest">Identification</h4>
@@ -250,9 +250,9 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
           </div>
         </div>
 
-        <div className="lg:col-span-3 space-y-8">
-           <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-xl border border-stone-50 space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-8">
+        <div className="lg:col-span-3 space-y-4">
+           <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-xl border border-stone-50 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
                  <DetailItem 
                     icon={<PawPrint />} 
                     label="Breed" 
@@ -336,7 +336,7 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
                  />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-stone-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-6 border-t border-stone-50">
                 {/* Emergency Contacts (editable) */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between text-charcoal">
@@ -525,7 +525,7 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-stone-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-6 border-t border-stone-50">
                  <div className="space-y-4">
                     <div className="flex items-center justify-between text-charcoal">
                        <div className="flex items-center gap-2">
@@ -691,7 +691,7 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
                  </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-stone-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-6 border-t border-stone-50">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sage">
                       <PawPrint size={16} />
@@ -740,14 +740,14 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
 
            {!isEditing && (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-muted p-8 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
+                <div className="bg-muted p-5 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
                    <div className="space-y-1">
                       <h4 className="font-bold text-charcoal">Update Papers</h4>
                       <p className="text-[10px] uppercase font-black tracking-widest text-stone-300">Scan medical records</p>
                    </div>
                    <ArrowUpIcon />
                 </div>
-                <div className="bg-muted p-8 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
+                <div className="bg-muted p-5 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
                    <div className="space-y-1">
                       <h4 className="font-bold text-charcoal">Add Companion</h4>
                       <p className="text-[10px] uppercase font-black tracking-widest text-stone-300">Travel with a new pet</p>

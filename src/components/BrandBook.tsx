@@ -300,15 +300,17 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
     : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10';
 
   return (
-    <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-charcoal' : 'border-stone-100'} p-8 flex flex-col items-center gap-6 aspect-[4/3] justify-center relative overflow-hidden`}>
-      <div ref={logoRef}>
-        <BrandLogo
-          size={variant.mark ? 'xl' : '3xl'}
-          variant={variant.textTone}
-          mark={variant.mark}
-        />
+    <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-charcoal' : 'border-stone-100'} flex flex-col aspect-[4/3] relative overflow-hidden`}>
+      <div className="flex-1 flex items-center justify-center p-8 min-h-0">
+        <div ref={logoRef}>
+          <BrandLogo
+            size={variant.mark ? 'xl' : '3xl'}
+            variant={variant.textTone}
+            mark={variant.mark}
+          />
+        </div>
       </div>
-      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1">
         <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
           {variant.label}
         </span>

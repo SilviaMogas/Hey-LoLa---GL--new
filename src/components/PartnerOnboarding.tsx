@@ -342,7 +342,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           </div>
           <span className="inline-block text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Partner Network</span>
           <h1 id="partner-success-heading" className="text-4xl sm:text-5xl font-serif italic tracking-tight leading-[0.95]">
-            We've got it<span className="text-brand-orange">.</span>
+            We've got it<span className="brand-dot" aria-hidden="true"></span>
           </h1>
           <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-md mx-auto">
             Thank you for joining the Hey Lola Partner Network. Our team will review your application within 5 business days and email you next steps.
@@ -392,7 +392,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Partner Network</span>
             <h1 id="partner-onboarding-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none">
-              Become a Hey Lola Partner<span className="text-brand-orange">.</span>
+              Become a Hey Lola Partner<span className="brand-dot" aria-hidden="true"></span>
             </h1>
             <p className="text-xs sm:text-sm text-stone-500 font-light italic leading-snug max-w-xl">
               Five short steps. Free to join. Verification takes up to 5 business days.
@@ -488,7 +488,7 @@ function SectionLabel({ icon, kicker, title, description }: { icon: React.ReactN
   return (
     <header className="space-y-1">
       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">{icon}{kicker}</span>
-      <h2 className="text-xl sm:text-2xl font-serif italic tracking-tight leading-tight">{title}<span className="text-brand-orange">.</span></h2>
+      <h2 className="text-xl sm:text-2xl font-serif italic tracking-tight leading-tight">{title}<span className="brand-dot" aria-hidden="true"></span></h2>
       {description && <p className="text-xs sm:text-sm text-stone-500 font-light italic leading-snug max-w-xl">{description}</p>}
     </header>
   );

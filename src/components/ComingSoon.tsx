@@ -134,7 +134,7 @@ export const ComingSoon: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => 
               Private Preview
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-charcoal">
-              Coming <span className="text-stone-300">soon</span><span className="text-brand-orange">.</span>
+              Coming <span className="text-stone-300">soon</span><span className="brand-dot" aria-hidden="true"></span>
             </h1>
             <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-md mx-auto">
               Your dog's lifestyle concierge is almost ready. We're putting the final touches before opening the doors.

@@ -72,7 +72,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           >
             <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">Brand Kit</span>
             <h1 id="brandbook-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white">
-              Hey Lola Brand Kit<span className="text-brand-orange">.</span>
+              Hey Lola Brand Kit<span className="brand-dot" aria-hidden="true"></span>
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
               Official brand assets and usage guidelines for Hey Lola — a boutique lifestyle concierge for dog parents.
@@ -86,7 +86,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Logo + Wordmark</span>
           <h2 id="logos-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            The HeyLola wordmark<span className="text-brand-orange">.</span>
+            The HeyLola wordmark<span className="brand-dot" aria-hidden="true"></span>
           </h2>
         </header>
 
@@ -110,7 +110,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           <header className="mb-8 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Color Palette</span>
             <h2 id="colors-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              A warm, editorial palette<span className="text-brand-orange">.</span>
+              A warm, editorial palette<span className="brand-dot" aria-hidden="true"></span>
             </h2>
           </header>
 
@@ -138,7 +138,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Typography</span>
           <h2 id="type-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            Two typefaces, one voice<span className="text-brand-orange">.</span>
+            Two typefaces, one voice<span className="brand-dot" aria-hidden="true"></span>
           </h2>
         </header>
 
@@ -169,7 +169,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           <header className="mb-8 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Usage Guidelines</span>
             <h2 id="usage-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              How to use the brand<span className="text-brand-orange">.</span>
+              How to use the brand<span className="brand-dot" aria-hidden="true"></span>
             </h2>
           </header>
 
@@ -193,7 +193,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
       <section id="concierges" aria-labelledby="concierges-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
         <header className="mb-10 space-y-2 max-w-2xl">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Concierges</span>
-          <h2 id="concierges-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four concierges<span className="text-brand-orange">.</span></h2>
+          <h2 id="concierges-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four concierges<span className="brand-dot" aria-hidden="true"></span></h2>
           <p className="text-sm text-stone-500 font-light italic leading-relaxed">
             Each concierge has a personality, a role and a full pose pack. Tap any face to open their dedicated page.
           </p>
@@ -389,7 +389,7 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
             className="text-center space-y-2 mb-10 sm:mb-14"
           >
             <h1 id={`concierge-${c.id}-heading`} className="text-6xl sm:text-7xl md:text-8xl font-serif italic tracking-tight leading-none">
-              {c.name}<span style={{ color: c.accent }}>.</span>
+              {c.name}<span className="brand-dot" aria-hidden="true" style={{ backgroundColor: c.accent }}></span>
             </h1>
             <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.5em] text-stone-400">
               {c.role}
@@ -443,7 +443,7 @@ export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBa
       <section className="py-12 px-5 sm:px-6 max-w-7xl mx-auto" aria-labelledby={`others-${c.id}-heading`}>
         <header className="text-center space-y-2 mb-8">
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The rest of the concierges</span>
-          <h2 id={`others-${c.id}-heading`} className="text-2xl sm:text-3xl font-serif italic tracking-tight">Meet the others<span className="text-brand-orange">.</span></h2>
+          <h2 id={`others-${c.id}-heading`} className="text-2xl sm:text-3xl font-serif italic tracking-tight">Meet the others<span className="brand-dot" aria-hidden="true"></span></h2>
         </header>
         <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">
           {others.map((o) => (

@@ -28,7 +28,7 @@ export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
       >
         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
         <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-          Boutique <span className="text-stone-300">membership tiers</span><span className="text-brand-orange">.</span>
+          Boutique <span className="text-stone-300">membership tiers</span><span className="brand-dot" aria-hidden="true"></span>
         </h2>
         <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">{description}</p>
       </motion.div>

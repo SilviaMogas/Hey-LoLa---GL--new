@@ -42,7 +42,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-black tracking-tight italic text-charcoal">
-              Something broke<span className="text-brand-orange">.</span>
+              Something broke<span className="brand-dot" aria-hidden="true"></span>
             </h1>
             <p className="text-sm text-stone-500 leading-relaxed">
               The page hit an unexpected error. We've logged it and are looking into it. Please try again.

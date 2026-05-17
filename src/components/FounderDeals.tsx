@@ -51,7 +51,7 @@ export const FounderDeals: React.FC<FounderDealsProps> = ({ onBack }) => {
             </span>
             <h1 id="deals-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9]">
               Verified deals.<br />
-              <span className="text-white/40">Negotiated by Hey Lola<span className="text-brand-orange">.</span></span>
+              <span className="text-white/40">Negotiated by Hey Lola<span className="brand-dot" aria-hidden="true"></span></span>
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
               Concierge-curated discounts and perks from partners we trust. Every deal is reviewed and negotiated by the Hey Lola team — no affiliate noise, no expired offers.

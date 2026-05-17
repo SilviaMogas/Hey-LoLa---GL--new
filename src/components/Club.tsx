@@ -90,7 +90,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
             <div className="space-y-1.5">
               <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">Membership</span>
               <h1 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.95] text-white">
-                Hey Lola <span className="text-white/30">Club</span><span className="text-brand-orange">.</span>
+                Hey Lola <span className="text-white/30">Club</span><span className="brand-dot" aria-hidden="true"></span>
               </h1>
             </div>
             <p className="text-sm md:text-base text-stone-400 font-light italic leading-snug max-w-md">
@@ -129,7 +129,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">FAQ</span>
-            <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight">Common questions<span className="text-brand-orange">.</span></h2>
+            <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight">Common questions<span className="brand-dot" aria-hidden="true"></span></h2>
           </div>
           {[
             { q: 'What is Hey Lola?', a: 'Hey Lola is a boutique lifestyle concierge for dog parents. It helps you organise your dog\'s essentials, discover trusted dog-friendly places, and access curated local perks.' },
@@ -158,7 +158,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
           <div className="relative z-10 space-y-4">
             <span className="text-white/40 font-black uppercase tracking-[0.5em] text-[10px]">Join the founding circle</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif italic tracking-tight text-white leading-[0.9]">
-              Start your journey<span className="text-brand-orange">.</span>
+              Start your journey<span className="brand-dot" aria-hidden="true"></span>
             </h2>
             <p className="text-stone-400 font-light italic text-base max-w-md mx-auto">
               Free forever to start. Upgrade when you're ready.

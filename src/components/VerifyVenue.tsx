@@ -72,7 +72,7 @@ export const VerifyVenue: React.FC<VerifyVenueProps> = ({ placeId, token, onBack
           </div>
           <span className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300">Listing verification</span>
           <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.95] text-charcoal">
-            Verify your Hey&nbsp;Lola listing<span className="text-brand-orange">.</span>
+            Verify your Hey&nbsp;Lola listing<span className="brand-dot" aria-hidden="true"></span>
           </h1>
           <p className="text-base font-medium text-stone-400 italic leading-tight">
             Confirming this listing tells pet parents we've checked who's behind it. Click the button to verify; you can update your details from the dashboard later.

@@ -237,7 +237,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                </button>
                <h1 className="text-8xl font-black tracking-tighter leading-none">
                  {nameForWelcome ? (
-                   <>{t.onboarding.welcome} <span className="text-stone-300">{nameForWelcome}<span className="text-brand-orange">.</span></span></>
+                   <>{t.onboarding.welcome} <span className="text-stone-300">{nameForWelcome}<span className="brand-dot" aria-hidden="true"></span></span></>
                  ) : (
                    <>{t.onboarding.welcome}</>
                  )}
@@ -290,7 +290,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
           >
             <div className="space-y-4">
               <h1 className="text-8xl font-black tracking-tighter leading-none">
-                <span className="italic font-light text-stone-400">{t.dashboard.greeting}</span> <span className="text-charcoal">{userName?.split(" ")[0] || "there"}</span><span className="text-brand-orange">.</span>
+                <span className="italic font-light text-stone-400">{t.dashboard.greeting}</span> <span className="text-charcoal">{userName?.split(" ")[0] || "there"}</span><span className="brand-dot" aria-hidden="true"></span>
               </h1>
               <p className="text-2xl font-bold text-stone-400">{t.onboarding.petNameSubtitle}</p>
             </div>
@@ -357,7 +357,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
             </button>
 
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tighter">{t.onboarding.snapTitle} <span className="text-charcoal">{petData.name}</span><span className="text-brand-orange">.</span></h1>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tighter">{t.onboarding.snapTitle} <span className="text-charcoal">{petData.name}</span><span className="brand-dot" aria-hidden="true"></span></h1>
               <p className="text-sm font-bold text-stone-400">{t.onboarding.snapSubtitle}</p>
             </div>
 

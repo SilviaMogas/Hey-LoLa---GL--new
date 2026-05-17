@@ -301,7 +301,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         <div className="w-full max-w-[420px] space-y-3 animate-fade-in">
           <div className="space-y-0.5 text-center sm:text-left">
             <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-charcoal leading-tight">
-              {headline}<span className="text-brand-orange">.</span>
+              {headline}<span className="brand-dot" aria-hidden="true"></span>
             </h1>
             <p className="text-[12px] text-stone-500 leading-snug">{sub}</p>
           </div>

@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { CONCIERGES, conciergePose, type ConciergeProfile } from '../data/concierges';
+import { CONCIERGES, type ConciergeProfile } from '../data/concierges';
+import { ConciergeAvatar } from './ConciergeAvatar';
+import { EditorialPoster, type PosterTone } from './editorial/EditorialPoster';
 import { SEO } from '../lib/seo';
 
 interface ConciergesProps {
@@ -13,6 +15,10 @@ const BREADCRUMBS = [
   { name: 'Hey Lola', item: '/' },
   { name: 'The Concierges', item: '/concierges' },
 ];
+
+// Alternating editorial tones so the grid reads as a curated set,
+// not four identical cards. Matches the reference poster system.
+const TONES: PosterTone[] = ['light', 'dark', 'orange', 'light'];
 
 export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter }) => {
   return (
@@ -53,42 +59,50 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
         </div>
       </section>
 
-      {/* Fichas */}
+      {/* Editorial poster grid */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {CONCIERGES.map((c, i) => (
-            <motion.button
-              key={c.id}
-              type="button"
-              onClick={() => onOpenCharacter(c.id)}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06 }}
-              className="group relative flex flex-col h-full rounded-[2rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
-              aria-label={`Open ${c.name}'s page — ${c.role}`}
-            >
-              <div className={`aspect-square ${c.color} flex items-center justify-center relative overflow-hidden`}>
-                <img
-                  src={conciergePose(c.id, 1)}
-                  alt={`${c.name} — ${c.role}`}
-                  className="relative z-10 w-full h-full object-contain group-hover:scale-110 transition-all duration-700"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {CONCIERGES.map((c, i) => {
+            const tone = TONES[i % TONES.length];
+            return (
+              <motion.button
+                key={c.id}
+                type="button"
+                onClick={() => onOpenCharacter(c.id)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className="group text-left rounded-[1.75rem] overflow-hidden hover:-translate-y-1 transition-transform duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
+                aria-label={`Open ${c.name}'s page — ${c.role}`}
+              >
+                <EditorialPoster
+                  tone={tone}
+                  accent={c.accent}
+                  kicker={c.role}
+                  title={`Hey, ${c.name}`}
+                  caption={c.tagline}
+                  className="h-full"
+                  media={
+                    <div className={`absolute inset-0 ${tone === 'dark' ? 'bg-white/[0.04]' : tone === 'orange' ? 'bg-black/[0.04]' : c.color} flex items-center justify-center`}>
+                      <ConciergeAvatar
+                        id={c.id}
+                        poseIndex={1}
+                        rounded="none"
+                        alt={`${c.name} — ${c.role}`}
+                        className="w-full h-full !object-contain group-hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  }
+                  footer={
+                    <span className={`text-[11px] font-black uppercase tracking-[0.25em] inline-flex items-center gap-1 ${tone === 'dark' ? 'text-white' : 'text-charcoal'}`}>
+                      Open ficha <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  }
                 />
-              </div>
-              <div className="p-6 space-y-3">
-                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] ${c.badgeColor}`}>
-                  {c.role}
-                </span>
-                <h2 className="text-3xl font-serif italic tracking-tight leading-none">
-                  {c.name}<span style={{ color: c.accent }}>.</span>
-                </h2>
-                <p className="text-sm text-stone-500 font-light italic leading-snug">{c.tagline}</p>
-                <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-2">
-                  Open ficha <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
-                </p>
-              </div>
-            </motion.button>
-          ))}
+              </motion.button>
+            );
+          })}
         </div>
       </section>
 

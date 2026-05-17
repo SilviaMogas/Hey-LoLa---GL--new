@@ -133,7 +133,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           <div className="space-y-4 sm:space-y-6">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-stone-400">Curated City Guide</span>
             <h2 className="text-3xl md:text-4xl font-serif tracking-tight leading-[0.85] text-charcoal italic">
-              Trusted <br /><span className="text-stone-300">Cities<span className="text-brand-orange">.</span></span>
+              Trusted <br /><span className="text-stone-300">Cities<span className="brand-dot" aria-hidden="true" /></span>
             </h2>
             <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light leading-snug italic max-w-xl">
               {t.home.networkDesc}
@@ -204,7 +204,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           >
             <div className="space-y-5 sm:space-y-6 md:space-y-8 max-w-2xl border-l border-stone-200 pl-5 sm:pl-8 md:pl-10">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-stone-400">Editorial Hub</span>
-              <h2 className="text-3xl sm:text-3xl lg:text-3xl tracking-tight leading-[0.9] font-serif italic text-charcoal">Travel <span className="text-stone-300">Hub</span><span className="text-brand-orange">.</span></h2>
+              <h2 className="text-3xl sm:text-3xl lg:text-3xl tracking-tight leading-[0.9] font-serif italic text-charcoal">Travel <span className="text-stone-300">Hub</span><span className="brand-dot" aria-hidden="true" /></h2>
               <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light italic leading-snug">{t.blog.description}</p>
             </div>
             <button onClick={onBlog} className="luxury-button-secondary h-14 md:h-16 px-8 md:px-12 group self-start lg:self-auto">
@@ -289,7 +289,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               <div className="space-y-4">
                 <span className="text-white/40 font-black uppercase tracking-[0.5em] text-[10px]">Membership</span>
                 <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85] text-white">
-                  Hey Lola<br /><span className="text-white/30">Club</span><span className="text-brand-orange">.</span>
+                  Hey Lola<br /><span className="text-white/30">Club</span><span className="brand-dot" aria-hidden="true" />
                 </h2>
               </div>
               <p className="text-2xl sm:text-3xl text-white/70 font-light italic leading-snug">
@@ -374,7 +374,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             <div className="space-y-6 max-w-2xl border-l-2 border-stone-300 pl-8">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Creator Partners</span>
               <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight leading-none">
-                Built with local<br /><span className="text-stone-300">dog voices</span><span className="text-brand-orange">.</span>
+                Built with local<br /><span className="text-stone-300">dog voices</span><span className="brand-dot" aria-hidden="true" />
               </h2>
               <p className="text-xl text-stone-500 font-light italic leading-snug">
                 Our city guides are created with dog parents, bloggers and creators who know the best places before everyone else.
@@ -400,7 +400,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         <header className="text-center space-y-3 mb-10 max-w-2xl mx-auto">
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">How it works</span>
           <h2 id="how-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95]">
-            One trusted space, three audiences<span className="text-brand-orange">.</span>
+            One trusted space, three audiences<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-base text-stone-500 font-light italic leading-snug">
             Hey Lola helps modern dog parents organise their pet's life, foundations welcome new homes, and verified partners build trust with the community.
@@ -437,7 +437,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         <div className="max-w-7xl mx-auto space-y-16 relative z-10">
           <div className="text-center space-y-4">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The Concierges</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Concierges</span><span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Concierges</span><span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-lg text-stone-500 font-light italic max-w-xl mx-auto leading-relaxed">
               Your boutique guides to the dog-friendly world. Tap any concierge to open their brand book and the full pose pack.
             </p>
@@ -529,7 +529,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                     <PawPrint size={32} />
                   </div>
                   <div className="space-y-3">
-                    <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic text-charcoal leading-none">Insight Received<span className="text-brand-orange">.</span></h2>
+                    <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic text-charcoal leading-none">Insight Received<span className="brand-dot" aria-hidden="true" /></h2>
                     <p className="text-base sm:text-lg text-stone-400 font-light italic tracking-tight">{t.blog.insightDesc}</p>
                   </div>
                 </div>

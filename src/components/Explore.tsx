@@ -730,9 +730,9 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
         <div className="space-y-1">
            <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter leading-[0.95] max-w-xl text-charcoal">
              {personaliseHeadline ? (
-               <>Explore <span className="text-stone-300">{CITIES[activeCity].name}</span><span className="text-brand-orange">.</span></>
+               <>Explore <span className="text-stone-300">{CITIES[activeCity].name}</span><span className="brand-dot" aria-hidden="true" /></>
              ) : (
-               <>Start <span className="text-stone-300">exploring</span><span className="text-brand-orange">.</span></>
+               <>Start <span className="text-stone-300">exploring</span><span className="brand-dot" aria-hidden="true" /></>
              )}
            </h2>
            <p className="text-sm font-medium text-stone-400 max-w-md italic leading-snug">{t.explore.subtitle}</p>
@@ -1011,7 +1011,7 @@ function VoteSection({
       </div>
       <div className="space-y-3 max-w-2xl">
         <h3 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.95] text-charcoal">
-          {t.explore.voteSectionTitle}<span className="text-brand-orange">.</span>
+          {t.explore.voteSectionTitle}<span className="brand-dot" aria-hidden="true" />
         </h3>
         <p className="text-base font-medium text-stone-400 italic leading-tight">{t.explore.voteSectionDesc}</p>
       </div>

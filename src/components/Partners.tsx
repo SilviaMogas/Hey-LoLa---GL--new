@@ -41,7 +41,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black italic tracking-tighter leading-[0.9] text-charcoal">
               Join the boutique <br className="hidden md:block"/>
-              <span className="text-stone-300">dog-friendly network</span><span className="text-brand-orange">.</span>
+              <span className="text-stone-300">dog-friendly network</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-lg md:text-xl font-medium text-stone-500 max-w-xl italic leading-tight">
               Hey Lola connects curated businesses with modern dog parents looking for trusted places and better experiences.
@@ -86,7 +86,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
         <div className="max-w-5xl mx-auto">
           <div className="text-center space-y-4 mb-14 max-w-2xl mx-auto">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Partner Benefits</span>
-            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Verified partners. Better experiences<span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Verified partners. Better experiences<span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-sm text-stone-500 font-light italic leading-relaxed pt-1">
               Hey Lola works with dog-friendly businesses that want to welcome dog parents with trust, quality and simple member perks.
             </p>
@@ -121,7 +121,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
       <section className="px-5 sm:px-6 py-20 bg-stone-50">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">How it works<span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">How it works<span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-stone-500 font-light">A simple, self-service journey to become a Verified partner.</p>
           </div>
 
@@ -147,7 +147,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
       <section className="px-5 sm:px-6 py-20 bg-white border-y border-stone-100">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Partner Tiers<span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl font-serif italic tracking-tight text-charcoal">Partner Tiers<span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-stone-500 font-light">Explore how our partner network is structured.</p>
           </div>
           
@@ -222,7 +222,7 @@ export const Partners: React.FC<{ onBack: () => void; onJoinWaitlist: () => void
 
       <section className="px-5 sm:px-6 py-20 bg-charcoal text-white text-center">
         <div className="max-w-2xl mx-auto space-y-8">
-          <h2 className="text-3xl md:text-4xl font-serif italic tracking-tight">Launching first in Miami<span className="text-brand-orange">.</span></h2>
+          <h2 className="text-3xl md:text-4xl font-serif italic tracking-tight">Launching first in Miami<span className="brand-dot" aria-hidden="true" /></h2>
           <p className="text-stone-400 font-light italic text-lg">
             We are onboarding founding partners in Miami right now. Join early and get priority visibility during the launch. New York City and Barcelona coming next.
           </p>

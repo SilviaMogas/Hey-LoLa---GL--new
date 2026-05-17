@@ -44,7 +44,7 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
           >
             <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">The Concierges</span>
             <h1 id="concierges-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white">
-              Meet the four concierges<span className="text-brand-orange">.</span>
+              Meet the four concierges<span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
               Four illustrated concierges, four personalities. Together they shape how Hey Lola sounds, feels and moves. Tap any face to open their full page.
@@ -80,7 +80,7 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
                   {c.role}
                 </span>
                 <h2 className="text-3xl font-serif italic tracking-tight leading-none">
-                  {c.name}<span style={{ color: c.accent }}>.</span>
+                  {c.name}<span className="brand-dot" aria-hidden="true" style={{ backgroundColor: c.accent }} />
                 </h2>
                 <p className="text-sm text-stone-500 font-light italic leading-snug">{c.tagline}</p>
                 <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-2">

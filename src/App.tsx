@@ -648,7 +648,7 @@ function WelcomeHeader({ profile, email }: { profile?: any | null, email?: strin
   return (
     <div className="mb-4 sm:mb-6 animate-fade-in">
       <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-charcoal">
-        <span className="italic font-light text-stone-400">Hey</span> {firstName}<span className="text-brand-orange">.</span>
+        <span className="italic font-light text-stone-400">Hey</span> {firstName}<span className="brand-dot" aria-hidden="true" />
       </h1>
     </div>
   );

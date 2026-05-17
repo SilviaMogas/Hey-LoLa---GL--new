@@ -31,7 +31,7 @@ export const Blog: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <div className="text-right">
           <h1 className="text-2xl sm:text-3xl font-black italic tracking-tighter">
-            The <span className="text-stone-300">Journal</span><span className="text-brand-orange">.</span>
+            The <span className="text-stone-300">Journal</span><span className="brand-dot" aria-hidden="true" />
           </h1>
           <p className="text-[9px] font-black font-sans uppercase tracking-[0.4em] text-stone-300 mt-1">Stories & Guides</p>
         </div>

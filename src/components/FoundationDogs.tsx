@@ -74,7 +74,7 @@ export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPa
             </span>
             <h1 id="dogs-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9]">
               Dogs looking for<br />
-              <span className="text-white/30">the right home</span><span className="text-brand-orange">.</span>
+              <span className="text-white/30">the right home</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug">
               Every dog here is part of a verified rescue partner. Their passport lives on Hey Lola so animal lovers can discover them, express interest, and continue through the official adoption process.

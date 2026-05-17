@@ -64,7 +64,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif italic tracking-tight leading-[0.95] text-charcoal/90">
-                Built around the ones who give us unconditional love<span className="text-brand-orange">.</span>
+                Built around the ones who give us unconditional love<span className="brand-dot" aria-hidden="true" />
               </h1>
 
               <p className="text-base sm:text-lg text-stone-500 font-light italic leading-relaxed max-w-xl md:border-l md:border-stone-200 md:pl-6">
@@ -103,7 +103,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
 
             <blockquote className="py-6 my-2 border-y border-stone-200">
               <p className="text-2xl sm:text-3xl font-serif italic text-charcoal leading-snug">
-                When Lola came into my life, everything connected<span className="text-brand-orange">.</span>
+                When Lola came into my life, everything connected<span className="brand-dot" aria-hidden="true" />
               </p>
             </blockquote>
 
@@ -132,7 +132,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
           <div className="max-w-2xl mx-auto space-y-5 relative z-10">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">Our vision</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-tight">
-              A future that is more pet friendly, more connected, more community driven<span className="text-brand-orange">.</span>
+              A future that is more pet friendly, more connected, more community driven<span className="brand-dot" aria-hidden="true" />
             </h2>
             <div className="space-y-2 text-white/60 font-light italic text-base sm:text-lg leading-relaxed">
               <p>A future where traveling with animals feels natural.</p>
@@ -151,7 +151,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
           <div className="max-w-2xl mx-auto space-y-5">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">More than a platform</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-tight text-charcoal">
-              A cultural movement around modern pet lifestyles<span className="text-brand-orange">.</span>
+              A cultural movement around modern pet lifestyles<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-base sm:text-lg text-stone-600 font-light leading-relaxed">
               Hey Lola is not only about technology. A space where animals are welcomed. Where communities connect. Where brands, cities, hospitality, travel, wellness, and experiences become more inclusive for pets and their humans.
@@ -170,7 +170,7 @@ export const About: React.FC<AboutProps> = ({ onBack, onExplore }) => {
               To improve the lives of pets and the humans who love them — through trusted experiences, connected communities and more pet-inclusive ecosystems around the world.
             </h2>
             <p className="text-xl sm:text-2xl font-serif italic text-stone-500 pt-2">
-              Because they are not "just pets". They are family<span className="text-brand-orange">.</span>
+              Because they are not "just pets". They are family<span className="brand-dot" aria-hidden="true" />
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">

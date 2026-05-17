@@ -88,7 +88,7 @@ export const Footer: React.FC = () => {
             Still exploring?
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif italic tracking-tight leading-[0.95]">
-            Find your way in<span className="text-brand-orange">.</span>
+            Find your way in<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-sm sm:text-base text-white/50 font-light italic max-w-md mx-auto leading-snug">
             Two ways to step into the Hey Lola world — as a dog parent, or as a partner who welcomes them.
@@ -226,7 +226,7 @@ export const Footer: React.FC = () => {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 text-center sm:text-left">
           <BrandLogo size="2xl" className="opacity-30" />
           <p className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight text-stone-400/80">
-            Your dog's lifestyle concierge<span className="text-brand-orange/60">.</span>
+            Your dog's lifestyle concierge<span className="brand-dot brand-dot--soft" aria-hidden="true" />
           </p>
         </div>
       </div>

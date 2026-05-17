@@ -86,6 +86,22 @@
 }
 
 @layer components {
+  /* The Hey Lola brand full-stop. A square — matching the logo wordmark —
+     not the round typographic period. Sized in em so it scales with the
+     heading it follows. Default colour is brand orange; pass an inline
+     style background-color to tint it (e.g. per-concierge accent). */
+  .brand-dot {
+    display: inline-block;
+    width: 0.26em;
+    height: 0.26em;
+    margin-left: 0.06em;
+    background-color: var(--color-brand-orange);
+    vertical-align: baseline;
+  }
+  .brand-dot--soft {
+    opacity: 0.6;
+  }
+
   .vertical-text {
     writing-mode: vertical-rl;
     transform: rotate(180deg);

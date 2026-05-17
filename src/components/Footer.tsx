@@ -162,24 +162,25 @@ export const Footer: React.FC = () => {
                 {t.footer.tagline}
               </p>
               <div className="flex items-center gap-3 pt-2">
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-400 hover:text-charcoal hover:shadow-md transition-all duration-300"
-                  aria-label="Hey Lola on LinkedIn"
-                >
-                  <Linkedin size={15} />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-400 hover:text-charcoal hover:shadow-md transition-all duration-300"
-                  aria-label="Hey Lola on Instagram"
+                {/* Social profiles — disabled placeholders until the real
+                    handles exist. No dead links to generic homepages. */}
+                <span
+                  className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-300 cursor-not-allowed"
+                  title="Instagram — coming soon"
+                  aria-label="Hey Lola on Instagram — coming soon"
                 >
                   <Instagram size={15} />
-                </a>
+                </span>
+                <span
+                  className="w-10 h-10 rounded-full bg-white border border-stone-100 flex items-center justify-center text-stone-300 cursor-not-allowed"
+                  title="LinkedIn — coming soon"
+                  aria-label="Hey Lola on LinkedIn — coming soon"
+                >
+                  <Linkedin size={15} />
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-300 self-center">
+                  Soon
+                </span>
               </div>
             </div>
 

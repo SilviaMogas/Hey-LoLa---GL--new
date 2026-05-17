@@ -725,23 +725,23 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
   }, [isLoggedIn, clickCount, onRequireAuth]);
 
   return (
-    <div className="flex flex-col gap-6 md:gap-8 min-h-[calc(100vh-120px)] pb-8">
-      <div className="flex flex-col gap-8">
-        <div className="space-y-4">
-           <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.9] max-w-xl text-charcoal">
+    <div className="flex flex-col gap-4 min-h-[calc(100vh-120px)] pb-8">
+      <div className="flex flex-col gap-4">
+        <div className="space-y-1">
+           <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter leading-[0.95] max-w-xl text-charcoal">
              {personaliseHeadline ? (
                <>Explore <span className="text-stone-300">{CITIES[activeCity].name}</span><span className="text-brand-orange">.</span></>
              ) : (
                <>Start <span className="text-stone-300">exploring</span><span className="text-brand-orange">.</span></>
              )}
            </h2>
-           <p className="text-lg font-medium text-stone-400 max-w-md italic leading-tight">{t.explore.subtitle}</p>
+           <p className="text-sm font-medium text-stone-400 max-w-md italic leading-snug">{t.explore.subtitle}</p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           <p className="text-[8px] font-black uppercase tracking-widest text-stone-300 ml-1">{t.explore.switchDestination}</p>
 
-          <div className="flex gap-1.5 p-1.5 bg-white rounded-full border border-stone-line shadow-sm overflow-x-auto w-fit max-w-full">
+          <div className="flex gap-1.5 p-1 bg-white rounded-full border border-stone-line shadow-sm overflow-x-auto w-fit max-w-full">
             {CONTINENT_ORDER.map(cont => {
               const label = t.explore[`continent${cont.charAt(0).toUpperCase() + cont.slice(1)}` as keyof typeof t.explore] as string;
               const unlockedCount = (Object.values(CITIES) as { continent: ContinentId }[]).filter(c => c.continent === cont).length;
@@ -750,7 +750,7 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
                   key={cont}
                   onClick={() => setActiveContinent(cont)}
                   className={cn(
-                    "text-[9px] font-black uppercase tracking-widest px-5 py-3 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5",
+                    "text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5",
                     activeContinent === cont
                       ? 'bg-charcoal text-white shadow-md'
                       : 'text-stone-400 hover:text-charcoal hover:bg-stone-50'
@@ -768,7 +768,7 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
             })}
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-2 pb-4 w-full">
+          <div className="flex flex-wrap gap-2 pt-1 w-full">
             {(Object.entries(CITIES) as [CityId, typeof CITIES[CityId]][])
               .filter(([, city]) => city.continent === activeContinent)
               .map(([id, city]) => (
@@ -820,19 +820,19 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2.5">
         <div className="relative group max-w-2xl w-full">
           <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-stone-300 group-focus-within:text-charcoal transition-colors" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder={t.explore.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-stone-line h-12 md:h-14 pl-14 pr-8 rounded-full text-sm font-medium focus:outline-none focus:border-charcoal/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.02)]"
+            className="w-full bg-white border border-stone-line h-11 md:h-12 pl-14 pr-8 rounded-full text-sm font-medium focus:outline-none focus:border-charcoal/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.02)]"
           />
         </div>
-        
-        <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
+
+        <div className="flex gap-2 pb-1 overflow-x-auto scrollbar-hide">
           {CATEGORIES.map(cat => (
             <button 
               key={cat}

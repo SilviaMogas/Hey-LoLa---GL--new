@@ -209,7 +209,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
   const nameForWelcome = profile?.firstName || userName?.split(' ')[0];
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-6 min-h-screen flex flex-col justify-center">
+    <div className="max-w-4xl mx-auto py-6 px-6 min-h-screen flex flex-col justify-center">
       {/* Progress Indicator */}
       <div className="fixed top-0 left-0 w-full h-1 bg-stone-50 z-50">
         <motion.div 
@@ -231,7 +231,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
             <div className="space-y-6">
                <button 
                  onClick={prevStep}
-                 className="flex items-center justify-center gap-2 text-stone-300 hover:text-charcoal transition-colors font-black uppercase tracking-widest text-[10px] mx-auto mb-8 bg-stone-50 px-6 py-3 rounded-full border border-stone-100"
+                 className="flex items-center justify-center gap-2 text-stone-300 hover:text-charcoal transition-colors font-black uppercase tracking-widest text-[10px] mx-auto mb-4 bg-stone-50 px-6 py-3 rounded-full border border-stone-100"
                >
                  <ArrowLeft size={14} /> {t.onboarding.goBack}
                </button>
@@ -331,7 +331,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                 <button 
                   onClick={nextStep}
                   disabled={!petData.name || (petData.type === 'Other' && !otherPetType)}
-                  className="flex-1 bg-charcoal text-white py-6 rounded-3xl font-bold text-lg shadow-soft hover:shadow-xl transition-all disabled:opacity-20 flex items-center justify-center gap-3"
+                  className="flex-1 bg-charcoal text-white py-4 rounded-2xl font-bold text-base shadow-soft hover:shadow-xl transition-all disabled:opacity-20 flex items-center justify-center gap-3"
                 >
                   {t.onboarding.assemblePassport} <ArrowRight size={22} />
                 </button>
@@ -536,7 +536,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               <button onClick={prevStep} className="px-10 py-5 text-stone-400 font-bold">{t.onboarding.prev}</button>
               <button 
                 onClick={nextStep}
-                className="flex-1 bg-charcoal text-white py-6 rounded-3xl font-bold text-lg shadow-soft hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                className="flex-1 bg-charcoal text-white py-4 rounded-2xl font-bold text-base shadow-soft hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >
                 {t.onboarding.assembleMedical} <ArrowRight size={22} />
               </button>
@@ -700,7 +700,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               <button onClick={prevStep} className="px-10 py-5 text-stone-400 font-bold">{t.onboarding.prev}</button>
               <button 
                 onClick={nextStep}
-                className="flex-1 bg-charcoal text-white py-6 rounded-3xl font-bold text-lg shadow-soft hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                className="flex-1 bg-charcoal text-white py-4 rounded-2xl font-bold text-base shadow-soft hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >
                 {t.onboarding.origins} <ArrowRight size={22} />
               </button>

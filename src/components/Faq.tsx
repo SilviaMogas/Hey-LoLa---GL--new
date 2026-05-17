@@ -51,7 +51,7 @@ export const Faq: React.FC<FaqProps> = ({ onBack }) => {
           <div className="space-y-2">
             <span className="text-stone-400 font-black uppercase tracking-[0.4em] text-[10px]">FAQ</span>
             <h1 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.95] text-charcoal">
-              Common <span className="text-stone-300">questions</span><span className="brand-dot" aria-hidden="true"></span>
+              Common <span className="text-stone-300">questions</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-base text-stone-500 italic max-w-xl">
               How Hey Lola works for pet parents, founding members, creators, venues, vets and the trust that holds it all together.

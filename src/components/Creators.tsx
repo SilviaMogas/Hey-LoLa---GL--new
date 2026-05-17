@@ -90,7 +90,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
           >
             <span className="text-stone-400 font-black uppercase tracking-[0.4em] text-[10px]">Creator Partners</span>
             <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.9] text-charcoal">
-              Built with local <span className="text-stone-300">dog voices</span><span className="brand-dot" aria-hidden="true"></span>
+              Built with local <span className="text-stone-300">dog voices</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-lg font-medium text-stone-400 max-w-md italic leading-tight">
               If you know the best dog-friendly spots before anyone else, we want to work with you.
@@ -147,7 +147,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
           >
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Apply to join</span>
             <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight">
-              Creator application<span className="brand-dot" aria-hidden="true"></span>
+              Creator application<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-stone-400 font-light italic">
               Tell us about yourself and your dog. We review every application personally.
@@ -164,7 +164,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                 <PawPrint size={36} className="text-white" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-3xl font-serif italic text-charcoal">Application received<span className="brand-dot" aria-hidden="true"></span></h3>
+                <h3 className="text-3xl font-serif italic text-charcoal">Application received<span className="brand-dot" aria-hidden="true" /></h3>
                 <p className="text-stone-400 font-light italic">We'll review your application and get back to you within a few days.</p>
               </div>
             </motion.div>

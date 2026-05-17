@@ -134,7 +134,7 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                   <CheckCircle size={32} />
                 </div>
                 <h3 className="text-3xl font-serif italic tracking-tight text-charcoal">
-                  You're on the list<span className="brand-dot" aria-hidden="true"></span>
+                  You're on the list<span className="brand-dot" aria-hidden="true" />
                 </h3>
                 <p className="text-stone-500 font-light leading-relaxed">
                   {type === 'member'
@@ -155,7 +155,7 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                     {type === 'member' ? 'Early Access' : 'Partner Network'}
                   </span>
                   <h2 className="text-3xl font-serif italic tracking-tight text-charcoal mt-2">
-                    Join the waitlist<span className="brand-dot" aria-hidden="true"></span>
+                    Join the waitlist<span className="brand-dot" aria-hidden="true" />
                   </h2>
                 </div>
 

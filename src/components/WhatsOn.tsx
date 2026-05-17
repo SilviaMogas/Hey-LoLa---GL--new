@@ -89,7 +89,7 @@ export const WhatsOn: React.FC<WhatsOnProps> = ({ onBack }) => {
             </span>
             <h1 id="whats-on-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9]">
               Gatherings, stories,<br />
-              <span className="text-white/40">and a few firsts<span className="brand-dot" aria-hidden="true"></span></span>
+              <span className="text-white/40">and a few firsts<span className="brand-dot" aria-hidden="true" /></span>
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
               Where to find us, what we're announcing and the milestones along the way. Updated as the calendar fills in.
@@ -103,7 +103,7 @@ export const WhatsOn: React.FC<WhatsOnProps> = ({ onBack }) => {
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">01 — Upcoming</span>
           <h2 id="upcoming-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            Save the date<span className="brand-dot" aria-hidden="true"></span>
+            Save the date<span className="brand-dot" aria-hidden="true" />
           </h2>
         </header>
 
@@ -125,7 +125,7 @@ export const WhatsOn: React.FC<WhatsOnProps> = ({ onBack }) => {
             <header className="mb-8 space-y-2">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">02 — Past</span>
               <h2 id="past-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-                Where we have been<span className="brand-dot" aria-hidden="true"></span>
+                Where we have been<span className="brand-dot" aria-hidden="true" />
               </h2>
             </header>
             <div className="space-y-4">
@@ -143,7 +143,7 @@ export const WhatsOn: React.FC<WhatsOnProps> = ({ onBack }) => {
           <header className="mb-8 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">03 — Links</span>
             <h2 id="links-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              Worth a click<span className="brand-dot" aria-hidden="true"></span>
+              Worth a click<span className="brand-dot" aria-hidden="true" />
             </h2>
           </header>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -175,7 +175,7 @@ export const WhatsOn: React.FC<WhatsOnProps> = ({ onBack }) => {
               {HEY_LOLA_LINKS.length > 0 ? '04' : '03'} — Milestones
             </span>
             <h2 id="milestones-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              The Hey Lola timeline<span className="brand-dot" aria-hidden="true"></span>
+              The Hey Lola timeline<span className="brand-dot" aria-hidden="true" />
             </h2>
           </header>
           <ol className="relative border-l border-stone-200 ml-3 space-y-8">

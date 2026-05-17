@@ -125,7 +125,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
               className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white"
             >
               Better lives for dogs<br />
-              <span className="text-white/30">and their people</span><span className="brand-dot" aria-hidden="true"></span>
+              <span className="text-white/30">and their people</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug">
               The Hey Lola Foundation is the social impact arm of the boutique concierge — funded by members and partners, run with full transparency, dedicated to rescue, welfare, community and education in every Hey Lola city.
@@ -143,7 +143,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">01 — Mission</span>
           <h2 id="mission-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            A boutique concierge with a conscience<span className="brand-dot" aria-hidden="true"></span>
+            A boutique concierge with a conscience<span className="brand-dot" aria-hidden="true" />
           </h2>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
@@ -173,7 +173,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
           <header className="mb-10 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">02 — Pillars</span>
             <h2 id="pillars-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              Four pillars, one circle<span className="brand-dot" aria-hidden="true"></span>
+              Four pillars, one circle<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl">
               Every Foundation initiative belongs to one of these four pillars. We say no to anything that doesn't fit — to stay focused, to stay credible, to stay useful.
@@ -205,7 +205,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">03 — Member support</span>
           <h2 id="support-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            Funded by the community we serve<span className="brand-dot" aria-hidden="true"></span>
+            Funded by the community we serve<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl">
             We're designing the Foundation to be sustainable by default. No external begging rounds; the platform funds the mission.
@@ -230,7 +230,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
           <header className="mb-10 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">04 — Programs</span>
             <h2 id="programs-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              What we're putting on the calendar<span className="brand-dot" aria-hidden="true"></span>
+              What we're putting on the calendar<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl">
               The first programs we want to ship as the Foundation takes shape. Cities lead, partners host, members show up.
@@ -260,7 +260,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
                 <PawPrint size={11} /> Rescue dogs
               </span>
               <h2 id="dogs-entry-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-                Meet dogs looking for a home<span className="brand-dot" aria-hidden="true"></span>
+                Meet dogs looking for a home<span className="brand-dot" aria-hidden="true" />
               </h2>
               <p className="text-sm sm:text-base text-stone-500 font-light italic leading-relaxed max-w-md">
                 Every rescue partner dog has a Hey Lola passport — a warm, trustworthy way to discover them, express interest and continue through the official adoption process.
@@ -287,7 +287,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
               <Heart size={11} /> Get involved
             </span>
             <h2 id="involve-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              For shelters, partners and humans who love dogs<span className="brand-dot" aria-hidden="true"></span>
+              For shelters, partners and humans who love dogs<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-sm sm:text-base text-stone-400 font-light italic leading-relaxed max-w-md">
               Are you a shelter, a foster network, a wellness brand or a business that wants to host a Foundation activation? Let's talk.

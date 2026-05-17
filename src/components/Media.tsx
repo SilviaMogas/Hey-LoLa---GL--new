@@ -74,7 +74,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
               <Newspaper size={11} /> Media Kit
             </span>
             <h1 id="media-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-white">
-              Press &amp; Media<span className="brand-dot" aria-hidden="true"></span>
+              Press &amp; Media<span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-base sm:text-lg text-stone-300 font-light italic leading-snug max-w-2xl">
               Brand assets, press materials and contact for journalists, partners and lifestyle editors covering the launch of Hey Lola.
@@ -110,7 +110,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
       <section id="fact-sheet" aria-labelledby="facts-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto">
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">01 — Fact sheet</span>
-          <h2 id="facts-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The essentials<span className="brand-dot" aria-hidden="true"></span></h2>
+          <h2 id="facts-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The essentials<span className="brand-dot" aria-hidden="true" /></h2>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -138,7 +138,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
               <Quote size={11} /> 02 — Brand statement
             </span>
-            <h2 id="statement-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">For press use<span className="brand-dot" aria-hidden="true"></span></h2>
+            <h2 id="statement-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">For press use<span className="brand-dot" aria-hidden="true" /></h2>
           </header>
           <blockquote className="text-xl sm:text-2xl md:text-3xl font-serif italic text-charcoal/80 leading-snug max-w-3xl">
             "{BRAND_STATEMENT}"
@@ -151,7 +151,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
       <section id="downloads" aria-labelledby="downloads-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto">
         <header className="mb-8 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">03 — Downloads</span>
-          <h2 id="downloads-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Brand assets<span className="brand-dot" aria-hidden="true"></span></h2>
+          <h2 id="downloads-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Brand assets<span className="brand-dot" aria-hidden="true" /></h2>
           <p className="text-sm text-stone-500 font-light italic max-w-xl leading-relaxed">
             High-resolution logos and visuals ready for press use. For full brand guidelines see the <a href="/brand-book" className="underline decoration-stone-300 underline-offset-4 hover:decoration-charcoal">Brand Book</a>.
           </p>
@@ -185,7 +185,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
         <div className="max-w-5xl mx-auto">
           <header className="mb-8 space-y-2">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">04 — Concierges</span>
-            <h2 id="press-concierges" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four faces of Hey Lola<span className="brand-dot" aria-hidden="true"></span></h2>
+            <h2 id="press-concierges" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four faces of Hey Lola<span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-sm text-stone-500 font-light italic max-w-xl leading-relaxed">
               The illustrated concierges. Right-click any image to save the high-resolution PNG.
             </p>
@@ -221,7 +221,7 @@ export const Media: React.FC<MediaProps> = ({ onBack }) => {
       <section id="contact" aria-labelledby="contact-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-3xl mx-auto text-center space-y-5">
         <header className="space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">05 — Contact</span>
-          <h2 id="contact-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Press enquiries<span className="brand-dot" aria-hidden="true"></span></h2>
+          <h2 id="contact-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">Press enquiries<span className="brand-dot" aria-hidden="true" /></h2>
         </header>
         <p className="text-base text-stone-500 font-light italic leading-relaxed">
           We typically reply within two business days. For exclusives, interviews or partnership coverage, please mention the outlet and timeline.

@@ -222,7 +222,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.9] text-charcoal">
             Your concierge<br />
-            <span className="text-stone-300">community</span><span className="brand-dot" aria-hidden="true"></span>
+            <span className="text-stone-300">community</span><span className="brand-dot" aria-hidden="true" />
           </h1>
           <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-xl">
             Discover dog-friendly places, perks, and city packs with other dog parents.
@@ -249,7 +249,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
                 <Users size={11} /> Groups for you
               </span>
               <h2 id="groups-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
-                Find your pack<span className="brand-dot" aria-hidden="true"></span>
+                Find your pack<span className="brand-dot" aria-hidden="true" />
               </h2>
             </div>
             <button
@@ -322,7 +322,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
               <div className="flex items-baseline justify-between">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">This Week's Top Explorers</span>
-                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">Concierge leaderboard<span className="brand-dot" aria-hidden="true"></span></h2>
+                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">Concierge leaderboard<span className="brand-dot" aria-hidden="true" /></h2>
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Updates Sunday</span>
               </div>

@@ -45,7 +45,7 @@ export const FoundingMemberModal: React.FC<FoundingMemberModalProps> = ({ isOpen
                   <Sparkles size={12} /> Founding Member
                 </div>
                 <h2 className="text-3xl font-serif italic text-white tracking-tight">
-                  The <span className="text-white/40">Founding Circle</span><span className="brand-dot" aria-hidden="true"></span>
+                  The <span className="text-white/40">Founding Circle</span><span className="brand-dot" aria-hidden="true" />
                 </h2>
               </div>
             </div>

@@ -87,6 +87,7 @@ export const PUBLIC_PATHS: ReadonlyArray<keyof typeof paths> = [
   'explore',
   'community',
   'brandBook',
+  'whatsOn',
   'media',
 ];
 

@@ -78,7 +78,7 @@ export const EditorialPoster: React.FC<EditorialPosterProps> = ({
         )}
         <h3 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95]">
           {title}
-          <span style={{ color: accent }}>.</span>
+          <span className="brand-dot" aria-hidden="true" style={{ backgroundColor: accent }} />
         </h3>
         {caption && (
           <p className={`text-sm font-light italic leading-snug ${TONE_CAPTION[tone]}`}>

@@ -163,7 +163,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
                 </span>
               </div>
               <h1 id="passport-heading" className="text-5xl sm:text-6xl md:text-7xl font-serif italic tracking-tight leading-[0.9]">
-                Meet {dog.name}<span className="text-brand-orange">.</span>
+                Meet {dog.name}<span className="brand-dot" aria-hidden="true" />
               </h1>
               <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-md">
                 A rescue dog looking for the right home through Hey Lola Foundation.
@@ -197,7 +197,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
         <header className="mb-6 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Rescue Passport</span>
           <h2 id="identity-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-            Identity<span className="text-brand-orange">.</span>
+            Identity<span className="brand-dot" aria-hidden="true" />
           </h2>
         </header>
 
@@ -259,7 +259,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
               <ShieldCheck size={11} /> Trust layer
             </span>
             <h2 id="trust-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">
-              Verified by Hey Lola Foundation<span className="text-brand-orange">.</span>
+              Verified by Hey Lola Foundation<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl">
               This rescue passport helps animal lovers discover verified foundation partners and express interest in dogs looking for a home.
@@ -322,7 +322,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
               <Share2 size={11} /> Share {dog.name}'s passport
             </span>
             <h2 id="share-heading" className="text-xl sm:text-2xl font-serif italic tracking-tight">
-              Help {dog.name} find their home<span className="text-brand-orange">.</span>
+              Help {dog.name} find their home<span className="brand-dot" aria-hidden="true" />
             </h2>
           </header>
 
@@ -482,7 +482,7 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
             <div className="w-14 h-14 mx-auto rounded-full bg-[#EBF1E9] text-[#7A8C6E] flex items-center justify-center">
               <Check size={22} />
             </div>
-            <h3 className="text-2xl font-serif italic">We've passed it along<span className="text-brand-orange">.</span></h3>
+            <h3 className="text-2xl font-serif italic">We've passed it along<span className="brand-dot" aria-hidden="true" /></h3>
             <p className="text-sm text-stone-500 font-light italic leading-relaxed">
               We will help you continue through the official {dog.partnerName} adoption process. Final adoption decisions are managed directly by the rescue partner.
             </p>
@@ -560,7 +560,7 @@ function QrModal({ dog, url, onClose }: { dog: FoundationDog; url: string; onClo
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2 justify-center">
             <QrCode size={11} /> Passport QR
           </span>
-          <h3 className="text-2xl font-serif italic leading-tight">Scan to meet {dog.name}<span className="text-brand-orange">.</span></h3>
+          <h3 className="text-2xl font-serif italic leading-tight">Scan to meet {dog.name}<span className="brand-dot" aria-hidden="true" /></h3>
           <p className="text-xs text-stone-500 italic font-light max-w-xs mx-auto">
             Use this QR on flyers, stickers and adoption cards. Scanning opens {dog.name}'s rescue passport.
           </p>

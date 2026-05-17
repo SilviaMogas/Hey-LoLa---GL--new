@@ -75,7 +75,7 @@ export const Perks: React.FC<PerksProps> = ({ onBack, onJoinClub, onOpenVenue, o
             <ArrowRight size={11} />
           </div>
           <h1 id="perks-heading" className="text-4xl sm:text-5xl md:text-6xl font-serif italic tracking-tight leading-[0.95] text-charcoal">
-            Member perks that<br /> make the city <span className="text-stone-300">richer</span><span className="text-brand-orange">.</span>
+            Member perks that<br /> make the city <span className="text-stone-300">richer</span><span className="brand-dot" aria-hidden="true" />
           </h1>
           <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-2xl mx-auto">
             Discounts, welcome treats, priority booking and free shipping — curated by Hey Lola, redeemable in-app, interconnected with the city map.
@@ -140,7 +140,7 @@ export const Perks: React.FC<PerksProps> = ({ onBack, onJoinClub, onOpenVenue, o
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 inline-flex items-center gap-2">
               <MapPin size={11} /> Interconnected with the map
             </span>
-            <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">See perks on the map<span className="text-brand-orange">.</span></h2>
+            <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">See perks on the map<span className="brand-dot" aria-hidden="true" /></h2>
             <p className="text-sm sm:text-base text-stone-400 font-light italic leading-relaxed max-w-md">
               Every place-based perk pins to its location on Explore. Plan brunch, hotel stays and weekend walks around them.
             </p>

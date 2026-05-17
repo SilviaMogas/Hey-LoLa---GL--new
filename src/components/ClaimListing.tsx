@@ -178,7 +178,7 @@ export const ClaimListing: React.FC<ClaimListingProps> = ({ token, onBack }) => 
           </div>
           <span className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300">{t.explore.claimListingKicker}</span>
           <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.95] text-charcoal">
-            {t.explore.claimListingTitle}<span className="text-brand-orange">.</span>
+            {t.explore.claimListingTitle}<span className="brand-dot" aria-hidden="true" />
           </h1>
           <p className="text-base font-medium text-stone-400 italic leading-tight">{t.explore.claimListingSubtitle}</p>
         </header>

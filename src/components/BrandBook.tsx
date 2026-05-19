@@ -300,13 +300,14 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
     : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10';
 
   return (
-    <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-charcoal' : 'border-stone-100'} flex flex-col aspect-[4/3] relative overflow-hidden`}>
-      <div className="flex-1 flex items-center justify-center p-8 min-h-0">
-        <div ref={logoRef}>
+    <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-white/10' : 'border-stone-200'} flex flex-col aspect-[4/3] relative overflow-hidden`}>
+      <div className="flex-1 flex items-center justify-center px-6 py-10 sm:px-10 sm:py-12 min-h-0">
+        <div ref={logoRef} className="w-full flex items-center justify-center">
           <BrandLogo
-            size={variant.mark ? 'xl' : '3xl'}
+            size={variant.mark ? '6xl' : '7xl'}
             variant={variant.textTone}
             mark={variant.mark}
+            className="max-w-full"
           />
         </div>
       </div>

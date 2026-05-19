@@ -10,6 +10,22 @@ import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
 import { track } from '../lib/analytics';
 import { SUPPORTED_COUNTRIES, validateMicrochip, type SupportedCountry } from '../lib/microchip';
 import { applicableVaccines } from '../lib/vaccines';
+import { COUNTRIES } from '../data/countries';
+
+/** Common vaccines surfaced as dropdown options. Free text via "Other"
+ *  is still allowed for anything not in this short list. */
+const COMMON_VACCINES = [
+  'Rabies',
+  'DHPP (Distemper, Hepatitis, Parvovirus, Parainfluenza)',
+  'DHPPi — Polivalente',
+  'Leptospirosis',
+  'Bordetella (Kennel Cough)',
+  'Lyme disease',
+  'Canine Influenza',
+  'Coronavirus',
+  'Giardia',
+  'Other',
+];
 
 import { PetData, Activity } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
@@ -33,7 +49,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
     currentWeight: { value: '', date: new Date().toISOString().split('T')[0] },
     weightHistory: [],
     vaccinations: [],
-    vaxStatus: 'Verified',
+    vaxStatus: 'Pending',
     specialNeeds: '',
     photoURL: '',
     countryOfBirth: '',
@@ -478,26 +494,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                 <label className="text-[10px] uppercase font-black tracking-widest text-stone-300 flex items-center gap-2">
                   <MapPin size={14} /> Country of Origin
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {SUPPORTED_COUNTRIES.map((c) => {
-                    const selected = petData.countryOfBirth === c.code;
-                    return (
-                      <button
-                        key={c.code}
-                        type="button"
-                        onClick={() => setPetData({ ...petData, countryOfBirth: c.code })}
-                        className={cn(
-                          'flex items-center justify-center gap-2 p-3 rounded-2xl text-sm font-bold border transition-all',
-                          selected
-                            ? 'bg-charcoal text-white border-charcoal shadow-sm'
-                            : 'bg-muted text-charcoal border-transparent hover:border-stone-200',
-                        )}
-                      >
-                        <span className="text-base">{c.flag}</span> {c.label}
-                      </button>
-                    );
-                  })}
-                </div>
+                <select
+                  value={petData.countryOfBirth || ''}
+                  onChange={(e) => setPetData({ ...petData, countryOfBirth: e.target.value })}
+                  className="w-full bg-muted p-4 rounded-2xl text-sm font-bold border-none focus:ring-4 focus:ring-stone-100 outline-none appearance-none"
+                >
+                  <option value="">Select a country…</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-2">
@@ -624,19 +630,48 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                     </button>
                   </div>
                   
+                  <div className="text-[10px] leading-snug bg-amber-50 border border-amber-100 text-amber-800 rounded-2xl px-4 py-3 mb-2 flex items-start gap-2">
+                    <Info size={14} className="shrink-0 mt-0.5" />
+                    <span>
+                      All vaccines start as <strong>Pending</strong>. We&apos;ll complete the verification
+                      process directly with your vet — you just record what you know.
+                    </span>
+                  </div>
                   <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4">
                     {petData.vaccinations?.map((vax, idx) => (
-                      <div key={idx} className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-2xl relative">
-                        <input 
-                          placeholder={t.onboarding.vaccineName} 
-                          value={vax.name}
-                          onChange={(e) => {
-                            const newVax = [...petData.vaccinations!];
-                            newVax[idx].name = e.target.value;
-                            setPetData({...petData, vaccinations: newVax});
-                          }}
-                          className="bg-transparent border-none text-xs font-bold outline-none"
-                        />
+                      <div key={idx} className="p-4 bg-muted rounded-2xl relative space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <select
+                            value={COMMON_VACCINES.includes(vax.name) ? vax.name : (vax.name ? 'Other' : '')}
+                            onChange={(e) => {
+                              const newVax = [...petData.vaccinations!];
+                              newVax[idx].name = e.target.value === 'Other' ? '' : e.target.value;
+                              setPetData({...petData, vaccinations: newVax});
+                            }}
+                            className="flex-1 bg-transparent border-none text-xs font-bold outline-none cursor-pointer"
+                          >
+                            <option value="">{t.onboarding.vaccineName}</option>
+                            {COMMON_VACCINES.map((v) => (
+                              <option key={v} value={v}>{v}</option>
+                            ))}
+                          </select>
+                          <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 rounded-full px-2 py-1">
+                            <ShieldCheck size={9} /> Verification pending
+                          </span>
+                        </div>
+                        {(!COMMON_VACCINES.includes(vax.name) || vax.name === '') && (
+                          <input
+                            placeholder="Custom vaccine name…"
+                            value={vax.name}
+                            onChange={(e) => {
+                              const newVax = [...petData.vaccinations!];
+                              newVax[idx].name = e.target.value;
+                              setPetData({...petData, vaccinations: newVax});
+                            }}
+                            className="w-full bg-white border border-stone-100 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-stone-100"
+                          />
+                        )}
+                        <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <label className="text-[8px] uppercase font-black text-stone-300">{t.onboarding.date}</label>
                           <input 
@@ -663,7 +698,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                             className="bg-transparent border-none text-[10px] font-bold outline-none block w-full"
                           />
                         </div>
-                        <button 
+                        </div>
+                        <button
                           onClick={() => {
                             const newVax = petData.vaccinations!.filter((_, i) => i !== idx);
                             setPetData({...petData, vaccinations: newVax});
@@ -786,22 +822,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                           className="flex-1 bg-muted p-3 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-stone-200 outline-none"
                         >
                           <option value="">Select country…</option>
-                          {SUPPORTED_COUNTRIES.map((c) => (
+                          {COUNTRIES.map((c) => (
                             <option key={c.code} value={c.code}>{c.flag} {c.label}</option>
                           ))}
                         </select>
                         <input
-                          type="number"
-                          min={2000}
-                          max={new Date().getFullYear()}
-                          placeholder="Year"
+                          type="date"
+                          max={new Date().toISOString().split('T')[0]}
                           value={entry.date}
                           onChange={(e) => {
                             const next = [...(petData.travelHistory || [])];
                             next[idx] = { ...next[idx], date: e.target.value };
                             setPetData({ ...petData, travelHistory: next });
                           }}
-                          className="w-24 bg-muted p-3 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-stone-200 outline-none"
+                          className="w-40 bg-muted p-3 rounded-xl text-xs font-bold border-none focus:ring-2 focus:ring-stone-200 outline-none"
                         />
                         <button
                           type="button"
@@ -824,30 +858,52 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               {!!petData.travelHistory?.length && (
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">Where to next?</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {SUPPORTED_COUNTRIES.map((c) => {
-                      const selected = (petData.plannedDestinations || []).includes(c.code);
-                      return (
-                        <button
-                          key={c.code}
-                          type="button"
-                          onClick={() => {
-                            const list = petData.plannedDestinations || [];
-                            const next = selected ? list.filter((x) => x !== c.code) : [...list, c.code];
-                            setPetData({ ...petData, plannedDestinations: next });
-                          }}
-                          className={cn(
-                            'flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold border transition-all',
-                            selected
-                              ? 'bg-charcoal text-white border-charcoal shadow-sm'
-                              : 'bg-muted text-charcoal border-transparent hover:border-stone-200',
-                          )}
-                        >
-                          <span className="text-base">{c.flag}</span> {c.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      if (!code) return;
+                      const list = petData.plannedDestinations || [];
+                      if (!list.includes(code)) {
+                        setPetData({ ...petData, plannedDestinations: [...list, code] });
+                      }
+                    }}
+                    className="w-full bg-muted p-3 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-stone-200 outline-none"
+                  >
+                    <option value="">Add a country…</option>
+                    {COUNTRIES
+                      .filter((c) => !(petData.plannedDestinations || []).includes(c.code))
+                      .map((c) => (
+                        <option key={c.code} value={c.code}>{c.flag} {c.label}</option>
+                      ))}
+                  </select>
+                  {!!(petData.plannedDestinations || []).length && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {(petData.plannedDestinations || []).map((code) => {
+                        const c = COUNTRIES.find((x) => x.code === code);
+                        if (!c) return null;
+                        return (
+                          <span
+                            key={code}
+                            className="inline-flex items-center gap-1.5 bg-charcoal text-white text-xs font-bold rounded-full pl-3 pr-1.5 py-1"
+                          >
+                            <span className="text-sm">{c.flag}</span> {c.label}
+                            <button
+                              type="button"
+                              onClick={() => setPetData({
+                                ...petData,
+                                plannedDestinations: (petData.plannedDestinations || []).filter((x) => x !== code),
+                              })}
+                              className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                              aria-label={`Remove ${c.label}`}
+                            >
+                              <X size={10} />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -921,22 +977,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
             </div>
 
             <div className="grid grid-cols-1 gap-5 bg-white p-5 sm:p-7 rounded-3xl shadow-xl border border-stone-50">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <OnboardingInput
-                  icon={<MapPin size={14} />}
-                  label={t.onboarding.cityFrom}
-                  value={userProfileData.homeCity}
-                  onChange={(v) => setUserProfileData({...userProfileData, homeCity: v})}
-                  placeholder="e.g. Miami, Madrid, London..."
-                />
-                <OnboardingInput
-                  icon={<ArrowRight size={14} />}
-                  label={t.onboarding.travelTo}
-                  value={userProfileData.dreamDestination}
-                  onChange={(v) => setUserProfileData({...userProfileData, dreamDestination: v})}
-                  placeholder="e.g. Tokyo, Swiss Alps, Tulum..."
-                />
-              </div>
+              <OnboardingInput
+                icon={<ArrowRight size={14} />}
+                label={t.onboarding.travelTo}
+                value={userProfileData.dreamDestination}
+                onChange={(v) => setUserProfileData({...userProfileData, dreamDestination: v})}
+                placeholder="e.g. Tokyo, Swiss Alps, Tulum..."
+              />
 
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">What are you looking for here?</label>
@@ -964,7 +1011,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">Relationship status (optional)</label>
+                <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">Furry parent status</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'single', label: 'Single' },

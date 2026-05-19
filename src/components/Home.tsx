@@ -444,19 +444,41 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {CONCIERGES.map((c) => (
-              <DogConciergeCard
-                key={c.id}
-                name={c.name}
-                role={c.role}
-                personality={c.personality}
-                style={c.style}
-                vibe={c.vibe}
-                color={c.color}
-                badgeColor={c.badgeColor}
-                onClick={onConcierge ? () => onConcierge(c.id) : undefined}
-              />
-            ))}
+            {CONCIERGES.map((c) => {
+              if (!c.revealed) {
+                return (
+                  <article
+                    key={c.id}
+                    className="relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
+                    aria-label={`${c.name} — coming soon`}
+                  >
+                    <div className="aspect-square bg-stone-100/50 flex items-center justify-center relative">
+                      <span className="text-6xl font-serif italic text-stone-300 select-none">{c.name[0]}</span>
+                      <span className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-[0.3em] bg-white/85 backdrop-blur text-stone-500 rounded-full px-3 py-1.5 border border-stone-100">
+                        Coming soon
+                      </span>
+                    </div>
+                    <div className="p-8 space-y-3 text-center flex-1 flex flex-col justify-center">
+                      <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-stone-500 leading-none">{c.name}</h3>
+                      <p className="text-[12px] font-light text-stone-400 italic">We&apos;ll reveal them soon.</p>
+                    </div>
+                  </article>
+                );
+              }
+              return (
+                <DogConciergeCard
+                  key={c.id}
+                  name={c.name}
+                  role={c.role}
+                  personality={c.personality}
+                  style={c.style}
+                  vibe={c.vibe}
+                  color={c.color}
+                  badgeColor={c.badgeColor}
+                  onClick={onConcierge ? () => onConcierge(c.id) : undefined}
+                />
+              );
+            })}
           </div>
         </div>
         

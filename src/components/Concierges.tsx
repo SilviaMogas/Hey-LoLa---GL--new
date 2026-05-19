@@ -64,6 +64,29 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {CONCIERGES.map((c, i) => {
             const tone = TONES[i % TONES.length];
+            if (!c.revealed) {
+              return (
+                <article
+                  key={c.id}
+                  className="rounded-[1.75rem] overflow-hidden bg-stone-50 border border-dashed border-stone-200 flex flex-col"
+                  aria-label={`${c.name} — coming soon`}
+                >
+                  <div className="aspect-square bg-stone-100/50 flex items-center justify-center relative">
+                    <span className="text-6xl font-serif italic text-stone-300 select-none">{c.name[0]}</span>
+                    <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-[0.3em] bg-white/85 backdrop-blur text-stone-500 rounded-full px-2.5 py-1 border border-stone-100">
+                      Coming soon
+                    </span>
+                  </div>
+                  <div className="p-6 sm:p-7 flex-1 flex flex-col gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">Coming soon</span>
+                    <h3 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95] text-stone-500">
+                      Hey, {c.name}<span className="brand-dot brand-dot--soft" aria-hidden="true" />
+                    </h3>
+                    <p className="text-sm font-light italic text-stone-400 leading-snug">We&apos;ll reveal them soon.</p>
+                  </div>
+                </article>
+              );
+            }
             return (
               <motion.button
                 key={c.id}

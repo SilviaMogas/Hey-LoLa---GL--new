@@ -324,7 +324,9 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
             size="3xl"
             variant={variant.textTone}
             mark={variant.mark}
-            className={variant.mark ? 'h-auto w-[42%] max-w-[200px]' : 'h-auto w-[78%] max-w-[460px]'}
+            className={variant.mark
+              ? 'h-auto md:h-auto w-[55%] max-w-[240px]'
+              : 'h-auto md:h-auto w-[88%] max-w-[560px]'}
           />
         </div>
       </div>

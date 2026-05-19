@@ -30,11 +30,15 @@ interface LogoVariant {
   surface: string;
   textTone: 'black' | 'white' | 'orange';
   mark?: boolean;
+  /** Transparent-background preview — renders a checkerboard so the
+      transparency reads, and the SVG/PNG export keeps no fill. */
+  transparent?: boolean;
 }
 
 const LOGO_VARIANTS: LogoVariant[] = [
-  { label: 'On Light',  surface: 'bg-white',       textTone: 'black' },
-  { label: 'On Dark',   surface: 'bg-charcoal',    textTone: 'white' },
+  { label: 'On Light',     surface: 'bg-white',    textTone: 'black' },
+  { label: 'On Dark',      surface: 'bg-charcoal', textTone: 'white' },
+  { label: 'Transparent',  surface: 'bg-white',    textTone: 'black', transparent: true },
 ];
 
 const ICON_VARIANTS: LogoVariant[] = [
@@ -90,7 +94,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
           </h2>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           {LOGO_VARIANTS.map((v) => (
             <LogoTile key={v.label} variant={v} />
           ))}
@@ -301,17 +305,30 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
 
   return (
     <article className={`rounded-2xl ${variant.surface} border ${isDark ? 'border-white/10' : 'border-stone-200'} flex flex-col aspect-[4/3] relative overflow-hidden`}>
-      <div className="flex-1 flex items-center justify-center px-6 py-10 sm:px-10 sm:py-12 min-h-0">
+      {variant.transparent && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            backgroundColor: '#fff',
+            backgroundImage:
+              'linear-gradient(45deg,#eceae6 25%,transparent 25%),linear-gradient(-45deg,#eceae6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eceae6 75%),linear-gradient(-45deg,transparent 75%,#eceae6 75%)',
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0,0 10px,10px -10px,-10px 0',
+          }}
+        />
+      )}
+      <div className="flex-1 flex items-center justify-center px-6 py-6 sm:px-8 sm:py-8 min-h-0 relative z-10">
         <div ref={logoRef} className="w-full flex items-center justify-center">
           <BrandLogo
-            size={variant.mark ? '6xl' : '7xl'}
+            size="3xl"
             variant={variant.textTone}
             mark={variant.mark}
-            className="max-w-full"
+            className={variant.mark ? 'h-auto w-[42%] max-w-[200px]' : 'h-auto w-[78%] max-w-[460px]'}
           />
         </div>
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1">
+      <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1 relative z-10">
         <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
           {variant.label}
         </span>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { auth, db } from '../lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, limit } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
-import { Heart, MapPin, Calendar, Compass, ShieldCheck, ChevronRight, User as UserIcon, Plus, MessageSquare, Loader2, ArrowRight, Plane, Home as HomeIcon, Pencil, Check, Camera, Sparkles } from 'lucide-react';
+import { Heart, MapPin, Calendar, Compass, ShieldCheck, ChevronRight, User as UserIcon, Plus, MessageSquare, Loader2, ArrowRight, Plane, Home as HomeIcon, Pencil, Check, Camera, Sparkles, Coffee, Trees, Waves, Stethoscope, Bed, PartyPopper } from 'lucide-react';
 import { UserProfile, PetData, Place } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
 import { cn, compressDataUrl } from '../lib/utils';
@@ -412,6 +412,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
            </h1>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug">{t.dashboard.nextHeading}</p>
            <div className="pt-0.5"><StatusComposer userId={user?.uid} initialStatus={profile?.status} /></div>
+           <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug pt-2">What&apos;s on this week?</p>
+           <div className="pt-0.5">
+             <StatusComposer
+               userId={user?.uid}
+               initialStatus={profile?.whatsOn}
+               field="whatsOn"
+               presets={WHATS_ON_PRESETS}
+               placeholder="e.g. Park day, brunch, vet visit…"
+             />
+           </div>
          </div>
          {profile?.firstName && (
            <button
@@ -886,12 +896,31 @@ const STATUS_PRESETS = [
   { icon: Compass, label: 'Planning a trip' },
 ];
 
+const WHATS_ON_PRESETS = [
+  { icon: Trees, label: 'Park day' },
+  { icon: Coffee, label: 'Brunch' },
+  { icon: Waves, label: 'Beach day' },
+  { icon: Stethoscope, label: 'Vet visit' },
+  { icon: Bed, label: 'Hotel stay' },
+  { icon: PartyPopper, label: 'Dog event' },
+];
+
+interface StatusPreset {
+  icon: React.ComponentType<{ size?: number }>;
+  label: string;
+}
+
 interface StatusComposerProps {
   userId?: string;
   initialStatus?: string;
+  /** Firestore field on users/{uid} to write to. Defaults to 'status'. */
+  field?: 'status' | 'whatsOn';
+  /** Quick-pick chips shown above the free-text input. */
+  presets?: StatusPreset[];
+  placeholder?: string;
 }
 
-function StatusComposer({ userId, initialStatus }: StatusComposerProps) {
+function StatusComposer({ userId, initialStatus, field = 'status', presets = STATUS_PRESETS, placeholder }: StatusComposerProps) {
   const [status, setStatus] = useState(initialStatus || '');
   const [draft, setDraft] = useState(initialStatus || '');
   const [editing, setEditing] = useState(!initialStatus);
@@ -909,7 +938,7 @@ function StatusComposer({ userId, initialStatus }: StatusComposerProps) {
     try {
       await setDoc(
         doc(db, 'users', userId),
-        { status: trimmed, statusUpdatedAt: new Date().toISOString() },
+        { [field]: trimmed, [`${field}UpdatedAt`]: new Date().toISOString() },
         { merge: true }
       );
       setStatus(trimmed);
@@ -940,7 +969,7 @@ function StatusComposer({ userId, initialStatus }: StatusComposerProps) {
     <div className="space-y-3 pt-1">
       {/* Preset chips */}
       <div className="flex flex-wrap gap-2">
-        {STATUS_PRESETS.map(({ icon: Icon, label }) => (
+        {presets.map(({ icon: Icon, label }) => (
           <button
             key={label}
             type="button"
@@ -966,7 +995,7 @@ function StatusComposer({ userId, initialStatus }: StatusComposerProps) {
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, 80))}
-          placeholder="Or write your own answer…"
+          placeholder={placeholder ?? 'Or write your own answer…'}
           className="flex-1 h-10 px-4 rounded-full bg-white border border-stone-200 text-sm placeholder:text-stone-300 focus:outline-none focus:border-charcoal focus:ring-2 focus:ring-stone-100 transition-colors"
           maxLength={80}
         />

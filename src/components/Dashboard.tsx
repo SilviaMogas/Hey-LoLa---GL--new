@@ -245,7 +245,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
             className="bg-white border-4 border-stone-100 p-4 md:p-5 rounded-3xl shadow-xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-80 h-80 bg-stone-50/40 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="relative z-10 space-y-4">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              <div className="lg:col-span-2 space-y-4">
               <div className="space-y-1">
                 <span className="text-stone-400 text-[10px] font-black uppercase tracking-[0.4em]">Profile Curation</span>
                 <h3 className="text-2xl md:text-3xl font-serif italic tracking-tight text-charcoal/90 leading-tight">{t.dashboard.ownerDetails}</h3>
@@ -375,6 +376,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                   </button>
                 </div>
               </form>
+              </div>
+
+              <aside className="lg:col-span-1 space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Your dogs</h3>
+                {pets.length === 0 ? (
+                  <p className="text-xs text-stone-400 italic">No pets yet.</p>
+                ) : (
+                  pets.map((pet, i) => (
+                    <button
+                      key={pet.id || i}
+                      type="button"
+                      onClick={() => onOpenPet?.(i)}
+                      className="w-full text-left bg-stone-50 hover:bg-stone-100 border border-stone-100 rounded-2xl p-3 flex items-center gap-3 transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-stone-100 shrink-0 flex items-center justify-center text-lg">
+                        {pet.photoURL ? <img src={pet.photoURL} alt={pet.name} className="w-full h-full object-cover" /> : (pet.type === 'Cat' ? '🐈' : '🐕')}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-charcoal text-sm truncate">{pet.name || 'Unnamed'}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-stone-400 truncate">{pet.breed || pet.type}</p>
+                      </div>
+                    </button>
+                  ))
+                )}
+                <button
+                  type="button"
+                  onClick={onAddPet}
+                  className="w-full text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 hover:text-charcoal border-2 border-dashed border-stone-200 rounded-2xl py-3 transition-colors"
+                >
+                  + Add pet
+                </button>
+              </aside>
             </div>
           </motion.div>
         ) : !profile?.firstName && (

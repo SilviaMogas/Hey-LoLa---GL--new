@@ -210,17 +210,18 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
                 <article
                   key={c.id}
                   className="relative flex flex-col h-full rounded-[2rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
-                  aria-label={`${c.name} — coming soon`}
+                  aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
                 >
-                  <div className="aspect-square bg-stone-100/50 flex items-center justify-center relative">
-                    <span className="text-5xl font-serif italic text-stone-300 select-none">{c.name[0]}</span>
+                  <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
+                    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[9rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
+                    <span className="relative text-7xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
                     <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-[0.3em] bg-white/80 backdrop-blur text-stone-500 rounded-full px-2.5 py-1 border border-stone-100">
                       Coming soon
                     </span>
                   </div>
                   <div className="p-6 space-y-2">
-                    <h3 className="text-2xl font-serif italic tracking-tight leading-none text-stone-500">{c.name}</h3>
-                    <p className="text-[11px] text-stone-400 italic">We&apos;ll reveal them soon.</p>
+                    <h3 className="text-2xl font-serif italic tracking-tight leading-none text-stone-500">{c.name[0]}…</h3>
+                    <p className="text-[11px] text-stone-400 italic">A new face joining the pack soon.</p>
                   </div>
                 </article>
               );

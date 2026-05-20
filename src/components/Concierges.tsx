@@ -69,10 +69,11 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
                 <article
                   key={c.id}
                   className="rounded-[1.75rem] overflow-hidden bg-stone-50 border border-dashed border-stone-200 flex flex-col"
-                  aria-label={`${c.name} — coming soon`}
+                  aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
                 >
-                  <div className="aspect-square bg-stone-100/50 flex items-center justify-center relative">
-                    <span className="text-6xl font-serif italic text-stone-300 select-none">{c.name[0]}</span>
+                  <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
+                    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[10rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
+                    <span className="relative text-8xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
                     <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-[0.3em] bg-white/85 backdrop-blur text-stone-500 rounded-full px-2.5 py-1 border border-stone-100">
                       Coming soon
                     </span>
@@ -80,9 +81,9 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
                   <div className="p-6 sm:p-7 flex-1 flex flex-col gap-3">
                     <span className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">Coming soon</span>
                     <h3 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95] text-stone-500">
-                      Hey, {c.name}<span className="brand-dot brand-dot--soft" aria-hidden="true" />
+                      Hey, {c.name[0]}…<span className="brand-dot brand-dot--soft" aria-hidden="true" />
                     </h3>
-                    <p className="text-sm font-light italic text-stone-400 leading-snug">We&apos;ll reveal them soon.</p>
+                    <p className="text-sm font-light italic text-stone-400 leading-snug">A new face joining the pack soon.</p>
                   </div>
                 </article>
               );

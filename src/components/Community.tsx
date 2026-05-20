@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowRight,
@@ -11,11 +12,17 @@ import {
   Award,
   Users,
   Plus,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
 import { ScrollChips } from './ScrollChips';
+import { useAuth } from '../lib/useAuth';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { addDoc, collection, limit, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
+import { paths } from '../lib/routes';
 
 const COMMUNITY_BREADCRUMBS = [
   { name: 'Hey Lola', item: '/' },
@@ -62,6 +69,7 @@ const COMMUNITY_CARDS = [
     accent: 'bg-[#F5F8FA] text-[#5D848C]',
     cover: 'bg-gradient-to-br from-[#F5F8FA] via-[#FBFCFD] to-white',
     badge: 'Live in Miami',
+    href: `${paths.explore}?city=miami`,
   },
   {
     id: 'lolas-picks',
@@ -72,6 +80,7 @@ const COMMUNITY_CARDS = [
     accent: 'bg-[#FDF8F6] text-[#C4622D]',
     cover: 'bg-gradient-to-br from-[#FDF8F6] via-[#FCF6F2] to-white',
     badge: 'Updated weekly',
+    href: paths.explore,
   },
   {
     id: 'partner-perks',
@@ -82,6 +91,7 @@ const COMMUNITY_CARDS = [
     accent: 'bg-[#F7F9F5] text-[#6E8C5D]',
     cover: 'bg-gradient-to-br from-[#F7F9F5] via-[#FBFCF8] to-white',
     badge: 'Verified partners',
+    href: paths.perks,
   },
   {
     id: 'challenges',
@@ -92,6 +102,7 @@ const COMMUNITY_CARDS = [
     accent: 'bg-[#FAF9F5] text-[#8C845D]',
     cover: 'bg-gradient-to-br from-[#FAF9F5] via-[#FDFCF9] to-white',
     badge: 'Season 01',
+    href: paths.whatsOn,
   },
 ];
 
@@ -190,6 +201,42 @@ type CategoryFilter = 'all' | GroupCategory;
 export const Community: React.FC<CommunityProps> = (_props) => {
   const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
+  const { user, profile } = useAuth();
+  const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
+
+  // Subscribe to the 50 most recent community posts. Falls back to the
+  // seed feed silently when no real posts exist yet (so the page is
+  // never empty at launch).
+  useEffect(() => {
+    const q = query(
+      collection(db, 'posts'),
+      orderBy('createdAt', 'desc'),
+      limit(50),
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const posts = snap.docs.map((d): FeedPost => {
+        const data = d.data() as Record<string, unknown>;
+        const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+        return {
+          id: d.id,
+          author: String(data.author ?? 'Member'),
+          handle: String(data.handle ?? ''),
+          avatar: String(data.avatar ?? '/HeyLola.Lola.1.png'),
+          badge: data.badge as string | undefined,
+          city: data.city as string | undefined,
+          body: String(data.body ?? ''),
+          spot: data.spot as string | undefined,
+          likes: Number(data.likes ?? 0),
+          replies: Number(data.replies ?? 0),
+          timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
+        };
+      });
+      setLivePosts(posts);
+    }, (err) => handleFirestoreError(err, OperationType.READ, 'posts'));
+    return () => unsub();
+  }, []);
+
+  const feedPosts: FeedPost[] = livePosts.length > 0 ? livePosts : SEED_FEED;
   const sortedLeaderboard = useMemo(
     () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
     [],
@@ -228,11 +275,6 @@ export const Community: React.FC<CommunityProps> = (_props) => {
             Discover dog-friendly places, perks, and city packs with other dog parents.
           </p>
         </motion.header>
-
-        <div className="mb-6 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 bg-stone-50 border border-stone-100 px-3 py-1.5 rounded-full">
-          <span className="bg-brand-orange/10 text-brand-orange px-2 py-0.5 rounded-full">Preview</span>
-          The feed, leaderboard and groups below are sample content — they will fill with real members at launch.
-        </div>
 
         {/* Main cards grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-10 sm:pb-12">
@@ -306,7 +348,8 @@ export const Community: React.FC<CommunityProps> = (_props) => {
               transition={{ duration: 0.35 }}
               className="space-y-3 sm:space-y-4 pb-16"
             >
-              {SEED_FEED.map((post) => (
+              <PostComposer user={user} profile={profile} />
+              {feedPosts.map((post) => (
                 <FeedItem key={post.id} post={post} />
               ))}
             </motion.section>
@@ -349,13 +392,17 @@ interface CardData {
   accent: string;
   cover: string;
   badge?: string;
+  /** Where the card's CTA leads. Internal React-Router path. */
+  href: string;
 }
 
 function CommunityCard({ card, delay }: { card: CardData; delay: number }) {
   const Icon = card.icon;
+  const navigate = useNavigate();
   return (
     <motion.button
       type="button"
+      onClick={() => navigate(card.href)}
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -543,5 +590,107 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
         Join group <ArrowRight size={11} />
       </button>
     </motion.article>
+  );
+}
+
+/**
+ * Format a millisecond timestamp as a compact "Xm / Xh / Xd / Xw" tag.
+ * Mirrors the seed feed style so live + seeded posts read consistently.
+ */
+function formatTimeAgo(ms: number): string {
+  const diff = Date.now() - ms;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'now';
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}d`;
+  return `${Math.floor(d / 7)}w`;
+}
+
+interface PostComposerProps {
+  user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
+  profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
+}
+
+/**
+ * Free-form post composer. Writes to posts/{auto-id} so the
+ * onSnapshot subscription in Community surfaces the new post live for
+ * every viewer. Anonymous visitors see a sign-in prompt instead of the
+ * textarea — we don't allow unauthenticated writes.
+ */
+function PostComposer({ user, profile }: PostComposerProps) {
+  const navigate = useNavigate();
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="rounded-2xl border border-stone-100 bg-white p-4 sm:p-5 flex items-center justify-between gap-4">
+        <p className="text-sm text-stone-500 italic">Sign in to share an insight with the pack.</p>
+        <button
+          type="button"
+          onClick={() => navigate(paths.login)}
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors"
+        >
+          Sign in
+        </button>
+      </div>
+    );
+  }
+
+  const displayName = profile?.displayName
+    ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+    ?? user.displayName
+    ?? 'Member';
+
+  const submit = async () => {
+    const body = draft.trim();
+    if (!body || sending) return;
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'posts'), {
+        userId: user.uid,
+        author: displayName,
+        handle: '',
+        avatar: profile?.photoURL ?? user.photoURL ?? '',
+        body,
+        city: profile?.homeCity ?? '',
+        likes: 0,
+        replies: 0,
+        createdAt: serverTimestamp(),
+      });
+      setDraft('');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'posts');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-stone-100 bg-white p-4 sm:p-5 space-y-3">
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder={`What's on with you and your pack, ${displayName.split(' ')[0]}?`}
+        rows={3}
+        maxLength={500}
+        className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm leading-relaxed text-charcoal placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-stone-200 resize-none"
+      />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] text-stone-400 font-light">{draft.length} / 500</span>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!draft.trim() || sending}
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {sending ? <Loader2 size={11} className="animate-spin" /> : <Send size={11} />}
+          Post
+        </button>
+      </div>
+    </div>
   );
 }

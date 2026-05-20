@@ -15,7 +15,6 @@ import {
   Send,
   Loader2,
 } from 'lucide-react';
-import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
@@ -106,95 +105,7 @@ const COMMUNITY_CARDS = [
   },
 ];
 
-const LEADERBOARD: LeaderboardEntry[] = [
-  {
-    id: 'lola-silvia',
-    team: 'Lola & Silvia',
-    caption: 'Concierge crew · Miami',
-    avatar: conciergePose('lola', 1),
-    checkins: 32,
-    trend: 'up',
-  },
-  {
-    id: 'taco-crew',
-    team: "Taco's Crew",
-    caption: 'Wynwood & Downtown · Miami',
-    avatar: conciergePose('taco', 1),
-    checkins: 27,
-    trend: 'up',
-  },
-  {
-    id: 'toby-club',
-    team: 'Toby Trail Club',
-    caption: 'Family weekends · Miami',
-    avatar: '/HeyLola.Toby.1.png',
-    checkins: 24,
-    trend: 'steady',
-  },
-  {
-    id: 'nuc-city-pack',
-    team: 'Nuc City Pack',
-    caption: 'Beach + road trips · Miami',
-    avatar: '/HeyLola.Nuc.1.png',
-    checkins: 21,
-    trend: 'up',
-  },
-];
-
-const SEED_FEED: FeedPost[] = [
-  {
-    id: 'silvia-1',
-    author: 'Silvia & Lola',
-    handle: 'silviamogas',
-    avatar: conciergePose('lola', 1),
-    badge: 'Founder',
-    city: 'Miami',
-    body: "Brunch at Pura Vida Brickell with Lola today — they brought a bowl of water before we even sat down. Filing this one under 'corner-table material'.",
-    spot: 'Pura Vida Brickell',
-    likes: 18,
-    replies: 4,
-    timeAgo: '2h',
-  },
-  {
-    id: 'silvia-2',
-    author: 'Silvia & Taco',
-    handle: 'silviamogas',
-    avatar: conciergePose('taco', 1),
-    badge: 'Local discoveries',
-    city: 'Miami',
-    body: 'Taco tip: weekday afternoons at Wynwood Walls are blissfully quiet — perfect for slow walks before the rooftop crowd kicks in.',
-    spot: 'Wynwood Walls',
-    likes: 12,
-    replies: 2,
-    timeAgo: '6h',
-  },
-  {
-    id: 'silvia-3',
-    author: 'Silvia & Toby',
-    handle: 'silviamogas',
-    avatar: '/HeyLola.Toby.1.png',
-    badge: 'Community',
-    city: 'Miami',
-    body: 'Toby says the new dog meet-up on Sunday at Margaret Pace Park has the friendliest pack so far. Anyone joining next week?',
-    spot: 'Margaret Pace Park',
-    likes: 9,
-    replies: 5,
-    timeAgo: '1d',
-  },
-  {
-    id: 'silvia-4',
-    author: 'Silvia & Nuc',
-    handle: 'silviamogas',
-    avatar: '/HeyLola.Nuc.1.png',
-    badge: 'Adventures',
-    city: 'Miami → Key Biscayne',
-    body: 'Day trip with Nuc to Hobie Beach. Tide was calm, the dog-friendly stretch is bigger than I remembered. Bring a towel — and a flat white from Vice City Coffee on the way back.',
-    spot: 'Hobie Beach',
-    likes: 21,
-    replies: 7,
-    timeAgo: '2d',
-  },
-];
+const LEADERBOARD: LeaderboardEntry[] = [];
 
 export const Community: React.FC<CommunityProps> = (_props) => {
   const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
@@ -263,7 +174,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     return () => unsub();
   }, []);
 
-  const feedPosts: FeedPost[] = livePosts.length > 0 ? livePosts : SEED_FEED;
+  const feedPosts: FeedPost[] = livePosts;
   const sortedLeaderboard = useMemo(
     () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
     [],
@@ -273,7 +184,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     <div className="bg-white text-charcoal font-boutique min-h-screen">
       <SEO
         title="Hey Lola Community — Find Your Pack"
-        description="Discover dog-friendly places, perks, and city packs with other dog parents. Join the Miami Pack, follow Lola's Picks, unlock partner perks and take on community challenges."
+        description="Discover dog-friendly places, perks and city crews with other dog parents. Join Crew in Miami or NYC Vibes and share insights with the pack."
         url="/community"
         breadcrumbs={COMMUNITY_BREADCRUMBS}
       />
@@ -402,9 +313,17 @@ export const Community: React.FC<CommunityProps> = (_props) => {
               className="space-y-3 sm:space-y-4 pb-16"
             >
               <PostComposer user={user} profile={profile} />
-              {feedPosts.map((post) => (
-                <FeedItem key={post.id} post={post} user={user} profile={profile} />
-              ))}
+              {feedPosts.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 p-8 text-center">
+                  <p className="text-sm text-stone-500 italic">
+                    No posts yet. Be the first to share an insight with the pack.
+                  </p>
+                </div>
+              ) : (
+                feedPosts.map((post) => (
+                  <FeedItem key={post.id} post={post} user={user} profile={profile} />
+                ))
+              )}
             </motion.section>
           ) : (
             <motion.section

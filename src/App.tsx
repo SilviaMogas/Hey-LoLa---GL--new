@@ -335,7 +335,9 @@ function AppContent() {
               <FadeIn><About onBack={() => navigate(paths.home)} onExplore={() => navigate(paths.explore)} /></FadeIn>
             } />
             <Route path={paths.start} element={
-              <FadeIn><Start onBack={() => navigate(paths.home)} onExplore={() => navigate(paths.explore)} /></FadeIn>
+              <GuestOnlyRoute>
+                <FadeIn><Start onBack={() => navigate(paths.home)} onExplore={() => navigate(paths.explore)} /></FadeIn>
+              </GuestOnlyRoute>
             } />
             <Route path={paths.blog} element={
               <FadeIn><Blog onBack={() => navigate(paths.home)} /></FadeIn>

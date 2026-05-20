@@ -21,8 +21,9 @@ import { SEO } from '../lib/seo';
 import { ScrollChips } from './ScrollChips';
 import { useAuth } from '../lib/useAuth';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { addDoc, collection, limit, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { paths } from '../lib/routes';
+import type { PetData } from '../types';
 
 const COMMUNITY_BREADCRUMBS = [
   { name: 'Hey Lola', item: '/' },
@@ -203,6 +204,36 @@ export const Community: React.FC<CommunityProps> = (_props) => {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const { user, profile } = useAuth();
   const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
+  const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
+
+  // Latest public pets — newest joiners surface as a horizontal
+  // carousel of small fichas. Mirrors Dashboard's pets query so the
+  // same Firestore rules apply: anonymous visitors get an empty list
+  // (firestore rules require signed-in to list pets) and the
+  // carousel section quietly hides.
+  useEffect(() => {
+    if (!user) { setLatestMembers([]); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'pets'),
+          where('isPublic', '==', true),
+          limit(50),
+        ));
+        if (cancelled) return;
+        const pets = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as PetData))
+          .filter((p) => !p.isHidden && p.userId !== user.uid)
+          .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
+          .slice(0, 12);
+        setLatestMembers(pets);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.READ, 'pets');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Subscribe to the 50 most recent community posts. Falls back to the
   // seed feed silently when no real posts exist yet (so the page is

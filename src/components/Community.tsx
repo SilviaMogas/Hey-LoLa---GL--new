@@ -1,15 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   ArrowRight,
   MapPin,
-  Sparkles,
-  Gift,
-  Trophy,
   Heart,
   MessageSquare,
-  Award,
   Users,
   Plus,
   Send,
@@ -108,9 +104,8 @@ const COMMUNITY_CARDS = [
 const LEADERBOARD: LeaderboardEntry[] = [];
 
 export const Community: React.FC<CommunityProps> = (_props) => {
-  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
-  const { user, profile } = useAuth();
-  const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
+  const { user } = useAuth();
+  const [, setLivePosts] = useState<FeedPost[]>([]);
   const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
 
   // Latest public pets — newest joiners surface as a horizontal
@@ -123,15 +118,18 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     let cancelled = false;
     (async () => {
       try {
+        // Pull the newest pets registered on the platform — public or not —
+        // and let the carousel surface them. Firestore's `list` rule on
+        // /pets requires isSignedIn() so visitors won't see this; the
+        // client-side filter drops hidden pets and the viewer's own.
         const snap = await getDocs(query(
           collection(db, 'pets'),
-          where('isPublic', '==', true),
           limit(50),
         ));
         if (cancelled) return;
         const pets = snap.docs
           .map((d) => ({ id: d.id, ...d.data() } as PetData))
-          .filter((p) => !p.isHidden && p.userId !== user.uid)
+          .filter((p) => !p.isHidden && p.userId !== user.uid && (p.name || '').trim().length > 0)
           .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
           .slice(0, 12);
         setLatestMembers(pets);
@@ -157,12 +155,6 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     );
     return () => unsub();
   }, []);
-
-  const feedPosts: FeedPost[] = livePosts;
-  const sortedLeaderboard = useMemo(
-    () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
-    [],
-  );
 
   return (
     <div className="bg-white text-charcoal font-boutique min-h-screen">
@@ -276,60 +268,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </section>
         )}
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 border-b border-stone-100 mb-8">
-          <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<MessageSquare size={13} />}>
-            Latest posts
-          </TabButton>
-          <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={13} />}>
-            Top explorers
-          </TabButton>
-        </div>
-
-        <AnimatePresence mode="wait">
-          {activeTab === 'feed' ? (
-            <motion.section
-              key="feed"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-3 sm:space-y-4 pb-16"
-            >
-              <PostComposer user={user} profile={profile} />
-              {feedPosts.length === 0 ? (
-                <EmptyFeedState message="No posts yet. Be the first to share an insight with the pack." />
-              ) : (
-                feedPosts.map((post) => (
-                  <FeedItem key={post.id} post={post} user={user} profile={profile} />
-                ))
-              )}
-            </motion.section>
-          ) : (
-            <motion.section
-              key="leaderboard"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-4 pb-16"
-            >
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">This Week's Top Explorers</span>
-                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">Concierge leaderboard<span className="brand-dot" aria-hidden="true" /></h2>
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Updates Sunday</span>
-              </div>
-
-              <ol className="space-y-2 sm:space-y-3">
-                {sortedLeaderboard.map((entry, i) => (
-                  <LeaderboardRow key={entry.id} entry={entry} rank={i + 1} />
-                ))}
-              </ol>
-            </motion.section>
-          )}
-        </AnimatePresence>
+        <div className="pb-16" />
       </div>
     </div>
   );
@@ -641,9 +580,36 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // Reflect existing membership so a returning member sees 'Open room'
+  // straight away instead of a stale 'Join group' that double-writes a
+  // membership doc.
+  useEffect(() => {
+    if (!user) { setJoined(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'group_memberships'),
+          where('userId', '==', user.uid),
+          where('groupId', '==', group.id),
+          limit(1),
+        ));
+        if (!cancelled) setJoined(!snap.empty);
+      } catch (err) {
+        // Best-effort — fall back to 'Join group' label on rule errors.
+        void err;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, group.id]);
+
+  const openRoom = () => navigate(`/community/${group.id}`);
+
   const handleJoin = async () => {
     if (!user) { navigate(paths.login); return; }
-    if (busy || joined) return;
+    if (busy) return;
+    // Already a member → just open the room.
+    if (joined) { openRoom(); return; }
     setBusy(true);
     try {
       const ref = await addDoc(collection(db, 'group_memberships'), {
@@ -661,8 +627,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ membershipId: ref.id }),
       }).catch(() => { /* email is best-effort, never block join */ });
-      // Drop the user into the Reddit-style group room.
-      navigate(`/community/${group.id}`);
+      openRoom();
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
     } finally {
@@ -696,10 +661,14 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       <button
         type="button"
         onClick={handleJoin}
-        disabled={busy || joined}
+        disabled={busy}
         className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {joined ? <>Joined <Award size={11} /></> : busy ? <><Loader2 size={11} className="animate-spin" /> Joining…</> : <>Join group <ArrowRight size={11} /></>}
+        {busy
+          ? <><Loader2 size={11} className="animate-spin" /> Joining…</>
+          : joined
+            ? <>Open room <ArrowRight size={11} /></>
+            : <>Join group <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );

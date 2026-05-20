@@ -1,27 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Send, Loader2, Check, PenLine } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 
 /**
- * The Journal page: third-party RSS feed (Elfsight) on top, contributor
- * pitch form below. The form writes to business_leads/{auto-id} with
- * kind='journal_contributor' so admins can review pitches without a
- * new collection / rule.
+ * The Journal page. Recruits contributors via a pitch form that writes
+ * to business_leads/{auto-id} with kind='journal_contributor' so admins
+ * can review pitches without a new collection / rule.
  */
 export const Blog: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  // Lazy-load the Elfsight platform script once.
-  useEffect(() => {
-    const scriptId = 'elfsight-platform-script';
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = 'https://elfsightcdn.com/platform.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -82,19 +69,14 @@ export const Blog: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* RSS feed */}
-      <div className="w-full min-h-[40vh]">
-        <div className="elfsight-app-6d741dfd-833f-40ce-a827-cc7b81020c0c" data-elfsight-app-lazy></div>
-      </div>
-
       {/* Contributor pitch form */}
-      <section className="max-w-3xl mx-auto pt-16 sm:pt-20" aria-labelledby="contribute-heading">
+      <section className="max-w-3xl mx-auto pt-4 sm:pt-8" aria-labelledby="contribute-heading">
         <header className="text-center space-y-3 mb-10 sm:mb-12">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
             <PenLine size={11} /> Contribute
           </span>
-          <h2 id="contribute-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95]">
-            Want to write for Hey Lola<span className="brand-dot" aria-hidden="true" />
+          <h2 id="contribute-heading" className="text-3xl sm:text-5xl font-serif italic tracking-tight leading-[0.95]">
+            Write for Hey Lola<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-sm sm:text-base text-stone-500 font-light italic max-w-xl mx-auto leading-relaxed">
             Stories, city guides, dog-friendly itineraries, well-told moments with your dog.

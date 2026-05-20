@@ -29,7 +29,7 @@ export const CATEGORY_META: Record<GroupCategory, { label: string; color: string
 export const COMMUNITY_GROUPS: CommunityGroup[] = [
   {
     id: 'mia-pack',
-    name: 'Miami Pack',
+    name: 'Crew in Miami',
     category: 'social',
     city: 'Miami',
     members: 0,
@@ -39,7 +39,7 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'nyc-pack',
-    name: 'New York Pack',
+    name: 'NYC Vibes',
     category: 'social',
     city: 'NYC',
     members: 0,

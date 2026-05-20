@@ -55,7 +55,8 @@ export function ClaimPlaceDialog({ place, open, onClose, onSubmitted }: ClaimPla
     setSubmitting(true);
     try {
       const ref = collection(db, 'claim_requests');
-      await setDoc(doc(ref), {
+      const docRef = doc(ref);
+      await setDoc(docRef, {
         userId: auth.currentUser.uid,
         placeId: place.id,
         placeName: place.name,
@@ -69,6 +70,14 @@ export function ClaimPlaceDialog({ place, open, onClose, onSubmitted }: ClaimPla
         createdAt: new Date().toISOString(),
       });
       track('place_claimed', { placeId: place.id, placeName: place.name, city: place.city });
+      // Fire-and-forget: confirmation email to the claimant with the
+      // 1-week SLA + internal alert to hey@heylola.co. Endpoint re-reads
+      // the claim doc via Admin SDK so the client can't spoof recipients.
+      void fetch('/api/notify-claim', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ claimId: docRef.id }),
+      }).catch(() => { /* email is best-effort, never block the claim flow */ });
       setForm(EMPTY);
       onSubmitted();
     } catch (e) {

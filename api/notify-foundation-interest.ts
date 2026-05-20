@@ -1,4 +1,4 @@
-import { getAdminDb } from './_admin';
+import { getAdminDb, appUrl } from './_admin';
 import { sendFoundationInterestEmails } from '../src/lib/email';
 
 // Public endpoint called by the client immediately after a foundation_interest
@@ -10,13 +10,6 @@ import { sendFoundationInterestEmails } from '../src/lib/email';
 // POST /api/notify-foundation-interest
 //   Body: { interestId: string }
 const RECENT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-
-function appUrl(req: any): string {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  const proto = (req.headers?.['x-forwarded-proto'] as string) || 'https';
-  const host = (req.headers?.['x-forwarded-host'] as string) || (req.headers?.host as string) || 'heylola.co';
-  return `${proto}://${host}`;
-}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {

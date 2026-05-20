@@ -39,6 +39,7 @@ export const paths = {
   /* ── Public app surfaces (no auth) ─────────────────────────────── */
   explore: '/explore',
   community: '/community',
+  communityGroup: '/community/:groupId',
   venue: '/venue/:slug',
   verifyVenue: '/verify/:placeId/:token',
   claimListing: '/claim-listing/:token',
@@ -67,6 +68,7 @@ export const buildPath = {
   claimListing: (token: string) => `/claim-listing/${encodeURIComponent(token)}`,
   claim: (partnerSlug: string) => `/claim?partner=${encodeURIComponent(partnerSlug)}`,
   brandBookCharacter: (name: string) => `/brand-book/${encodeURIComponent(name.toLowerCase())}`,
+  communityGroup: (groupId: string) => `/community/${encodeURIComponent(groupId)}`,
 };
 
 /** Pages we actively want indexed by search engines. Used to generate

@@ -1,21 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   ArrowRight,
   MapPin,
-  Sparkles,
-  Gift,
-  Trophy,
   Heart,
   MessageSquare,
-  Award,
   Users,
   Plus,
   Send,
   Loader2,
 } from 'lucide-react';
-import { CONCIERGES, conciergePose } from '../data/concierges';
 import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
@@ -34,7 +29,7 @@ interface CommunityProps {
   initialMode?: 'community' | 'support';
 }
 
-interface FeedPost {
+export interface FeedPost {
   id: string;
   author: string;
   handle: string;
@@ -106,100 +101,11 @@ const COMMUNITY_CARDS = [
   },
 ];
 
-const LEADERBOARD: LeaderboardEntry[] = [
-  {
-    id: 'lola-silvia',
-    team: 'Lola & Silvia',
-    caption: 'Concierge crew · Miami',
-    avatar: conciergePose('lola', 1),
-    checkins: 32,
-    trend: 'up',
-  },
-  {
-    id: 'taco-crew',
-    team: "Taco's Crew",
-    caption: 'Wynwood & Downtown · Miami',
-    avatar: conciergePose('taco', 1),
-    checkins: 27,
-    trend: 'up',
-  },
-  {
-    id: 'toby-club',
-    team: 'Toby Trail Club',
-    caption: 'Family weekends · Miami',
-    avatar: '/HeyLola.Toby.1.png',
-    checkins: 24,
-    trend: 'steady',
-  },
-  {
-    id: 'nuc-city-pack',
-    team: 'Nuc City Pack',
-    caption: 'Beach + road trips · Miami',
-    avatar: '/HeyLola.Nuc.1.png',
-    checkins: 21,
-    trend: 'up',
-  },
-];
-
-const SEED_FEED: FeedPost[] = [
-  {
-    id: 'silvia-1',
-    author: 'Silvia & Lola',
-    handle: 'silviamogas',
-    avatar: conciergePose('lola', 1),
-    badge: 'Founder',
-    city: 'Miami',
-    body: "Brunch at Pura Vida Brickell with Lola today — they brought a bowl of water before we even sat down. Filing this one under 'corner-table material'.",
-    spot: 'Pura Vida Brickell',
-    likes: 18,
-    replies: 4,
-    timeAgo: '2h',
-  },
-  {
-    id: 'silvia-2',
-    author: 'Silvia & Taco',
-    handle: 'silviamogas',
-    avatar: conciergePose('taco', 1),
-    badge: 'Local discoveries',
-    city: 'Miami',
-    body: 'Taco tip: weekday afternoons at Wynwood Walls are blissfully quiet — perfect for slow walks before the rooftop crowd kicks in.',
-    spot: 'Wynwood Walls',
-    likes: 12,
-    replies: 2,
-    timeAgo: '6h',
-  },
-  {
-    id: 'silvia-3',
-    author: 'Silvia & Toby',
-    handle: 'silviamogas',
-    avatar: '/HeyLola.Toby.1.png',
-    badge: 'Community',
-    city: 'Miami',
-    body: 'Toby says the new dog meet-up on Sunday at Margaret Pace Park has the friendliest pack so far. Anyone joining next week?',
-    spot: 'Margaret Pace Park',
-    likes: 9,
-    replies: 5,
-    timeAgo: '1d',
-  },
-  {
-    id: 'silvia-4',
-    author: 'Silvia & Nuc',
-    handle: 'silviamogas',
-    avatar: '/HeyLola.Nuc.1.png',
-    badge: 'Adventures',
-    city: 'Miami → Key Biscayne',
-    body: 'Day trip with Nuc to Hobie Beach. Tide was calm, the dog-friendly stretch is bigger than I remembered. Bring a towel — and a flat white from Vice City Coffee on the way back.',
-    spot: 'Hobie Beach',
-    likes: 21,
-    replies: 7,
-    timeAgo: '2d',
-  },
-];
+const LEADERBOARD: LeaderboardEntry[] = [];
 
 export const Community: React.FC<CommunityProps> = (_props) => {
-  const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
-  const { user, profile } = useAuth();
-  const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
+  const { user } = useAuth();
+  const [, setLivePosts] = useState<FeedPost[]>([]);
   const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
 
   // Latest public pets — newest joiners surface as a horizontal
@@ -212,15 +118,18 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     let cancelled = false;
     (async () => {
       try {
+        // Pull the newest pets registered on the platform — public or not —
+        // and let the carousel surface them. Firestore's `list` rule on
+        // /pets requires isSignedIn() so visitors won't see this; the
+        // client-side filter drops hidden pets and the viewer's own.
         const snap = await getDocs(query(
           collection(db, 'pets'),
-          where('isPublic', '==', true),
           limit(50),
         ));
         if (cancelled) return;
         const pets = snap.docs
           .map((d) => ({ id: d.id, ...d.data() } as PetData))
-          .filter((p) => !p.isHidden && p.userId !== user.uid)
+          .filter((p) => !p.isHidden && p.userId !== user.uid && (p.name || '').trim().length > 0)
           .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
           .slice(0, 12);
         setLatestMembers(pets);
@@ -240,40 +149,18 @@ export const Community: React.FC<CommunityProps> = (_props) => {
       orderBy('createdAt', 'desc'),
       limit(50),
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const posts = snap.docs.map((d): FeedPost => {
-        const data = d.data() as Record<string, unknown>;
-        const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
-        return {
-          id: d.id,
-          author: String(data.author ?? 'Member'),
-          handle: String(data.handle ?? ''),
-          avatar: String(data.avatar ?? '/HeyLola.Lola.1.png'),
-          badge: data.badge as string | undefined,
-          city: data.city as string | undefined,
-          body: String(data.body ?? ''),
-          spot: data.spot as string | undefined,
-          likes: Number(data.likes ?? 0),
-          replies: Number(data.replies ?? 0),
-          timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
-        };
-      });
-      setLivePosts(posts);
-    }, (err) => handleFirestoreError(err, OperationType.READ, 'posts'));
+    const unsub = onSnapshot(q,
+      (snap) => setLivePosts(mapPostSnapshot(snap)),
+      (err) => handleFirestoreError(err, OperationType.READ, 'posts'),
+    );
     return () => unsub();
   }, []);
-
-  const feedPosts: FeedPost[] = livePosts.length > 0 ? livePosts : SEED_FEED;
-  const sortedLeaderboard = useMemo(
-    () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
-    [],
-  );
 
   return (
     <div className="bg-white text-charcoal font-boutique min-h-screen">
       <SEO
         title="Hey Lola Community — Find Your Pack"
-        description="Discover dog-friendly places, perks, and city packs with other dog parents. Join the Miami Pack, follow Lola's Picks, unlock partner perks and take on community challenges."
+        description="Discover dog-friendly places, perks and city crews with other dog parents. Join Crew in Miami or NYC Vibes and share insights with the pack."
         url="/community"
         breadcrumbs={COMMUNITY_BREADCRUMBS}
       />
@@ -381,56 +268,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </section>
         )}
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 border-b border-stone-100 mb-8">
-          <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<MessageSquare size={13} />}>
-            Latest posts
-          </TabButton>
-          <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={13} />}>
-            Top explorers
-          </TabButton>
-        </div>
-
-        <AnimatePresence mode="wait">
-          {activeTab === 'feed' ? (
-            <motion.section
-              key="feed"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-3 sm:space-y-4 pb-16"
-            >
-              <PostComposer user={user} profile={profile} />
-              {feedPosts.map((post) => (
-                <FeedItem key={post.id} post={post} user={user} profile={profile} />
-              ))}
-            </motion.section>
-          ) : (
-            <motion.section
-              key="leaderboard"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-4 pb-16"
-            >
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">This Week's Top Explorers</span>
-                  <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">Concierge leaderboard<span className="brand-dot" aria-hidden="true" /></h2>
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Updates Sunday</span>
-              </div>
-
-              <ol className="space-y-2 sm:space-y-3">
-                {sortedLeaderboard.map((entry, i) => (
-                  <LeaderboardRow key={entry.id} entry={entry} rank={i + 1} />
-                ))}
-              </ol>
-            </motion.section>
-          )}
-        </AnimatePresence>
+        <div className="pb-16" />
       </div>
     </div>
   );
@@ -514,12 +352,12 @@ interface Reply {
   timeAgo: string;
 }
 
-interface FeedAuthor {
+export interface FeedAuthor {
   user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
 }
 
-function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAuthor) {
+export function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAuthor) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
@@ -742,21 +580,54 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // Reflect existing membership so a returning member sees 'Open room'
+  // straight away instead of a stale 'Join group' that double-writes a
+  // membership doc.
+  useEffect(() => {
+    if (!user) { setJoined(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'group_memberships'),
+          where('userId', '==', user.uid),
+          where('groupId', '==', group.id),
+          limit(1),
+        ));
+        if (!cancelled) setJoined(!snap.empty);
+      } catch (err) {
+        // Best-effort — fall back to 'Join group' label on rule errors.
+        void err;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, group.id]);
+
+  const openRoom = () => navigate(`/community/${group.id}`);
+
   const handleJoin = async () => {
     if (!user) { navigate(paths.login); return; }
-    if (busy || joined) return;
+    if (busy) return;
+    // Already a member → just open the room.
+    if (joined) { openRoom(); return; }
     setBusy(true);
     try {
-      // Membership lives under users/{uid}/groups/{groupId} so the
-      // existing pets-subcollection rule pattern (owner-only writes)
-      // covers it for free without a dedicated firestore.rules entry.
-      await addDoc(collection(db, 'group_memberships'), {
+      const ref = await addDoc(collection(db, 'group_memberships'), {
         userId: user.uid,
         groupId: group.id,
         groupName: group.name,
         joinedAt: serverTimestamp(),
       });
       setJoined(true);
+      // Fire-and-forget welcome email. The server endpoint re-reads the
+      // membership doc via Admin SDK (source of truth) so the client
+      // can't forge a recipient by passing arbitrary fields.
+      void fetch('/api/notify-group-join', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ membershipId: ref.id }),
+      }).catch(() => { /* email is best-effort, never block join */ });
+      openRoom();
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
     } finally {
@@ -790,10 +661,14 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       <button
         type="button"
         onClick={handleJoin}
-        disabled={busy || joined}
+        disabled={busy}
         className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {joined ? <>Joined <Award size={11} /></> : busy ? <><Loader2 size={11} className="animate-spin" /> Joining…</> : <>Join group <ArrowRight size={11} /></>}
+        {busy
+          ? <><Loader2 size={11} className="animate-spin" /> Joining…</>
+          : joined
+            ? <>Open room <ArrowRight size={11} /></>
+            : <>Join group <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );
@@ -803,7 +678,46 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
  * Format a millisecond timestamp as a compact "Xm / Xh / Xd / Xw" tag.
  * Mirrors the seed feed style so live + seeded posts read consistently.
  */
-function formatTimeAgo(ms: number): string {
+/**
+ * Maps a Firestore posts-collection snapshot into FeedPost[], applying
+ * the shared shape + the empty-body filter both the global feed and
+ * each group room use. Centralised here so the two callers don't drift.
+ */
+export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Record<string, unknown> }> }): FeedPost[] {
+  return snap.docs
+    .map((d): FeedPost => {
+      const data = d.data();
+      const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+      return {
+        id: d.id,
+        author: String(data.author ?? 'Member'),
+        handle: String(data.handle ?? ''),
+        avatar: String(data.avatar ?? '/HeyLola.Lola.1.png'),
+        badge: data.badge as string | undefined,
+        city: data.city as string | undefined,
+        body: String(data.body ?? ''),
+        spot: data.spot as string | undefined,
+        likes: Number(data.likes ?? 0),
+        replies: Number(data.replies ?? 0),
+        timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
+      };
+    })
+    .filter((p) => p.body.trim().length > 0);
+}
+
+/**
+ * Soft empty-state card used both on /community and inside each group
+ * room when no posts exist yet.
+ */
+export function EmptyFeedState({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 p-8 text-center">
+      <p className="text-sm text-stone-500 italic">{message}</p>
+    </div>
+  );
+}
+
+export function formatTimeAgo(ms: number): string {
   const diff = Date.now() - ms;
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'now';
@@ -815,9 +729,14 @@ function formatTimeAgo(ms: number): string {
   return `${Math.floor(d / 7)}w`;
 }
 
-interface PostComposerProps {
+export interface PostComposerProps {
   user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
+  /** Extra fields stamped on every post created from this composer.
+   *  Used by the group rooms (/community/:groupId) to scope posts. */
+  extraFields?: Record<string, string>;
+  /** Override the default textarea placeholder. */
+  placeholder?: string;
 }
 
 /**
@@ -826,7 +745,7 @@ interface PostComposerProps {
  * every viewer. Anonymous visitors see a sign-in prompt instead of the
  * textarea — we don't allow unauthenticated writes.
  */
-function PostComposer({ user, profile }: PostComposerProps) {
+export function PostComposer({ user, profile, extraFields, placeholder }: PostComposerProps) {
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -866,6 +785,7 @@ function PostComposer({ user, profile }: PostComposerProps) {
         likes: 0,
         replies: 0,
         createdAt: serverTimestamp(),
+        ...(extraFields ?? {}),
       });
       setDraft('');
     } catch (err) {
@@ -880,7 +800,7 @@ function PostComposer({ user, profile }: PostComposerProps) {
       <textarea
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder={`What's on with you and your pack, ${displayName.split(' ')[0]}?`}
+        placeholder={placeholder ?? `What's on with you and your pack, ${displayName.split(' ')[0]}?`}
         rows={3}
         maxLength={500}
         className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm leading-relaxed text-charcoal placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-stone-200 resize-none"

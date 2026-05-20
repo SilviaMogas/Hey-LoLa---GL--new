@@ -89,6 +89,23 @@ service cloud.firestore {
       allow create: if willOwnResource();
       allow update: if ownsResource() || isAdmin();
       allow delete: if ownsResource() || isAdmin();
+
+      // Reddit-style threaded replies under each post.
+      match /replies/{replyId} {
+        allow read:   if isSignedIn();
+        allow create: if willOwnResource();
+        allow update: if ownsResource() || isAdmin();
+        allow delete: if ownsResource() || isAdmin();
+      }
+    }
+
+    // ────────── GROUP MEMBERSHIPS ──────────
+    match /group_memberships/{membershipId} {
+      // Each user can see / list their own memberships; create must declare correct userId.
+      allow read:   if ownsResource() || isAdmin();
+      allow list:   if isSignedIn();
+      allow create: if willOwnResource();
+      allow delete: if ownsResource() || isAdmin();
     }
 
     // ────────── CITY VOTES ──────────

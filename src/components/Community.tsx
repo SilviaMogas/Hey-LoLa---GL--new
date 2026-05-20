@@ -307,13 +307,6 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </p>
         </motion.header>
 
-        {/* Main cards grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-10 sm:pb-12">
-          {COMMUNITY_CARDS.map((card, i) => (
-            <CommunityCard key={card.id} card={card} delay={i * 0.08} />
-          ))}
-        </section>
-
         {/* Latest members — newest pets to opt-in to a public profile.
             Horizontal carousel so the page reads as alive, not static. */}
         {latestMembers.length > 0 && (
@@ -434,7 +427,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
             >
               <PostComposer user={user} profile={profile} />
               {feedPosts.map((post) => (
-                <FeedItem key={post.id} post={post} />
+                <FeedItem key={post.id} post={post} user={user} profile={profile} />
               ))}
             </motion.section>
           ) : (
@@ -537,7 +530,85 @@ function TabButton({ active, onClick, icon, children }: { active: boolean; onCli
   );
 }
 
-function FeedItem({ post }: { post: FeedPost }) {
+interface Reply {
+  id: string;
+  author: string;
+  avatar: string;
+  body: string;
+  timeAgo: string;
+}
+
+interface FeedAuthor {
+  user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
+  profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
+}
+
+function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAuthor) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+
+  // Seed posts (string ids, no Firestore doc) can't load real replies.
+  const isRealPost = !post.id.startsWith('silvia-');
+
+  const toggle = async () => {
+    setOpen((v) => !v);
+    if (!loaded && isRealPost) {
+      setLoaded(true);
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'posts', post.id, 'replies'),
+          orderBy('createdAt', 'asc'),
+          limit(50),
+        ));
+        const list = snap.docs.map((d): Reply => {
+          const data = d.data() as Record<string, unknown>;
+          const created = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+          return {
+            id: d.id,
+            author: String(data.author ?? 'Member'),
+            avatar: String(data.avatar ?? ''),
+            body: String(data.body ?? ''),
+            timeAgo: created ? formatTimeAgo(created) : 'just now',
+          };
+        });
+        setReplies(list);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.READ, 'posts/replies');
+      }
+    }
+  };
+
+  const submitReply = async () => {
+    if (!user) { navigate(paths.login); return; }
+    const body = draft.trim();
+    if (!body || sending || !isRealPost) return;
+    setSending(true);
+    const displayName = profile?.displayName
+      ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+      ?? user.displayName
+      ?? 'Member';
+    try {
+      const docRef = await addDoc(collection(db, 'posts', post.id, 'replies'), {
+        userId: user.uid,
+        parentPostId: post.id,
+        author: displayName,
+        avatar: profile?.photoURL ?? user.photoURL ?? '',
+        body,
+        createdAt: serverTimestamp(),
+      });
+      setReplies((prev) => [...prev, { id: docRef.id, author: displayName, avatar: profile?.photoURL ?? user.photoURL ?? '', body, timeAgo: 'now' }]);
+      setDraft('');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'posts/replies');
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
@@ -547,11 +618,16 @@ function FeedItem({ post }: { post: FeedPost }) {
     >
       <header className="flex items-start gap-4">
         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-stone-50 border border-stone-100 overflow-hidden shrink-0 flex items-center justify-center">
-          <img src={post.avatar} alt={post.author} className="w-full h-full object-contain" />
+          {post.avatar
+            ? <img src={post.avatar} alt={post.author} className="w-full h-full object-contain" />
+            : <span className="text-xl font-serif italic text-stone-300">{post.author[0]?.toUpperCase() || '·'}</span>}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-sm font-serif italic text-charcoal">{post.author}</p>
+            {post.handle && (
+              <span className="text-[10px] text-stone-400">@{post.handle}</span>
+            )}
             {post.badge && (
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 bg-stone-50 border border-stone-100 px-2 py-0.5 rounded-full">
                 {post.badge}
@@ -567,7 +643,7 @@ function FeedItem({ post }: { post: FeedPost }) {
         </div>
       </header>
 
-      <p className="text-sm sm:text-[15px] text-charcoal/90 leading-relaxed mt-4">{post.body}</p>
+      <p className="text-sm sm:text-[15px] text-charcoal/90 leading-relaxed mt-4 whitespace-pre-wrap">{post.body}</p>
 
       {post.spot && (
         <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-charcoal bg-stone-50 border border-stone-100 px-3 py-1.5 rounded-full">
@@ -579,10 +655,69 @@ function FeedItem({ post }: { post: FeedPost }) {
         <button type="button" className="inline-flex items-center gap-2 text-[11px] font-medium hover:text-charcoal transition-colors">
           <Heart size={13} /> {post.likes}
         </button>
-        <button type="button" className="inline-flex items-center gap-2 text-[11px] font-medium hover:text-charcoal transition-colors">
-          <MessageSquare size={13} /> {post.replies}
+        <button
+          type="button"
+          onClick={toggle}
+          className="inline-flex items-center gap-2 text-[11px] font-medium hover:text-charcoal transition-colors"
+        >
+          <MessageSquare size={13} /> {open ? 'Hide' : 'Reply'} · {Math.max(post.replies, replies.length)}
         </button>
       </footer>
+
+      {open && (
+        <div className="mt-4 pl-4 sm:pl-6 border-l-2 border-stone-100 space-y-3">
+          {replies.map((r) => (
+            <div key={r.id} className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-stone-50 border border-stone-100 overflow-hidden shrink-0 flex items-center justify-center">
+                {r.avatar
+                  ? <img src={r.avatar} alt={r.author} className="w-full h-full object-cover" />
+                  : <span className="text-[10px] font-serif italic text-stone-300">{r.author[0]?.toUpperCase()}</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <p className="text-xs font-serif italic text-charcoal">{r.author}</p>
+                  <span className="text-[10px] text-stone-400">· {r.timeAgo}</span>
+                </div>
+                <p className="text-sm text-charcoal/85 leading-relaxed whitespace-pre-wrap mt-0.5">{r.body}</p>
+              </div>
+            </div>
+          ))}
+
+          {isRealPost ? (
+            user ? (
+              <div className="flex items-start gap-2 pt-2">
+                <textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Write a reply…"
+                  rows={2}
+                  maxLength={500}
+                  className="flex-1 bg-stone-50 rounded-xl px-3 py-2 text-xs leading-relaxed text-charcoal placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-stone-200 resize-none"
+                />
+                <button
+                  type="button"
+                  onClick={submitReply}
+                  disabled={!draft.trim() || sending}
+                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-charcoal text-white hover:bg-charcoal/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Send reply"
+                >
+                  {sending ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate(paths.login)}
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
+              >
+                Sign in to reply
+              </button>
+            )
+          ) : (
+            <p className="text-[10px] text-stone-400 italic">Sample post — replies open once members start posting.</p>
+          )}
+        </div>
+      )}
     </motion.article>
   );
 }
@@ -677,12 +812,9 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       className="rounded-2xl border border-stone-100 bg-white p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col gap-3"
     >
       <header className="flex items-start gap-3">
-        <div className={`w-11 h-11 rounded-2xl ${meta.color} flex items-center justify-center text-xl shrink-0`} aria-hidden>
-          {group.emoji}
-        </div>
         <div className="flex-1 min-w-0">
           <p className={`text-[9px] font-black uppercase tracking-[0.25em] ${meta.accent} mb-1`}>{meta.label}</p>
-          <h3 className="text-lg font-serif italic leading-tight">{group.name}</h3>
+          <h3 className="text-xl font-serif italic leading-tight">{group.name}</h3>
         </div>
       </header>
       <p className="text-sm text-stone-500 font-light leading-relaxed">{group.description}</p>

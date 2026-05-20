@@ -209,14 +209,16 @@ export const Footer: React.FC = () => {
             </nav>
           </div>
 
-          {/* Legal strip */}
-          <div className="mt-12 pt-6 border-t border-stone-100 flex flex-col md:flex-row items-center md:items-baseline gap-3 md:gap-4 justify-between text-center md:text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-charcoal/70">
-              © {new Date().getFullYear()} BMBWeb3 Global FZCO — {t.footer.rights}
-            </p>
-            <p className="text-[11px] text-stone-400 font-light italic leading-relaxed">
-              IFZA Business Park · Dubai Silicon Oasis · P.O. Box 342001 · Dubai, UAE
-            </p>
+          {/* Legal strip — both lines grouped on the right */}
+          <div className="mt-12 pt-6 border-t border-stone-100 flex justify-center md:justify-end text-center md:text-right">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-charcoal/70">
+                © {new Date().getFullYear()} BMBWeb3 Global FZCO — {t.footer.rights}
+              </p>
+              <p className="text-[11px] text-stone-400 font-light italic leading-relaxed">
+                IFZA Business Park · Dubai Silicon Oasis · P.O. Box 342001 · Dubai, UAE
+              </p>
+            </div>
           </div>
         </div>
       </div>

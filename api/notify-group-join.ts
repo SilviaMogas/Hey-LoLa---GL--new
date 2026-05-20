@@ -1,4 +1,4 @@
-import { getAdminDb, getAdminAuth } from './_admin';
+import { getAdminDb, getAdminAuth, appUrl } from './_admin';
 import { sendGroupJoinEmail } from '../src/lib/email';
 
 // POST /api/notify-group-join
@@ -10,11 +10,30 @@ import { sendGroupJoinEmail } from '../src/lib/email';
 
 const RECENT_WINDOW_MS = 10 * 60 * 1000;
 
-function appUrl(req: any): string {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  const proto = (req.headers?.['x-forwarded-proto'] as string) || 'https';
-  const host = (req.headers?.['x-forwarded-host'] as string) || (req.headers?.host as string) || 'heylola.co';
-  return `${proto}://${host}`;
+async function resolveRecipient(db: ReturnType<typeof getAdminDb>, auth: ReturnType<typeof getAdminAuth>, userId: string): Promise<{ email: string; name: string }> {
+  let email = '';
+  let name = 'there';
+  try {
+    const userRecord = await auth.getUser(userId);
+    email = userRecord.email || '';
+    name = userRecord.displayName || name;
+  } catch (err) {
+    console.warn('notify-group-join: getUser failed', err);
+  }
+  if (email) return { email, name };
+  try {
+    const snap = await db.collection('users').doc(userId).get();
+    if (snap.exists) {
+      const p = snap.data() || {};
+      email = String(p.email || p.contactEmail || '');
+      const composed = [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
+      if (composed) name = composed;
+      else if (p.displayName) name = String(p.displayName);
+    }
+  } catch (err) {
+    console.warn('notify-group-join: profile lookup failed', err);
+  }
+  return { email, name };
 }
 
 export default async function handler(req: any, res: any) {
@@ -62,32 +81,7 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Look up the user's email + name from Firebase Auth + the user profile doc.
-  let email = '';
-  let name = 'there';
-  try {
-    const userRecord = await auth.getUser(userId);
-    email = userRecord.email || '';
-    name = userRecord.displayName || name;
-  } catch (err) {
-    console.warn('notify-group-join: getUser failed', err);
-  }
-  if (!email) {
-    // Fall back to the users/{uid} doc for the email (some accounts only
-    // have one or the other depending on signup path).
-    try {
-      const profileSnap = await db.collection('users').doc(userId).get();
-      if (profileSnap.exists) {
-        const profile = profileSnap.data() || {};
-        email = String(profile.email || profile.contactEmail || '');
-        const profileName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
-        if (profileName) name = profileName;
-        else if (profile.displayName) name = String(profile.displayName);
-      }
-    } catch (err) {
-      console.warn('notify-group-join: profile lookup failed', err);
-    }
-  }
+  const { email, name } = await resolveRecipient(db, auth, userId);
   if (!email || !email.includes('@')) {
     res.status(422).json({ success: false, error: 'User has no usable email.' });
     return;

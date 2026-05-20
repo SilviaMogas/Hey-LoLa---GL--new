@@ -1,10 +1,10 @@
 import { cert, getApps, initializeApp, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import { getAuth, Auth } from 'firebase-admin/auth';
 
 // Shared bootstrap for every Vercel API route that needs server-side
-// Firestore access via the Admin SDK. Centralised so the three endpoints
-// (invite-venue, submit-claim, verify-venue) stop carrying near-identical
-// 15-line copies of the same init dance.
+// Firestore / Auth access via the Admin SDK. Centralised so endpoints
+// stop carrying near-identical 15-line copies of the same init dance.
 //
 // Required env (any host):
 //   FIREBASE_ADMIN_PROJECT_ID
@@ -38,3 +38,21 @@ export function getAdminDb(): Firestore {
   const dbId = process.env.FIREBASE_DATABASE_ID;
   return dbId ? getFirestore(app, dbId) : getFirestore(app);
 }
+
+export function getAdminAuth(): Auth {
+  return getAuth(getAdminApp());
+}
+
+/**
+ * Resolve the public URL the request is being served from. Prefers the
+ * APP_URL env var (set on Vercel for the production domain) and falls
+ * back to the forwarded headers so preview deploys / local dev still
+ * generate working absolute links.
+ */
+export function appUrl(req: { headers?: Record<string, string | string[] | undefined> }): string {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  const proto = (req.headers?.['x-forwarded-proto'] as string) || 'https';
+  const host = (req.headers?.['x-forwarded-host'] as string) || (req.headers?.host as string) || 'heylola.co';
+  return `${proto}://${host}`;
+}
+

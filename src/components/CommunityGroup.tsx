@@ -11,6 +11,7 @@ import { SEO } from '../lib/seo';
 import {
   FeedItem,
   PostComposer,
+  EmptyFeedState,
   mapPostSnapshot,
   type FeedPost,
   type PostComposerProps,
@@ -119,11 +120,7 @@ export const CommunityGroup: React.FC = () => {
             placeholder={`Share something with the ${group.name}…`}
           />
           {livePosts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 p-8 text-center">
-              <p className="text-sm text-stone-500 italic">
-                No posts in this pack yet. Be the first.
-              </p>
-            </div>
+            <EmptyFeedState message="No posts in this pack yet. Be the first." />
           ) : (
             livePosts.map((post) => (
               <FeedItem key={post.id} post={post} user={user} profile={profile as PostComposerProps['profile']} />

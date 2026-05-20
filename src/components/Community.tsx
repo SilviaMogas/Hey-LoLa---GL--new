@@ -298,11 +298,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
             >
               <PostComposer user={user} profile={profile} />
               {feedPosts.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 p-8 text-center">
-                  <p className="text-sm text-stone-500 italic">
-                    No posts yet. Be the first to share an insight with the pack.
-                  </p>
-                </div>
+                <EmptyFeedState message="No posts yet. Be the first to share an insight with the pack." />
               ) : (
                 feedPosts.map((post) => (
                   <FeedItem key={post.id} post={post} user={user} profile={profile} />
@@ -738,6 +734,18 @@ export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Re
       };
     })
     .filter((p) => p.body.trim().length > 0);
+}
+
+/**
+ * Soft empty-state card used both on /community and inside each group
+ * room when no posts exist yet.
+ */
+export function EmptyFeedState({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/50 p-8 text-center">
+      <p className="text-sm text-stone-500 italic">{message}</p>
+    </div>
+  );
 }
 
 export function formatTimeAgo(ms: number): string {

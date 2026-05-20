@@ -296,6 +296,25 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
                  </div>
                  <div className="space-y-3">
                     <div className="flex items-center gap-2 text-stone-300">
+                      <PawPrint size={16} />
+                      <label className="text-[10px] font-black uppercase tracking-widest">Sex</label>
+                    </div>
+                    {isEditing ? (
+                      <select
+                        value={editedData.sex || ''}
+                        onChange={(e) => setEditedData({...editedData, sex: (e.target.value || undefined) as PetData['sex']})}
+                        className="w-full bg-muted border-none rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-stone-200"
+                      >
+                        <option value="">—</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    ) : (
+                      <p className="text-2xl font-black tracking-tighter text-charcoal">{petData.sex || 'N/A'}</p>
+                    )}
+                 </div>
+                 <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-stone-300">
                       <Calendar size={16} />
                       <label className="text-[10px] font-black uppercase tracking-widest">Born On / Age</label>
                     </div>

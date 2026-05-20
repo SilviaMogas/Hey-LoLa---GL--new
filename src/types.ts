@@ -52,6 +52,8 @@ export interface PetData {
   userId: string;
   name: string;
   type: 'Dog' | 'Cat' | 'Other' | 'pet_lover';
+  /** Biological sex of the pet. */
+  sex?: 'Male' | 'Female';
   breed: string;
   birthDate: string;
   currentWeight: WeightRecord;

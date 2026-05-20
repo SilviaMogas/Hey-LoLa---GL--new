@@ -8,6 +8,8 @@ import { cn, compressDataUrl } from '../lib/utils';
 import { getTier } from '../lib/membership';
 import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
 import { VACCINES_BY_COUNTRY } from '../lib/vaccines';
+import { useNavigate } from 'react-router-dom';
+import { paths } from '../lib/routes';
 
 // De-duplicated vaccine names for the edit-form suggestions (datalist).
 const VACCINE_SUGGESTIONS = Array.from(
@@ -22,6 +24,7 @@ interface PassportProps {
 }
 
 export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMemberPlan, ownerIsAdmin = false }) => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editedData, setEditedData] = useState<PetData>(() => ({
@@ -775,20 +778,24 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
 
            {!isEditing && (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-muted p-5 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
+                <div className="bg-muted p-5 rounded-2xl flex items-center justify-between border border-stone-50 opacity-60 cursor-default">
                    <div className="space-y-1">
                       <h4 className="font-bold text-charcoal">Update Papers</h4>
                       <p className="text-[10px] uppercase font-black tracking-widest text-stone-300">Scan medical records</p>
                    </div>
-                   <ArrowUpIcon />
+                   <span className="text-[9px] font-black uppercase tracking-widest text-stone-400 bg-white border border-stone-100 rounded-full px-3 py-1.5">Coming soon</span>
                 </div>
-                <div className="bg-muted p-5 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors">
+                <button
+                   type="button"
+                   onClick={() => navigate(paths.onboarding)}
+                   className="text-left w-full bg-muted p-5 rounded-2xl flex items-center justify-between group cursor-pointer border border-stone-50 hover:bg-stone-50 transition-colors"
+                >
                    <div className="space-y-1">
                       <h4 className="font-bold text-charcoal">Add Companion</h4>
                       <p className="text-[10px] uppercase font-black tracking-widest text-stone-300">Travel with a new pet</p>
                    </div>
                    <ArrowUpIcon />
-                </div>
+                </button>
              </div>
            )}
         </div>

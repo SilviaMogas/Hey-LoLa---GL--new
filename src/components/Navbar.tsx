@@ -55,7 +55,8 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
     { to: paths.community, label: t.common.hub, match: [paths.community] },
     { to: paths.club, label: 'Club', match: [paths.club] },
     { to: paths.creators, label: 'Creators', match: [paths.creators] },
-    { to: paths.start, label: 'Join', match: [paths.start] },
+    // "Join" is for signed-out visitors only — hide it once logged in.
+    ...(user ? [] : [{ to: paths.start, label: 'Join', match: [paths.start] }]),
   ];
 
   const isActive = (match: string[]) => match.includes(location.pathname);

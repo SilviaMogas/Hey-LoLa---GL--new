@@ -60,7 +60,7 @@ const CITIES: Record<CityId, { name: string; center: { lat: number; lng: number 
 
 const COMING_SOON: Record<ContinentId, string[]> = {
   europe: ['Paris', 'London', 'Lisbon', 'Berlin', 'Rome'],
-  americas: ['Toronto', 'Mexico City', 'Buenos Aires', 'Los Angeles'],
+  americas: ['Washington DC', 'Toronto', 'Mexico City', 'Buenos Aires', 'Los Angeles'],
   asia: ['Tokyo', 'Singapore', 'Seoul', 'Bangkok'],
   middleEast: ['Dubai', 'Tel Aviv'],
   oceania: ['Sydney', 'Melbourne']

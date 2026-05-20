@@ -16,6 +16,7 @@ import { cn } from '../lib/utils';
 import { track } from '../lib/analytics';
 import { useTranslation } from '../lib/LanguageContext';
 import { curatedPlaces } from '../data/curatedPlaces';
+import { ScrollChips } from './ScrollChips';
 
 // Custom orange pin — no asset requests, just an inline SVG
 const PIN_ICON = L.divIcon({
@@ -832,22 +833,22 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
           />
         </div>
 
-        <div className="flex gap-2 pb-1 overflow-x-auto scrollbar-hide">
+        <ScrollChips ariaLabel="Filter places by category">
           {CATEGORIES.map(cat => (
-            <button 
+            <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "whitespace-nowrap px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border shrink-0",
-                activeCategory === cat 
-                  ? 'bg-charcoal text-white border-charcoal shadow-md' 
-                  : 'bg-white text-stone-400 border-stone-line hover:border-stone-300 hover:text-charcoal'
+                'snap-start shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.18em] transition-all border',
+                activeCategory === cat
+                  ? 'bg-charcoal text-white border-charcoal shadow-sm'
+                  : 'bg-stone-50 text-stone-500 border-stone-100 hover:border-stone-300 hover:text-charcoal hover:bg-white',
               )}
             >
-              {cat === 'All' ? 'All Categories' : cat}
+              {cat === 'All' ? 'All' : cat}
             </button>
           ))}
-        </div>
+        </ScrollChips>
       </div>
 
       <div className="flex flex-col lg:flex-row flex-1 gap-6 min-h-[700px] relative">

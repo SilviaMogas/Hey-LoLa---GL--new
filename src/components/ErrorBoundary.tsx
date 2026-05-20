@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
+  componentStack?: string;
 }
 
 interface ErrorBoundaryProps {
@@ -24,6 +25,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // Surface to whatever error-monitoring tool is configured.
     // eslint-disable-next-line no-console
     console.error('UI crash:', error, info.componentStack);
+    this.setState({ componentStack: info.componentStack || undefined });
   }
 
   handleReset = () => {
@@ -48,6 +50,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               The page hit an unexpected error. We've logged it and are looking into it. Please try again.
             </p>
           </div>
+          {this.state.error && (
+            <details className="text-left bg-stone-50 border border-stone-100 rounded-xl p-4 text-[11px] text-stone-600">
+              <summary className="cursor-pointer font-bold text-charcoal mb-2">Detalles técnicos del error</summary>
+              <p className="font-mono break-words whitespace-pre-wrap">{this.state.error.message}</p>
+              {this.state.componentStack && (
+                <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-[10px] text-stone-400">{this.state.componentStack}</pre>
+              )}
+            </details>
+          )}
           <button
             onClick={this.handleReset}
             className="luxury-button-primary h-12 px-8 inline-flex items-center gap-2 text-[10px] tracking-[0.3em]"

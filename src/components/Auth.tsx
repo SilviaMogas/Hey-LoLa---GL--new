@@ -6,6 +6,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendEmailVerification,
   sendPasswordResetEmail,
 } from 'firebase/auth';
@@ -85,47 +87,89 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
     return () => clearTimeout(t);
   }, [username, mode]);
 
+  // Shared post-Google-auth provisioning: create the user doc for brand-new
+  // users, then hand control back to the app. Used by both the popup (desktop)
+  // and redirect (mobile) flows.
+  const provisionGoogleUser = async (user: any) => {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      const baseUsername = user.displayName?.toLowerCase().replace(/\s+/g, '') || 'traveler';
+      const finalUsername = `${baseUsername}${Math.floor(Math.random() * 1000)}`;
+      const nameParts = user.displayName?.split(' ') || [];
+      const batch = writeBatch(db);
+      const now = new Date().toISOString();
+      batch.set(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        displayName: user.displayName || user.email?.split('@')[0] || 'Traveler',
+        username: finalUsername,
+        userType: 'Dog Owner',
+        onboardingStep: 0,
+        onboarded: false,
+        onboardingStatus: 'pending',
+        createdAt: now,
+        updatedAt: now,
+      });
+      batch.set(doc(db, 'usernames', finalUsername), { uid: user.uid });
+      await batch.commit();
+      track('signup_completed', { method: 'google' });
+      onSuccess(true);
+    } else {
+      track('login_completed', { method: 'google' });
+      onSuccess(false);
+    }
+  };
+
+  // On mobile, signInWithPopup is unreliable (popups get blocked → blank
+  // screen), so we use signInWithRedirect and finish the flow here when the
+  // user returns to the app.
+  useEffect(() => {
+    let active = true;
+    getRedirectResult(auth)
+      .then((res) => { if (active && res?.user) return provisionGoogleUser(res.user); })
+      .catch((err) => {
+        if (active && err?.code && err.code !== 'auth/popup-closed-by-user') {
+          console.warn('Google redirect sign-in failed', err);
+        }
+      });
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isMobileDevice = () =>
+    typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
+
+    // Mobile: redirect (popup is unreliable and shows a blank screen).
+    if (isMobileDevice()) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return; // page navigates away; provisioning happens on return
+      } catch (err: any) {
+        setError(err?.message || 'Google sign-in failed');
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Desktop: popup, with a redirect fallback if the popup can't open.
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-
-      if (!userDoc.exists()) {
-        const baseUsername = user.displayName?.toLowerCase().replace(/\s+/g, '') || 'traveler';
-        const finalUsername = `${baseUsername}${Math.floor(Math.random() * 1000)}`;
-        const nameParts = user.displayName?.split(' ') || [];
-        const batch = writeBatch(db);
-        const now = new Date().toISOString();
-        batch.set(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          email: user.email,
-          firstName: nameParts[0] || '',
-          lastName: nameParts.slice(1).join(' ') || '',
-          displayName: user.displayName || user.email?.split('@')[0] || 'Traveler',
-          username: finalUsername,
-          userType: 'Dog Owner',
-          onboardingStep: 0,
-          onboarded: false,
-          onboardingStatus: 'pending',
-          createdAt: now,
-          updatedAt: now,
-        });
-        batch.set(doc(db, 'usernames', finalUsername), { uid: user.uid });
-        await batch.commit();
-        track('signup_completed', { method: 'google' });
-        onSuccess(true);
-      } else {
-        track('login_completed', { method: 'google' });
-        onSuccess(false);
-      }
+      await provisionGoogleUser(result.user);
     } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-environment' || code === 'auth/cancelled-popup-request') {
+        try { await signInWithRedirect(auth, googleProvider); return; } catch { /* fall through to message */ }
+      }
       let message = err.message || 'Google sign-in failed';
-      if (err.code === 'auth/operation-not-allowed') {
+      if (code === 'auth/operation-not-allowed') {
         message = 'Google Sign-In is not enabled in Firebase. Please use email signup.';
-      } else if (err.code === 'auth/popup-closed-by-user') {
+      } else if (code === 'auth/popup-closed-by-user') {
         message = '';
       }
       if (message) setError(message);

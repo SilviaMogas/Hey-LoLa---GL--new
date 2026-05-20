@@ -11,6 +11,7 @@ import { DmInbox } from './DmInbox';
 import { curatedPlaces } from '../data/curatedPlaces';
 import { getTier } from '../lib/membership';
 import { getMembershipDerived } from '../lib/levels';
+import { setHandle, normalizeHandle, changesRemaining } from '../lib/handle';
 
 interface DashboardProps {
   user: any;
@@ -40,6 +41,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
   const [newBio, setNewBio] = useState('');
   const [newCity, setNewCity] = useState('');
   const [newPhotoURL, setNewPhotoURL] = useState('');
+  const [newHandle, setNewHandle] = useState('');
+  const [handleError, setHandleError] = useState('');
   const [showForm, setShowForm] = useState(initialShowProfile || false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -144,6 +147,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       setNewLastName(profile.lastName ?? '');
       setNewBio(profile.bio ?? '');
       setNewCity(profile.homeCity ?? '');
+      setNewHandle(profile.username ?? '');
       // Mirror the Navbar fallback: when the Firestore profile has no photo
       // yet, fall back to the auth photoURL (e.g. Google sign-in avatar) so
       // the form preview always matches what the rest of the app shows.
@@ -160,6 +164,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     setNewLastName(profile.lastName ?? '');
     setNewBio(profile.bio ?? '');
     setNewCity(profile.homeCity ?? '');
+    setNewHandle(profile.username ?? '');
+    setHandleError('');
     setNewPhotoURL(profile.photoURL || user?.photoURL || '');
   }, [showForm, profile, user]);
 
@@ -201,8 +207,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     e.preventDefault();
     if (!newFirstName || !newLastName) return;
     setIsUpdating(true);
-    persistProfile()
-      .then(closeForm)
+    setHandleError('');
+    (async () => {
+      await persistProfile();
+      const desired = normalizeHandle(newHandle);
+      const current = (profile?.username || '').toLowerCase();
+      if (desired && desired !== current) {
+        const res = await setHandle({
+          uid: user.uid,
+          currentHandle: profile?.username,
+          newHandle: desired,
+          changedAt: profile?.usernameChangedAt,
+          countAsChange: true,
+        });
+        if (!res.ok) { setHandleError(res.reason); return; }
+      }
+      closeForm();
+    })()
       .catch((err) => {
         console.error('Failed to update profile', err);
         alert('Could not save your profile. Please try again.');
@@ -304,6 +325,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                     placeholder="e.g. Barcelona"
                     className="luxury-input h-11 w-full text-sm font-medium"
                   />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">Handle</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-medium">@</span>
+                    <input
+                      type="text"
+                      value={newHandle}
+                      onChange={(e) => { setNewHandle(normalizeHandle(e.target.value)); setHandleError(''); }}
+                      placeholder="tu_handle"
+                      maxLength={20}
+                      className="luxury-input h-11 w-full text-sm font-medium pl-9"
+                    />
+                  </div>
+                  {handleError ? (
+                    <p className="text-[11px] text-red-500 ml-1">{handleError}</p>
+                  ) : (
+                    <p className="text-[11px] text-stone-400 ml-1">3-20 caracteres: letras, números o _. Te quedan {changesRemaining(profile?.usernameChangedAt)} cambios este mes.</p>
+                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -625,7 +666,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                    <div className="space-y-2">
                     <p className="text-base font-light text-stone-400 italic leading-snug">{t.dashboard.noSpots}</p>
                     <button onClick={onExplore} className="text-[10px] font-black uppercase tracking-[0.3em] text-charcoal hover:tracking-[0.4em] transition-all">
-                        Discover Barcelona
+                        Discover {profile?.homeCity?.trim() || 'new places'}
                     </button>
                    </div>
                 </div>

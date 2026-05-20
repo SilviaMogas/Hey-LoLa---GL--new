@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { paths } from '../lib/routes';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
+import { signOut } from 'firebase/auth';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { ArrowRight, ArrowLeft, PawPrint, ShieldCheck, Weight, Calendar, Info, Loader2, Camera, X, MapPin } from 'lucide-react';
 import { cn, compressDataUrl } from '../lib/utils';
@@ -11,6 +12,7 @@ import { track } from '../lib/analytics';
 import { SUPPORTED_COUNTRIES, validateMicrochip, type SupportedCountry } from '../lib/microchip';
 import { applicableVaccines } from '../lib/vaccines';
 import { COUNTRIES } from '../data/countries';
+import { setHandle, normalizeHandle } from '../lib/handle';
 
 /** Common vaccines surfaced as dropdown options. Free text via "Other"
  *  is still allowed for anything not in this short list. */
@@ -72,6 +74,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
     dreamDestination: profile?.dreamDestination || '',
     appIntents: (profile?.appIntents as string[]) || [] as string[],
     relationshipStatus: (profile?.relationshipStatus as string) || '',
+    handle: profile?.username || '',
   });
   const APP_INTENTS = [
     { id: 'community', label: 'Make dog-parent friends', emoji: '🐶' },
@@ -147,6 +150,22 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
           : {}),
         updatedAt: new Date().toISOString()
       }, { merge: true });
+
+      // Claim the chosen handle — initial claim, not counted against the
+      // monthly change limit. Best-effort: never blocks onboarding completion.
+      const desiredHandle = normalizeHandle(userProfileData.handle);
+      const currentHandle = (profile?.username || '').toLowerCase();
+      if (desiredHandle && desiredHandle !== currentHandle) {
+        try {
+          await setHandle({
+            uid: userId,
+            currentHandle: profile?.username,
+            newHandle: desiredHandle,
+            changedAt: profile?.usernameChangedAt,
+            countAsChange: false,
+          });
+        } catch { /* keep onboarding flowing even if the handle is taken */ }
+      }
 
       track('onboarding_completed', { hasPet: !isPetLover, petType: isPetLover ? 'none' : String(finalPetType) });
       if (!isPetLover) track('pet_created', { petType: String(finalPetType) });
@@ -228,12 +247,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
     <div className="max-w-4xl mx-auto py-6 px-6 min-h-screen flex flex-col justify-center">
       {/* Progress Indicator */}
       <div className="fixed top-0 left-0 w-full h-1 bg-stone-50 z-50">
-        <motion.div 
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${(step / 6) * 100}%` }}
           className="h-full bg-charcoal"
         />
       </div>
+
+      {/* Escape hatch — always allow signing out, even if onboarding is incomplete. */}
+      <button
+        onClick={() => signOut(auth)}
+        className="fixed top-4 right-4 z-50 text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-charcoal bg-white/80 backdrop-blur border border-stone-100 px-4 py-2 rounded-full shadow-sm transition-colors"
+      >
+        Log out
+      </button>
 
       <AnimatePresence mode="wait">
         {step === 0 && (
@@ -983,6 +1010,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
                 value={userProfileData.dreamDestination}
                 onChange={(v) => setUserProfileData({...userProfileData, dreamDestination: v})}
                 placeholder="e.g. Tokyo, Swiss Alps, Tulum..."
+              />
+
+              <OnboardingInput
+                icon={<PawPrint size={14} />}
+                label="Your handle (@username)"
+                value={userProfileData.handle}
+                onChange={(v) => setUserProfileData({...userProfileData, handle: normalizeHandle(v)})}
+                placeholder="e.g. lola_thedog"
               />
 
               <div className="space-y-2">

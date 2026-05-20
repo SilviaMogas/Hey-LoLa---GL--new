@@ -168,6 +168,8 @@ export interface UserProfile {
   emailVerified?: boolean;
   status?: string;
   statusUpdatedAt?: string;
+  /** ISO timestamps of handle changes — used to enforce max 2 changes / 30 days. */
+  usernameChangedAt?: string[];
   createdAt: string;
   updatedAt: string;
 }

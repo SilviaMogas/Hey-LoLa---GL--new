@@ -6,6 +6,13 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { ShieldCheck, Calendar, Weight, PawPrint, Info, AlertCircle, MapPin, Edit2, Save, X, Camera, Loader2 } from 'lucide-react';
 import { cn, compressDataUrl } from '../lib/utils';
 import { getTier } from '../lib/membership';
+import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
+import { VACCINES_BY_COUNTRY } from '../lib/vaccines';
+
+// De-duplicated vaccine names for the edit-form suggestions (datalist).
+const VACCINE_SUGGESTIONS = Array.from(
+  new Set(Object.values(VACCINES_BY_COUNTRY).flat().map((v) => v.name)),
+).sort();
 
 interface PassportProps {
   petData: PetData;
@@ -253,13 +260,37 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
         <div className="lg:col-span-3 space-y-4">
            <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-xl border border-stone-50 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-                 <DetailItem 
-                    icon={<PawPrint />} 
-                    label="Breed" 
-                    value={isEditing ? editedData.breed : petData.breed} 
+                 <DetailItem
+                    icon={<PawPrint />}
+                    label="Name"
+                    value={isEditing ? (editedData.name || '') : petData.name}
                     isEditing={isEditing}
-                    onChange={(v) => setEditedData({...editedData, breed: v})}
+                    onChange={(v) => setEditedData({...editedData, name: v})}
                  />
+                 <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-stone-300">
+                      <PawPrint size={16} />
+                      <label className="text-[10px] font-black uppercase tracking-widest">Breed</label>
+                    </div>
+                    {isEditing ? (
+                      <>
+                        <input
+                          list="breed-options"
+                          value={editedData.breed || ''}
+                          onChange={(e) => setEditedData({...editedData, breed: e.target.value})}
+                          placeholder="Start typing or pick a breed…"
+                          className="w-full bg-muted border-none rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-stone-200"
+                        />
+                        <datalist id="breed-options">
+                          {(editedData.type === 'Cat' ? CAT_BREEDS : DOG_BREEDS).map((b) => (
+                            <option key={b} value={b} />
+                          ))}
+                        </datalist>
+                      </>
+                    ) : (
+                      <p className="text-2xl font-black tracking-tighter text-charcoal">{petData.breed || 'N/A'}</p>
+                    )}
+                 </div>
                  <div className="space-y-3">
                     <div className="flex items-center gap-2 text-stone-300">
                       <Calendar size={16} />
@@ -635,14 +666,18 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
                          </button>
                        )}
                     </div>
+                    <datalist id="vaccine-options">
+                       {VACCINE_SUGGESTIONS.map((name) => <option key={name} value={name} />)}
+                    </datalist>
                     <div className="space-y-3">
                        {(isEditing ? editedData.vaccinations : petData.vaccinations)?.map((vax: any, i: number) => (
                          <div key={i} className="p-4 bg-muted rounded-2xl space-y-1 relative group">
                             {isEditing ? (
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                  <input 
-                                    value={vax.name} 
+                                  <input
+                                    list="vaccine-options"
+                                    value={vax.name}
                                     onChange={(e) => {
                                       const newVax = [...editedData.vaccinations];
                                       newVax[i].name = e.target.value;

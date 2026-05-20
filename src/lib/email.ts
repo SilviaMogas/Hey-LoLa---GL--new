@@ -388,3 +388,69 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// ────────── COMMUNITY GROUP JOIN ──────────
+
+export interface GroupJoinEmailOpts {
+  /** Recipient address (the user who just joined). */
+  to: string;
+  /** First name (or full display name). Used in greeting. */
+  name: string;
+  /** Display name of the group, e.g. "Crew in Miami". */
+  groupName: string;
+  /** Direct URL to the group's room (Reddit-style page). */
+  groupUrl: string;
+}
+
+/**
+ * One-shot welcome email fired when a member joins a community group.
+ * Resend-only — silently no-ops when RESEND_API_KEY is missing so
+ * local dev / preview deploys don't break the join flow.
+ */
+export async function sendGroupJoinEmail(opts: GroupJoinEmailOpts): Promise<SendResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { delivered: false, skippedReason: 'RESEND_API_KEY is not configured.' };
+  const from = process.env.EMAIL_FROM || DEFAULT_FROM;
+  const replyTo = process.env.EMAIL_REPLY_TO || DEFAULT_REPLY_TO;
+  const resend = new Resend(apiKey);
+  const firstName = (opts.name || 'there').trim().split(/\s+/)[0];
+  const safeGroup = esc(opts.groupName);
+  const subject = `Welcome to ${opts.groupName}`;
+
+  const text = [
+    `Hi ${firstName},`,
+    '',
+    `You're in — welcome to ${opts.groupName}.`,
+    '',
+    `Drop in to introduce yourself, share a spot or just lurk: ${opts.groupUrl}`,
+    '',
+    'See you in the pack,',
+    'Hey Lola',
+    '— hey@heylola.co',
+  ].join('\n');
+
+  const html = `<!doctype html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#1a1a1a; max-width:560px; margin:0 auto; padding:24px;">
+    <p>Hi ${esc(firstName)},</p>
+    <p>You&rsquo;re in — welcome to <strong>${safeGroup}</strong>.</p>
+    <p>Drop in to introduce yourself, share a spot or just lurk:</p>
+    <p style="margin: 24px 0;">
+      <a href="${esc(opts.groupUrl)}" style="display:inline-block; padding: 12px 22px; background:#0A0A0A; color:#fff; text-decoration:none; border-radius:999px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; font-size:11px;">Open ${safeGroup}</a>
+    </p>
+    <p style="margin-top: 32px;">See you in the pack,<br/>The Hey Lola Team<br/><a href="mailto:hey@heylola.co" style="color:#1a1a1a;">hey@heylola.co</a></p>
+  </body></html>`;
+
+  try {
+    const r = await resend.emails.send({
+      from,
+      to: opts.to,
+      subject,
+      text,
+      html,
+      replyTo,
+    });
+    if (r.error) return { delivered: false, error: r.error.message ?? 'Resend error' };
+    return { delivered: true };
+  } catch (err) {
+    return { delivered: false, error: (err as Error).message ?? 'Send failed' };
+  }
+}

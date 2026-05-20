@@ -33,7 +33,7 @@ interface CommunityProps {
   initialMode?: 'community' | 'support';
 }
 
-interface FeedPost {
+export interface FeedPost {
   id: string;
   author: string;
   handle: string;
@@ -169,7 +169,9 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
         };
       });
-      setLivePosts(posts);
+      // Skip posts with empty body — usually leftover test docs from
+      // before validation tightened in the composer.
+      setLivePosts(posts.filter((p) => p.body.trim().length > 0));
     }, (err) => handleFirestoreError(err, OperationType.READ, 'posts'));
     return () => unsub();
   }, []);
@@ -433,12 +435,12 @@ interface Reply {
   timeAgo: string;
 }
 
-interface FeedAuthor {
+export interface FeedAuthor {
   user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
 }
 
-function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAuthor) {
+export function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAuthor) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
@@ -666,16 +668,23 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
     if (busy || joined) return;
     setBusy(true);
     try {
-      // Membership lives under users/{uid}/groups/{groupId} so the
-      // existing pets-subcollection rule pattern (owner-only writes)
-      // covers it for free without a dedicated firestore.rules entry.
-      await addDoc(collection(db, 'group_memberships'), {
+      const ref = await addDoc(collection(db, 'group_memberships'), {
         userId: user.uid,
         groupId: group.id,
         groupName: group.name,
         joinedAt: serverTimestamp(),
       });
       setJoined(true);
+      // Fire-and-forget welcome email. The server endpoint re-reads the
+      // membership doc via Admin SDK (source of truth) so the client
+      // can't forge a recipient by passing arbitrary fields.
+      void fetch('/api/notify-group-join', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ membershipId: ref.id }),
+      }).catch(() => { /* email is best-effort, never block join */ });
+      // Drop the user into the Reddit-style group room.
+      navigate(`/community/${group.id}`);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
     } finally {
@@ -722,7 +731,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
  * Format a millisecond timestamp as a compact "Xm / Xh / Xd / Xw" tag.
  * Mirrors the seed feed style so live + seeded posts read consistently.
  */
-function formatTimeAgo(ms: number): string {
+export function formatTimeAgo(ms: number): string {
   const diff = Date.now() - ms;
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'now';
@@ -734,9 +743,14 @@ function formatTimeAgo(ms: number): string {
   return `${Math.floor(d / 7)}w`;
 }
 
-interface PostComposerProps {
+export interface PostComposerProps {
   user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
+  /** Extra fields stamped on every post created from this composer.
+   *  Used by the group rooms (/community/:groupId) to scope posts. */
+  extraFields?: Record<string, string>;
+  /** Override the default textarea placeholder. */
+  placeholder?: string;
 }
 
 /**
@@ -745,7 +759,7 @@ interface PostComposerProps {
  * every viewer. Anonymous visitors see a sign-in prompt instead of the
  * textarea — we don't allow unauthenticated writes.
  */
-function PostComposer({ user, profile }: PostComposerProps) {
+export function PostComposer({ user, profile, extraFields, placeholder }: PostComposerProps) {
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -785,6 +799,7 @@ function PostComposer({ user, profile }: PostComposerProps) {
         likes: 0,
         replies: 0,
         createdAt: serverTimestamp(),
+        ...(extraFields ?? {}),
       });
       setDraft('');
     } catch (err) {
@@ -799,7 +814,7 @@ function PostComposer({ user, profile }: PostComposerProps) {
       <textarea
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder={`What's on with you and your pack, ${displayName.split(' ')[0]}?`}
+        placeholder={placeholder ?? `What's on with you and your pack, ${displayName.split(' ')[0]}?`}
         rows={3}
         maxLength={500}
         className="w-full bg-stone-50 rounded-xl px-4 py-3 text-sm leading-relaxed text-charcoal placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-stone-200 resize-none"

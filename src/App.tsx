@@ -36,6 +36,7 @@ import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 const Auth = lazy(() => import('./components/Auth').then(m => ({ default: m.Auth })));
 const Explore = lazy(() => import('./components/Explore').then(m => ({ default: m.Explore })));
 const Community = lazy(() => import('./components/Community').then(m => ({ default: m.Community })));
+const CommunityGroup = lazy(() => import('./components/CommunityGroup').then(m => ({ default: m.CommunityGroup })));
 const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const Passport = lazy(() => import('./components/Passport').then(m => ({ default: m.Passport })));
 const Onboarding = lazy(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
@@ -471,6 +472,11 @@ function AppContent() {
             <Route path={paths.community} element={
               <FadeIn className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
                 <Community petName={pets[activePetIndex]?.name || ''} initialMode={communityMode} />
+              </FadeIn>
+            } />
+            <Route path={paths.communityGroup} element={
+              <FadeIn className="px-4 sm:px-6 py-6">
+                <CommunityGroup />
               </FadeIn>
             } />
             <Route path={paths.venue} element={<VenueRoute />} />

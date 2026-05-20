@@ -454,3 +454,106 @@ export async function sendGroupJoinEmail(opts: GroupJoinEmailOpts): Promise<Send
     return { delivered: false, error: (err as Error).message ?? 'Send failed' };
   }
 }
+
+// ────────── VENUE CLAIM SUBMITTED ──────────
+
+export interface VenueClaimEmailOpts {
+  /** Claimant's email — the address they submitted on the form. */
+  claimantEmail: string;
+  /** Claimant's full name (contactPerson on the form). */
+  claimantName: string;
+  /** The business they are claiming on Hey Lola. */
+  businessName: string;
+  /** The listing as it appears in our database. */
+  placeName: string;
+  /** Optional venue page URL so admins can jump to the listing. */
+  placeUrl?: string;
+  /** Short message the claimant included (truncated to ~600 chars). */
+  message?: string;
+}
+
+/**
+ * Fires two emails when a venue claim is submitted:
+ *   1. Confirmation to the claimant — "we received your request, we'll
+ *      review and reply within 1 week."
+ *   2. Internal alert to ADMIN_INBOX with the submission summary.
+ * Mirrors sendPartnerApplicationEmails so behaviour stays consistent
+ * across the contact-form-style flows.
+ */
+export async function sendVenueClaimEmails(opts: VenueClaimEmailOpts): Promise<{ confirmation: SendResult; alert: SendResult }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    const skipped: SendResult = { delivered: false, skippedReason: 'RESEND_API_KEY is not configured.' };
+    return { confirmation: skipped, alert: skipped };
+  }
+  const from = process.env.EMAIL_FROM || DEFAULT_FROM;
+  const replyTo = process.env.EMAIL_REPLY_TO || DEFAULT_REPLY_TO;
+  const resend = new Resend(apiKey);
+  const firstName = (opts.claimantName || 'there').trim().split(/\s+/)[0];
+  const safeBiz = esc(opts.businessName);
+  const safePlace = esc(opts.placeName);
+  const safeMsg = opts.message ? esc(opts.message.slice(0, 600)) : '';
+
+  const confirmText = [
+    `Hi ${firstName},`,
+    '',
+    `Thanks for submitting a claim for ${opts.businessName}.`,
+    '',
+    'Our team reviews each request manually. You will hear back from us within one week with the next steps to verify the listing.',
+    '',
+    'In the meantime, if you need anything, reply to this email or write to hey@heylola.co.',
+    '',
+    'Hey Lola',
+  ].join('\n');
+
+  const confirmHtml = `<!doctype html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#1a1a1a; max-width:560px; margin:0 auto; padding:24px;">
+    <p>Hi ${esc(firstName)},</p>
+    <p>Thanks for submitting a claim for <strong>${safeBiz}</strong>.</p>
+    <p>Our team reviews each request manually. <strong>You&rsquo;ll hear back from us within one week</strong> with the next steps to verify the listing.</p>
+    <p>In the meantime, if you need anything, reply to this email or write to <a href="mailto:hey@heylola.co" style="color:#1a1a1a;">hey@heylola.co</a>.</p>
+    <p style="margin-top: 32px;">Hey Lola<br/><a href="mailto:hey@heylola.co" style="color:#1a1a1a;">hey@heylola.co</a></p>
+  </body></html>`;
+
+  const alertText = [
+    'New venue claim submitted',
+    '',
+    `Place:     ${opts.placeName}`,
+    `Business:  ${opts.businessName}`,
+    `Claimant:  ${opts.claimantName}`,
+    `Email:     ${opts.claimantEmail}`,
+    opts.placeUrl ? `Listing:   ${opts.placeUrl}` : '',
+    opts.message ? `Message:\n${opts.message}` : '',
+    '',
+    'Review the claim in Admin → Onboarding → Venue claims.',
+  ].filter(Boolean).join('\n');
+
+  const alertHtml = `<!doctype html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#1a1a1a; max-width:560px; margin:0 auto; padding:24px;">
+    <h2 style="margin:0 0 16px 0;">New venue claim</h2>
+    <table style="border-collapse:collapse; font-size:14px;">
+      <tr><td style="padding:4px 12px 4px 0; color:#7a7a7a;">Place</td><td style="padding:4px 0;">${safePlace}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0; color:#7a7a7a;">Business</td><td style="padding:4px 0;">${safeBiz}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0; color:#7a7a7a;">Claimant</td><td style="padding:4px 0;">${esc(opts.claimantName)}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0; color:#7a7a7a;">Email</td><td style="padding:4px 0;"><a href="mailto:${esc(opts.claimantEmail)}" style="color:#1a1a1a;">${esc(opts.claimantEmail)}</a></td></tr>
+      ${opts.placeUrl ? `<tr><td style="padding:4px 12px 4px 0; color:#7a7a7a;">Listing</td><td style="padding:4px 0;"><a href="${esc(opts.placeUrl)}" style="color:#1a1a1a;">${esc(opts.placeUrl)}</a></td></tr>` : ''}
+    </table>
+    ${safeMsg ? `<p style="margin-top:16px; white-space:pre-wrap;">${safeMsg}</p>` : ''}
+    <p style="margin-top:24px; color:#7a7a7a;">Review the claim in Admin → Onboarding → Venue claims.</p>
+  </body></html>`;
+
+  const send = async (to: string, subject: string, text: string, html: string): Promise<SendResult> => {
+    try {
+      const r = await resend.emails.send({ from, to, subject, text, html, replyTo });
+      if (r.error) return { delivered: false, error: r.error.message ?? 'Resend error' };
+      return { delivered: true };
+    } catch (err) {
+      return { delivered: false, error: (err as Error).message ?? 'Send failed' };
+    }
+  };
+
+  const [confirmation, alert] = await Promise.all([
+    send(opts.claimantEmail, `Thanks — your ${opts.businessName} claim is in review`, confirmText, confirmHtml),
+    send(ADMIN_INBOX, `[Claim] ${opts.businessName} (${opts.placeName})`, alertText, alertHtml),
+  ]);
+
+  return { confirmation, alert };
+}

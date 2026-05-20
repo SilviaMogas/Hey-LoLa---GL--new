@@ -1,4 +1,4 @@
-export type ConciergeId = 'lola' | 'taco' | 'nuc' | 'toby';
+export type ConciergeId = 'lola' | 'bruno' | 'milo' | 'taco';
 
 export interface ConciergeProfile {
   id: ConciergeId;
@@ -23,6 +23,9 @@ export interface ConciergeProfile {
   imageUrl: string;
   /** square head crop used for avatars; falls back to imageUrl if missing */
   headUrl?: string;
+  /** Whether this concierge has been publicly revealed. Unrevealed ones
+   *  render as "Coming soon" teasers and don't open a detail page. */
+  revealed: boolean;
 }
 
 /**
@@ -46,10 +49,32 @@ const concierge = (
   accent: string,
   imageUrl: string,
   headUrl?: string,
+  revealed: boolean = true,
 ): ConciergeProfile => ({
   id, name, role, tagline, personality, style, vibe, bio,
-  breed, signature, color, badgeColor, accent, imageUrl, headUrl,
+  breed, signature, color, badgeColor, accent, imageUrl, headUrl, revealed,
 });
+
+/**
+ * Coming-soon teaser. For concierges who haven't been publicly revealed
+ * yet: keeps the data shape consistent while signalling to the UI to
+ * render a locked "Coming soon" placeholder. The portrait, personality
+ * and bio are intentionally empty — they belong to the real reveal.
+ */
+const comingSoon = (id: ConciergeId, name: string): ConciergeProfile =>
+  concierge(
+    id,
+    name,
+    'Coming soon',
+    "We'll reveal them soon.",
+    '', '', '', '', '', '',
+    'bg-stone-100',
+    'bg-stone-200 text-stone-500',
+    '#A8A29E',
+    '',
+    undefined,
+    false,
+  );
 
 export const CONCIERGES: ConciergeProfile[] = [
   concierge(
@@ -69,54 +94,9 @@ export const CONCIERGES: ConciergeProfile[] = [
     '/HeyLola.Lola.1.png',
     '/Lola head.png',
   ),
-  concierge(
-    'taco',
-    'Taco',
-    'Local Discoveries Editor',
-    'Intelligent, curious and creative.',
-    'Intelligent, curious, creative.',
-    'Green cap, round glasses and an orange collar with a paw tag.',
-    'Hidden cafés, dog-friendly bookshops, the next great neighbourhood.',
-    'Taco is the curious one. He maps neighbourhoods on foot, peeks into every doorway and brings back the spots no guidebook covers. If a place feels right, Taco probably found it first.',
-    'Shiba Inu',
-    'Green cap, round glasses, orange collar with paw tag',
-    'bg-[#F4F8EF]',
-    'bg-[#E0EDD2] text-[#5F7A4C]',
-    '#6E8C5D',
-    '/HeyLola.Taco.1.png',
-  ),
-  concierge(
-    'nuc',
-    'Nuc',
-    'Adventure Concierge',
-    'Loyal, brave and protective.',
-    'Loyal, brave, protective.',
-    'Orange collar with a gold star tag and a red explorer backpack.',
-    'Weekend escapes, beach days, dog-friendly road trips.',
-    'Nuc is the concierge for everything beyond the city limits. He maps the routes, the rest stops and the hotel lobbies that welcome a tired dog at the end of a long day.',
-    'Dachshund',
-    'Orange collar with star tag, red backpack',
-    'bg-[#FCF1EE]',
-    'bg-[#F7D5CC] text-[#A33E29]',
-    '#C2412B',
-    '/HeyLola.Nuc.1.png',
-  ),
-  concierge(
-    'toby',
-    'Toby',
-    'Community Heart',
-    'Friendly, joyful and playful.',
-    'Friendly, joyful, playful.',
-    'Orange collar with a blue bone tag engraved with his name.',
-    'Park meet-ups, family-friendly events, repeat visits.',
-    "Toby is the soft side of the pack — the concierge who remembers your dog's name and what made you laugh last time. The reason Hey Lola feels personal.",
-    'Golden Retriever',
-    'Orange collar with blue bone name tag',
-    'bg-[#EFF5FA]',
-    'bg-[#D2E4F1] text-[#3F6B8C]',
-    '#3F6B8C',
-    '/HeyLola.Toby.1.png',
-  ),
+  comingSoon('bruno', 'Bruno'),
+  comingSoon('milo', 'Milo'),
+  comingSoon('taco', 'Taco'),
 ];
 
 /** Quick lookup helper. */

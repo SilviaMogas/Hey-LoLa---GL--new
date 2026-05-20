@@ -204,35 +204,58 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {CONCIERGES.map((c) => (
-            <motion.button
-              key={c.id}
-              type="button"
-              onClick={() => onOpenCharacter(c.id)}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="group relative flex flex-col h-full rounded-[2rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
-              aria-label={`Open ${c.name}'s page — ${c.role}`}
-            >
-              <div className={`aspect-square ${c.color} flex items-center justify-center relative overflow-hidden`}>
-                <ConciergeAvatar
-                  id={c.id}
-                  poseIndex={1}
-                  rounded="none"
-                  alt={`${c.name} — ${c.role}`}
-                  className="relative z-10 w-full h-full !object-contain group-hover:scale-110 transition-all duration-700"
-                />
-              </div>
-              <div className="p-6 space-y-2">
-                <h3 className="text-2xl font-serif italic tracking-tight leading-none">{c.name}</h3>
-                <p className="text-[11px] text-stone-400 italic">{c.role}</p>
-                <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-3">
-                  Open page <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
-                </p>
-              </div>
-            </motion.button>
-          ))}
+          {CONCIERGES.map((c) => {
+            if (!c.revealed) {
+              return (
+                <article
+                  key={c.id}
+                  className="relative flex flex-col h-full rounded-[2rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
+                  aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
+                    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[9rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
+                    <span className="relative text-7xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
+                    <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-[0.3em] bg-white/80 backdrop-blur text-stone-500 rounded-full px-2.5 py-1 border border-stone-100">
+                      Coming soon
+                    </span>
+                  </div>
+                  <div className="p-6 space-y-2">
+                    <h3 className="text-2xl font-serif italic tracking-tight leading-none text-stone-500">{c.name[0]}…</h3>
+                    <p className="text-[11px] text-stone-400 italic">A new face joining the pack soon.</p>
+                  </div>
+                </article>
+              );
+            }
+            return (
+              <motion.button
+                key={c.id}
+                type="button"
+                onClick={() => onOpenCharacter(c.id)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="group relative flex flex-col h-full rounded-[2rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
+                aria-label={`Open ${c.name}'s page — ${c.role}`}
+              >
+                <div className={`aspect-square ${c.color} flex items-center justify-center relative overflow-hidden`}>
+                  <ConciergeAvatar
+                    id={c.id}
+                    poseIndex={1}
+                    rounded="none"
+                    alt={`${c.name} — ${c.role}`}
+                    className="relative z-10 w-full h-full !object-contain group-hover:scale-110 transition-all duration-700"
+                  />
+                </div>
+                <div className="p-6 space-y-2">
+                  <h3 className="text-2xl font-serif italic tracking-tight leading-none">{c.name}</h3>
+                  <p className="text-[11px] text-stone-400 italic">{c.role}</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-3">
+                    Open page <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
+                  </p>
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
       </section>
 
@@ -365,7 +388,9 @@ interface BrandBookCharacterProps {
 
 export const BrandBookCharacter: React.FC<BrandBookCharacterProps> = ({ id, onBack, onOther }) => {
   const c = CONCIERGES.find((x) => x.id === id) ?? CONCIERGES[0];
-  const others = CONCIERGES.filter((x) => x.id !== c.id);
+  // The "meet the others" rail at the bottom only links to revealed concierges
+  // (Coming-soon ones don't have a detail page yet).
+  const others = CONCIERGES.filter((x) => x.id !== c.id && x.revealed);
   const characterBreadcrumbs = [
     { name: 'Hey Lola', item: '/' },
     { name: 'Brand Book', item: '/brand-book' },

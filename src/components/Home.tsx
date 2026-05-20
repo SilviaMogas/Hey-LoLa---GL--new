@@ -444,19 +444,42 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {CONCIERGES.map((c) => (
-              <DogConciergeCard
-                key={c.id}
-                name={c.name}
-                role={c.role}
-                personality={c.personality}
-                style={c.style}
-                vibe={c.vibe}
-                color={c.color}
-                badgeColor={c.badgeColor}
-                onClick={onConcierge ? () => onConcierge(c.id) : undefined}
-              />
-            ))}
+            {CONCIERGES.map((c) => {
+              if (!c.revealed) {
+                return (
+                  <article
+                    key={c.id}
+                    className="relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
+                    aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
+                  >
+                    <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
+                      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[12rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
+                      <span className="relative text-9xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
+                      <span className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-[0.3em] bg-white/85 backdrop-blur text-stone-500 rounded-full px-3 py-1.5 border border-stone-100">
+                        Coming soon
+                      </span>
+                    </div>
+                    <div className="p-8 space-y-3 text-center flex-1 flex flex-col justify-center">
+                      <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-stone-500 leading-none">{c.name[0]}…</h3>
+                      <p className="text-[12px] font-light text-stone-400 italic">A new face joining the pack soon.</p>
+                    </div>
+                  </article>
+                );
+              }
+              return (
+                <DogConciergeCard
+                  key={c.id}
+                  name={c.name}
+                  role={c.role}
+                  personality={c.personality}
+                  style={c.style}
+                  vibe={c.vibe}
+                  color={c.color}
+                  badgeColor={c.badgeColor}
+                  onClick={onConcierge ? () => onConcierge(c.id) : undefined}
+                />
+              );
+            })}
           </div>
         </div>
         

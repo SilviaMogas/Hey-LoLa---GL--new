@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { timingSafeEqual } from 'crypto';
-import { getAdminDb } from './_admin';
+import { getAdminDb, appUrl } from './_admin';
+import { sendVenueClaimEmails } from '../src/lib/email';
 
 // Public endpoint backing the /claim-listing/{token} page.
 //
@@ -207,6 +208,22 @@ export default async function handler(req: any, res: any) {
       verificationTokenExpiresAt: FieldValue.delete(),
       lastClaimSubmittedAt: now,
     });
+
+    // Fire the post-submission emails (confirmation + admin alert). Best-
+    // effort: an email provider hiccup must not roll back the verified
+    // claim that's already persisted above.
+    try {
+      await sendVenueClaimEmails({
+        claimantEmail: contactEmail,
+        claimantName: String(body.contactName).trim(),
+        businessName: String(body.businessName).trim() || r.placeData.name,
+        placeName: r.placeData.name,
+        placeUrl: `${appUrl(req)}/venue/${encodeURIComponent(r.placeId)}`,
+        message: typeof body.message === 'string' ? body.message : undefined,
+      });
+    } catch (err) {
+      console.warn('submit-claim: email dispatch failed', err);
+    }
 
     res.status(200).json({ success: true, placeName: r.placeData.name, autoApproved });
   } catch (err: any) {

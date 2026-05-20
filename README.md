@@ -66,3 +66,18 @@ gmail) drops to `pending_review` for manual approval.
 5. **Send invites**: log in to heylola.co as an admin → Dashboard →
    `BACK OFFICE` → Places tab → click `Invite to verify` per venue.
    Disabled when `contactEmail` is empty.
+
+## Reviewing transactional emails
+
+Every email Hey Lola sends — partner application confirmations, foundation
+interest acknowledgements, group join welcomes, admin alerts, etc. — lives
+as a React component in [`emails/`](emails/). Designers and copywriters
+can preview them in the browser without running the app:
+
+```bash
+npm install        # one-time
+npm run email      # opens http://localhost:3500
+```
+
+See [`emails/README.md`](emails/README.md) for the full guide: how to edit
+copy, swap brand colours, send live tests via Resend, and add new templates.

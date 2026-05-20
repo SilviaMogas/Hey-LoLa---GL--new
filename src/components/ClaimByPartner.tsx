@@ -107,7 +107,8 @@ export const ClaimByPartner: React.FC<ClaimByPartnerProps> = ({ slug, user, onBa
     setSubmitting(true);
     try {
       const ref = collection(db, 'claim_requests');
-      await setDoc(doc(ref), {
+      const docRef = doc(ref);
+      await setDoc(docRef, {
         userId: auth.currentUser.uid,
         placeId: place.id,
         placeName: place.name,
@@ -123,6 +124,11 @@ export const ClaimByPartner: React.FC<ClaimByPartnerProps> = ({ slug, user, onBa
         createdAt: new Date().toISOString(),
       });
       track('place_claimed', { placeId: place.id, placeName: place.name, city: place.city });
+      void fetch('/api/notify-claim', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ claimId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       setDone(true);
       onSubmitted();
     } catch (e) {

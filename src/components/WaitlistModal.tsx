@@ -62,7 +62,7 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
     try {
       if (type === 'member') {
         const waitlistRef = collection(db, 'waitlist');
-        await addDoc(waitlistRef, {
+        const docRef = await addDoc(waitlistRef, {
           type: 'member',
           firstName,
           lastName,
@@ -75,9 +75,14 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
           consent,
           createdAt: serverTimestamp(),
         });
+        void fetch('/api/notify-waitlist', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ entryId: docRef.id }),
+        }).catch(() => { /* email is best-effort */ });
       } else {
         const partnersRef = collection(db, 'partner_applications');
-        await addDoc(partnersRef, {
+        const docRef = await addDoc(partnersRef, {
           businessName,
           category,
           city,
@@ -89,9 +94,17 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
           policy,
           suggestedPerk,
           claimProfile,
+          source: 'self_onboarding',
           status: 'pending',
           createdAt: serverTimestamp(),
         });
+        // Fire-and-forget: confirmation to applicant + admin alert. The
+        // endpoint re-reads the doc via Admin SDK so it cannot be spoofed.
+        void fetch('/api/notify-partner-application', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ applicationId: docRef.id }),
+        }).catch(() => { /* email is best-effort */ });
       }
       setSuccess(true);
     } catch (err: any) {

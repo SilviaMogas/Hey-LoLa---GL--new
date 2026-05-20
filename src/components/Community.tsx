@@ -151,28 +151,10 @@ export const Community: React.FC<CommunityProps> = (_props) => {
       orderBy('createdAt', 'desc'),
       limit(50),
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const posts = snap.docs.map((d): FeedPost => {
-        const data = d.data() as Record<string, unknown>;
-        const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
-        return {
-          id: d.id,
-          author: String(data.author ?? 'Member'),
-          handle: String(data.handle ?? ''),
-          avatar: String(data.avatar ?? '/HeyLola.Lola.1.png'),
-          badge: data.badge as string | undefined,
-          city: data.city as string | undefined,
-          body: String(data.body ?? ''),
-          spot: data.spot as string | undefined,
-          likes: Number(data.likes ?? 0),
-          replies: Number(data.replies ?? 0),
-          timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
-        };
-      });
-      // Skip posts with empty body — usually leftover test docs from
-      // before validation tightened in the composer.
-      setLivePosts(posts.filter((p) => p.body.trim().length > 0));
-    }, (err) => handleFirestoreError(err, OperationType.READ, 'posts'));
+    const unsub = onSnapshot(q,
+      (snap) => setLivePosts(mapPostSnapshot(snap)),
+      (err) => handleFirestoreError(err, OperationType.READ, 'posts'),
+    );
     return () => unsub();
   }, []);
 
@@ -731,6 +713,33 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
  * Format a millisecond timestamp as a compact "Xm / Xh / Xd / Xw" tag.
  * Mirrors the seed feed style so live + seeded posts read consistently.
  */
+/**
+ * Maps a Firestore posts-collection snapshot into FeedPost[], applying
+ * the shared shape + the empty-body filter both the global feed and
+ * each group room use. Centralised here so the two callers don't drift.
+ */
+export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Record<string, unknown> }> }): FeedPost[] {
+  return snap.docs
+    .map((d): FeedPost => {
+      const data = d.data();
+      const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+      return {
+        id: d.id,
+        author: String(data.author ?? 'Member'),
+        handle: String(data.handle ?? ''),
+        avatar: String(data.avatar ?? '/HeyLola.Lola.1.png'),
+        badge: data.badge as string | undefined,
+        city: data.city as string | undefined,
+        body: String(data.body ?? ''),
+        spot: data.spot as string | undefined,
+        likes: Number(data.likes ?? 0),
+        replies: Number(data.replies ?? 0),
+        timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
+      };
+    })
+    .filter((p) => p.body.trim().length > 0);
+}
+
 export function formatTimeAgo(ms: number): string {
   const diff = Date.now() - ms;
   const m = Math.floor(diff / 60000);

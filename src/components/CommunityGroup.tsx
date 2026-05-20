@@ -11,7 +11,7 @@ import { SEO } from '../lib/seo';
 import {
   FeedItem,
   PostComposer,
-  formatTimeAgo,
+  mapPostSnapshot,
   type FeedPost,
   type PostComposerProps,
 } from './Community';
@@ -43,26 +43,10 @@ export const CommunityGroup: React.FC = () => {
       orderBy('createdAt', 'desc'),
       limit(100),
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const posts = snap.docs.map((d): FeedPost => {
-        const data = d.data() as Record<string, unknown>;
-        const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
-        return {
-          id: d.id,
-          author: String(data.author ?? 'Member'),
-          handle: String(data.handle ?? ''),
-          avatar: String(data.avatar ?? ''),
-          badge: data.badge as string | undefined,
-          city: data.city as string | undefined,
-          body: String(data.body ?? ''),
-          spot: data.spot as string | undefined,
-          likes: Number(data.likes ?? 0),
-          replies: Number(data.replies ?? 0),
-          timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
-        };
-      });
-      setLivePosts(posts.filter((p) => p.body.trim().length > 0));
-    }, (err) => handleFirestoreError(err, OperationType.READ, 'posts'));
+    const unsub = onSnapshot(q,
+      (snap) => setLivePosts(mapPostSnapshot(snap)),
+      (err) => handleFirestoreError(err, OperationType.READ, 'posts'),
+    );
     return () => unsub();
   }, [groupId]);
 

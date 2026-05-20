@@ -16,9 +16,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { CONCIERGES, conciergePose } from '../data/concierges';
-import { COMMUNITY_GROUPS, CATEGORY_META, type GroupCategory, type CommunityGroup } from '../data/communityGroups';
+import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
-import { ScrollChips } from './ScrollChips';
 import { useAuth } from '../lib/useAuth';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
@@ -197,11 +196,8 @@ const SEED_FEED: FeedPost[] = [
   },
 ];
 
-type CategoryFilter = 'all' | GroupCategory;
-
 export const Community: React.FC<CommunityProps> = (_props) => {
   const [activeTab, setActiveTab] = useState<'feed' | 'leaderboard'>('feed');
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const { user, profile } = useAuth();
   const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
   const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
@@ -271,12 +267,6 @@ export const Community: React.FC<CommunityProps> = (_props) => {
   const sortedLeaderboard = useMemo(
     () => [...LEADERBOARD].sort((a, b) => b.checkins - a.checkins),
     [],
-  );
-  const visibleGroups = useMemo(
-    () => activeCategory === 'all'
-      ? COMMUNITY_GROUPS
-      : COMMUNITY_GROUPS.filter((g) => g.category === activeCategory),
-    [activeCategory],
   );
 
   return (
@@ -360,50 +350,36 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </section>
         )}
 
-        {/* Groups */}
-        <section aria-labelledby="groups-heading" className="pb-12">
-          <header className="flex items-end justify-between gap-4 mb-5">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
-                <Users size={11} /> Groups for you
-              </span>
-              <h2 id="groups-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
-                Find your pack<span className="brand-dot" aria-hidden="true" />
-              </h2>
-            </div>
-            <a
-              href="mailto:hey@heylola.co?subject=Suggest%20a%20community%20group"
-              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
-            >
-              <Plus size={11} /> Suggest a group
-            </a>
-          </header>
+        {/* Groups — only surfaced to signed-in members. While we're
+            curating the first packs we keep the section out of sight
+            for anonymous visitors instead of teasing them with content
+            they can't join. */}
+        {user && (
+          <section aria-labelledby="groups-heading" className="pb-12">
+            <header className="flex items-end justify-between gap-4 mb-5">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
+                  <Users size={11} /> Groups for you
+                </span>
+                <h2 id="groups-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
+                  Find your pack<span className="brand-dot" aria-hidden="true" />
+                </h2>
+              </div>
+              <a
+                href="mailto:hey@heylola.co?subject=Suggest%20a%20community%20group"
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
+              >
+                <Plus size={11} /> Suggest a group
+              </a>
+            </header>
 
-          {/* Category filter */}
-          <div className="mb-5">
-            <ScrollChips ariaLabel="Group categories">
-              <CategoryPill
-                label="All"
-                active={activeCategory === 'all'}
-                onClick={() => setActiveCategory('all')}
-              />
-              {(Object.keys(CATEGORY_META) as GroupCategory[]).map((cat) => (
-                <CategoryPill
-                  key={cat}
-                  label={CATEGORY_META[cat].label}
-                  active={activeCategory === cat}
-                  onClick={() => setActiveCategory(cat)}
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {COMMUNITY_GROUPS.map((g, i) => (
+                <GroupCard key={g.id} group={g} delay={i * 0.04} />
               ))}
-            </ScrollChips>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {visibleGroups.map((g, i) => (
-              <GroupCard key={g.id} group={g} delay={i * 0.04} />
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {/* Tabs */}
         <div className="flex items-center gap-2 border-b border-stone-100 mb-8">
@@ -758,21 +734,6 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
   );
 }
 
-function CategoryPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.25em] border transition-all duration-300 ${
-        active
-          ? 'bg-charcoal text-white border-charcoal shadow-md'
-          : 'bg-white text-stone-500 border-stone-200 hover:border-charcoal hover:text-charcoal'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
 
 function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const meta = CATEGORY_META[group.category];

@@ -314,6 +314,59 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           ))}
         </section>
 
+        {/* Latest members — newest pets to opt-in to a public profile.
+            Horizontal carousel so the page reads as alive, not static. */}
+        {latestMembers.length > 0 && (
+          <section aria-labelledby="latest-members-heading" className="pb-10 sm:pb-12">
+            <header className="flex items-end justify-between gap-4 mb-5">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
+                  <Users size={11} /> Latest members
+                </span>
+                <h2 id="latest-members-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
+                  Just joined the pack<span className="brand-dot" aria-hidden="true" />
+                </h2>
+              </div>
+            </header>
+            <div className="-mx-5 px-5 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none">
+              <ul className="flex gap-3 sm:gap-4 pb-2 snap-x snap-mandatory">
+                {latestMembers.map((p) => (
+                  <li
+                    key={p.id}
+                    className="snap-start shrink-0 w-[180px] sm:w-[200px] rounded-2xl bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="aspect-square bg-stone-50 overflow-hidden">
+                      {p.photoURL ? (
+                        <img
+                          src={p.photoURL}
+                          alt={p.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl font-serif italic text-stone-300 select-none">
+                          {p.name?.[0]?.toUpperCase() || '🐾'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <p className="text-sm font-serif italic tracking-tight leading-none truncate">{p.name || 'New member'}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 truncate">
+                        {p.breed || p.type}
+                      </p>
+                      {p.city && (
+                        <p className="text-[10px] text-stone-500 font-light italic truncate inline-flex items-center gap-1">
+                          <MapPin size={9} /> {p.city}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
         {/* Groups */}
         <section aria-labelledby="groups-heading" className="pb-12">
           <header className="flex items-end justify-between gap-4 mb-5">
@@ -325,12 +378,12 @@ export const Community: React.FC<CommunityProps> = (_props) => {
                 Find your pack<span className="brand-dot" aria-hidden="true" />
               </h2>
             </div>
-            <button
-              type="button"
+            <a
+              href="mailto:hey@heylola.co?subject=Suggest%20a%20community%20group"
               className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
             >
               <Plus size={11} /> Suggest a group
-            </button>
+            </a>
           </header>
 
           {/* Category filter */}
@@ -588,6 +641,33 @@ function CategoryPill({ label, active, onClick }: { label: string; active: boole
 
 function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const meta = CATEGORY_META[group.category];
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [joined, setJoined] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const handleJoin = async () => {
+    if (!user) { navigate(paths.login); return; }
+    if (busy || joined) return;
+    setBusy(true);
+    try {
+      // Membership lives under users/{uid}/groups/{groupId} so the
+      // existing pets-subcollection rule pattern (owner-only writes)
+      // covers it for free without a dedicated firestore.rules entry.
+      await addDoc(collection(db, 'group_memberships'), {
+        userId: user.uid,
+        groupId: group.id,
+        groupName: group.name,
+        joinedAt: serverTimestamp(),
+      });
+      setJoined(true);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
@@ -616,9 +696,11 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       </footer>
       <button
         type="button"
-        className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors"
+        onClick={handleJoin}
+        disabled={busy || joined}
+        className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Join group <ArrowRight size={11} />
+        {joined ? <>Joined <Award size={11} /></> : busy ? <><Loader2 size={11} className="animate-spin" /> Joining…</> : <>Join group <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );

@@ -146,6 +146,37 @@ service cloud.firestore {
       allow delete: if ownsResource() || isAdmin();
     }
 
+    // ────────── MEMBER PUBLIC PROFILES (community directory) ──────────
+    // Safe, denormalised member card written by the owner when they opt in
+    // to the community directory. Discoverable to signed-in members only
+    // when optIn == true. Never exposes the private /users doc.
+    match /member_public/{uid} {
+      allow get:    if (isSignedIn() && resource.data.optIn == true)
+                       || isOwner(uid) || isAdmin();
+      allow list:   if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow delete: if isAdmin() || isOwner(uid);
+    }
+
+    // ────────── CONNECTIONS (LinkedIn-style requests) ──────────
+    // A request from one member to another with a short message. Either
+    // participant can read/update (accept/decline/cancel); only the sender
+    // can create, and only as a pending request that includes themselves.
+    match /connections/{connectionId} {
+      allow create: if isSignedIn()
+                       && request.resource.data.fromUid == request.auth.uid
+                       && request.resource.data.status == 'pending'
+                       && request.auth.uid in request.resource.data.participants
+                       && request.resource.data.participants.size() == 2;
+      allow get:    if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow list:   if isSignedIn();  // client filters by participants array-contains uid
+      allow update: if isSignedIn()
+                       && request.auth.uid in resource.data.participants
+                       && request.resource.data.participants == resource.data.participants;
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid in resource.data.participants);
+    }
+
     // ────────── CITY VOTES ──────────
     match /city_votes/{voteId} {
       allow read:   if isSignedIn();

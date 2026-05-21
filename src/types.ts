@@ -175,6 +175,11 @@ export interface UserProfile {
   /** Founding Member — unlocks the closed Founders' Circle community. Set by
    *  admin / billing; not writable from the client (see firestore.rules). */
   foundingMember?: boolean;
+  /** Opted in to be discoverable in the community member directory and to
+   *  receive connection requests. The owner toggles this from the dashboard. */
+  communityOptIn?: boolean;
+  /** Free-text interests / hobbies shown on the member card. */
+  interests?: string[];
   createdAt: string;
   updatedAt: string;
 }

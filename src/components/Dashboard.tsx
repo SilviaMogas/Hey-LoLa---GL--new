@@ -8,6 +8,7 @@ import { UserProfile, PetData, Place } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
 import { cn, compressDataUrl } from '../lib/utils';
 import { DmInbox } from './DmInbox';
+import { CommunityConnections } from './CommunityConnections';
 import { curatedPlaces } from '../data/curatedPlaces';
 import { getTier } from '../lib/membership';
 import { getMembershipDerived } from '../lib/levels';
@@ -585,6 +586,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                )}
             </div>
           </section>
+
+          {/* Community connections — opt-in + requests + connected members */}
+          <CommunityConnections onOpenDm={(otherUid, otherName) => onOpenDm?.(otherUid, otherName)} />
 
           {/* DM Inbox */}
           <DmInbox

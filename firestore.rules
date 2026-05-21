@@ -19,6 +19,20 @@ service cloud.firestore {
     function willOwnResource() {
       return isSignedIn() && request.resource.data.userId == request.auth.uid;
     }
+    // Billing-critical fields on a /users doc may ONLY be written by the
+    // server (Stripe / Lemon Squeezy webhooks via the Admin SDK, which
+    // bypasses these rules) or by an admin. Stops a signed-in user from
+    // self-granting a paid plan by writing these fields from the client.
+    function billingFieldsUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['memberPlan', 'membership', 'stripeCustomerId']);
+    }
+    function createsNoPaidPlan() {
+      return (!('memberPlan' in request.resource.data)
+                || request.resource.data.memberPlan == 'free')
+        && !('membership' in request.resource.data)
+        && !('stripeCustomerId' in request.resource.data);
+    }
 
     // ────────── default deny ──────────
     // Admin can read/write anything; everything else must be explicitly allowed.
@@ -30,17 +44,26 @@ service cloud.firestore {
     match /users/{userId} {
       allow get:    if isOwner(userId) || isAdmin();
       allow list:   if isAdmin();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      // On signup the user creates their own profile but cannot seed a paid plan.
+      allow create: if isAdmin() || (isOwner(userId) && createsNoPaidPlan());
+      // The owner can edit their profile, but billing fields are server-only.
+      allow update: if isAdmin() || (isOwner(userId) && billingFieldsUnchanged());
       allow delete: if isAdmin();
+
+      // Billing cache written by the Stripe / Lemon Squeezy webhooks (Admin SDK).
+      match /billing/{docId} {
+        allow read:  if isOwner(userId) || isAdmin();
+        allow write: if isAdmin();
+      }
     }
 
-    // Username uniqueness lookup — public read so signup can check availability;
-    // create only if signed in (and the rule prevents overwrites because doc id == username).
+    // Username uniqueness lookup — public read so signup can check availability.
+    // The reservation must be owned by the creator; owners may release their own
+    // handle (needed to change it), admins may release any.
     match /usernames/{username} {
       allow read:   if true;
-      allow create: if isSignedIn();
-      allow delete: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
     }
 
     // ────────── PETS ──────────

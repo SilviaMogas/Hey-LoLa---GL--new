@@ -71,7 +71,11 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path
   }
   console.error('Firestore Error: ', JSON.stringify(errInfo, null, 2));
-  throw new Error(JSON.stringify(errInfo));
+  // NOTE: this used to `throw`, which turned any recoverable read failure
+  // (e.g. a permission error before security rules are published, or a missing
+  // index) into a full-page crash via the ErrorBoundary ("Something broke").
+  // We now log and return so the UI degrades gracefully — sections that can't
+  // load just stay empty instead of white-screening the whole page.
 }
 
 /**

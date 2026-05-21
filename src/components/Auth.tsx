@@ -8,7 +8,6 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  sendEmailVerification,
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, writeBatch, addDoc, collection } from 'firebase/firestore';
@@ -287,27 +286,19 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         batch.set(doc(db, 'usernames', usernameKey), { uid: user.uid });
         await batch.commit();
         await updateProfile(user, { displayName });
-        // Single-email guarantee: try the branded Hey Lola welcome first
-        // (it embeds the Firebase verification link generated server-side
-        // via Admin SDK). If the endpoint can't deliver — Resend missing,
-        // verification link generation failed, network error — fall back
-        // to Firebase's default sendEmailVerification so the user ALWAYS
-        // gets exactly one verification email.
-        let confirmationDelivered = false;
-        try {
-          const r = await fetch('/api/notify-signup', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ userId: user.uid }),
-          });
-          if (r.ok) {
-            const body = await r.json().catch(() => null);
-            confirmationDelivered = !!body?.confirmationDelivered;
-          }
-        } catch { /* network blip; fall through to Firebase */ }
-        if (!confirmationDelivered) {
-          try { await sendEmailVerification(user); } catch { /* swallow — user can re-request later */ }
-        }
+        // Always deliver the branded Hey Lola welcome via Resend (embeds
+        // the Firebase verification link generated server-side via Admin
+        // SDK). NO fallback to Firebase's default sendEmailVerification —
+        // that email lands in spam and defeats the point of a branded
+        // experience. If Resend can't deliver, the user can re-trigger via
+        // the "Resend link" button on /verify-email; the underlying
+        // delivery failure should be diagnosed in Vercel function logs and
+        // env-var configuration, not papered over with the ugly default.
+        void fetch('/api/notify-signup', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ userId: user.uid }),
+        }).catch(() => { /* email is best-effort */ });
         track('signup_completed', { method: 'email', userType });
         onSuccess(true);
       } else if (mode === 'login') {

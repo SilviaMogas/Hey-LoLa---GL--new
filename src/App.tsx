@@ -16,7 +16,6 @@ import { UpgradeModal } from './components/UpgradeModal';
 import { PetData } from './types';
 import { db, auth } from './lib/firebase';
 import { collection, query, where, setDoc, doc, onSnapshot } from 'firebase/firestore';
-import { sendEmailVerification } from 'firebase/auth';
 import { Home } from './components/Home';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -504,7 +503,18 @@ function AppContent() {
             } />
             <Route path={paths.verifyEmail} element={
               <ProtectedRoute>
-                <FadeIn><VerifyEmail email={user?.email || ''} onResend={() => sendEmailVerification(auth.currentUser!)} /></FadeIn>
+                <FadeIn><VerifyEmail email={user?.email || ''} onResend={async () => {
+                  // Re-trigger the branded Hey Lola welcome via Resend
+                  // (same endpoint used at signup). NO Firebase fallback —
+                  // the goal is to NEVER send the default Firebase verify
+                  // email, which lands in spam.
+                  if (!auth.currentUser) return;
+                  await fetch('/api/notify-signup', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ userId: auth.currentUser.uid }),
+                  }).catch(() => { /* swallow — UI shows generic "Sending..." */ });
+                }} /></FadeIn>
               </ProtectedRoute>
             } />
             <Route path={paths.onboarding} element={

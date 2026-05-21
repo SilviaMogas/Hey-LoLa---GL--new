@@ -151,7 +151,11 @@ export interface UserProfile {
   username: string;
   userType: 'Dog Owner' | 'Business';
   photoURL?: string;
+  /** Free text — where the member actually lives. May differ from localHub. */
   homeCity?: string;
+  /** The Hey Lola city hub the member joined at signup (one of HUB_CITIES).
+   *  Drives community + Explore. May or may not match homeCity. */
+  localHub?: string;
   bio?: string;
   dreamDestination?: string;
   referralCode?: string;

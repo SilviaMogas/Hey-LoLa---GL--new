@@ -6,6 +6,7 @@ import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { syncPetPublicCard } from '../lib/petPublic';
+import { HUB_CITIES } from '../lib/hubs';
 import { ArrowRight, ArrowLeft, PawPrint, ShieldCheck, Weight, Calendar, Info, Loader2, Camera, X, MapPin } from 'lucide-react';
 import { cn, compressDataUrl } from '../lib/utils';
 import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
@@ -72,6 +73,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
   const navigate = useNavigate();
   const [userProfileData, setUserProfileData] = useState({
     homeCity: profile?.homeCity || '',
+    localHub: profile?.localHub || '',
     dreamDestination: profile?.dreamDestination || '',
     appIntents: (profile?.appIntents as string[]) || [] as string[],
     relationshipStatus: (profile?.relationshipStatus as string) || '',
@@ -131,6 +133,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
       // the user adds a second pet without going through step 6 again.
       const profilePatch: Record<string, string | string[]> = {};
       if (userProfileData.homeCity) profilePatch.homeCity = userProfileData.homeCity;
+      if (userProfileData.localHub) profilePatch.localHub = userProfileData.localHub;
       if (userProfileData.dreamDestination) profilePatch.dreamDestination = userProfileData.dreamDestination;
       if (userProfileData.appIntents.length) profilePatch.appIntents = userProfileData.appIntents;
       if (userProfileData.relationshipStatus) profilePatch.relationshipStatus = userProfileData.relationshipStatus;
@@ -1008,6 +1011,30 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
             </div>
 
             <div className="grid grid-cols-1 gap-5 bg-white p-5 sm:p-7 rounded-3xl shadow-xl border border-stone-50">
+              {/* Local Hub — the single city the member joins (our cities). */}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">Your Local Hub</label>
+                <p className="text-[11px] text-stone-400 -mt-1">Pick the Hey Lola city you want to be part of. It doesn't have to be where you live.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {HUB_CITIES.map((h) => {
+                    const selected = userProfileData.localHub === h.id;
+                    return (
+                      <button
+                        key={h.id}
+                        type="button"
+                        onClick={() => setUserProfileData({ ...userProfileData, localHub: selected ? '' : h.id })}
+                        className={cn(
+                          'px-3 py-2.5 rounded-2xl text-xs font-bold border transition-all inline-flex items-center gap-1.5 justify-center',
+                          selected ? 'bg-charcoal text-white border-charcoal' : 'bg-muted border-transparent text-charcoal hover:border-stone-200',
+                        )}
+                      >
+                        <span aria-hidden="true">{h.emoji}</span> {h.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <OnboardingInput
                 icon={<ArrowRight size={14} />}
                 label={t.onboarding.travelTo}

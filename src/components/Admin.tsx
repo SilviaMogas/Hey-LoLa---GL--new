@@ -907,6 +907,14 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                           <div>
                             <p className="font-bold">{user.displayName}</p>
                             <p className="text-[10px] text-stone-400">@{user.username} • {user.email}</p>
+                            {(user.localHub || user.homeCity) && (
+                              <p className="text-[10px] text-stone-400">
+                                📍 {user.localHub ? `Hub: ${user.localHub}` : ''}
+                                {user.localHub && user.homeCity ? ' · ' : ''}
+                                {user.homeCity ? `Lives: ${user.homeCity}` : ''}
+                              </p>
+                            )}
+                            {user.bio && <p className="text-[10px] text-stone-400 italic max-w-[240px] line-clamp-2">{user.bio}</p>}
                           </div>
                         </div>
                       </td>
@@ -953,16 +961,24 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                         ) : (
                           <ul className="space-y-1">
                             {pets.map(pet => (
-                              <li key={pet.id} className="flex items-center gap-2">
-                                <span className="text-[14px] leading-none">
-                                  {pet.type === 'Dog' ? '🐕' : pet.type === 'Cat' ? '🐈' : '🐾'}
-                                </span>
-                                <span className="text-charcoal font-bold text-[12px]">{pet.name || 'Unnamed'}</span>
-                                {pet.breed && (
-                                  <span className="text-[9px] uppercase tracking-widest text-stone-400 bg-stone-50 rounded-full px-2 py-0.5">
-                                    {pet.breed}
+                              <li key={pet.id}>
+                                <a
+                                  href={`/pet/${pet.id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-2 group hover:bg-stone-50 rounded-lg px-1.5 py-0.5 -mx-1.5 transition-colors"
+                                  title={`Open ${pet.name || 'pet'} profile`}
+                                >
+                                  <span className="text-[14px] leading-none">
+                                    {pet.type === 'Dog' ? '🐕' : pet.type === 'Cat' ? '🐈' : '🐾'}
                                   </span>
-                                )}
+                                  <span className="text-charcoal font-bold text-[12px] group-hover:underline underline-offset-2">{pet.name || 'Unnamed'}</span>
+                                  {pet.breed && (
+                                    <span className="text-[9px] uppercase tracking-widest text-stone-400 bg-stone-50 rounded-full px-2 py-0.5">
+                                      {pet.breed}
+                                    </span>
+                                  )}
+                                </a>
                               </li>
                             ))}
                           </ul>

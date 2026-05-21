@@ -16,6 +16,7 @@ import { setHandle, normalizeHandle, changesRemaining } from '../lib/handle';
 import { syncPetPublicCard } from '../lib/petPublic';
 import { useNavigate } from 'react-router-dom';
 import { buildPath } from '../lib/routes';
+import { HUB_CITIES, hubLabel } from '../lib/hubs';
 
 interface DashboardProps {
   user: any;
@@ -54,6 +55,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
   const [newLastName, setNewLastName] = useState('');
   const [newBio, setNewBio] = useState('');
   const [newCity, setNewCity] = useState('');
+  const [newLocalHub, setNewLocalHub] = useState('');
   const [newPhotoURL, setNewPhotoURL] = useState('');
   const [newHandle, setNewHandle] = useState('');
   const [handleError, setHandleError] = useState('');
@@ -99,8 +101,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
         }
 
         // Local community furrys — real public pet profiles from other users.
-        // Priority: user's homeCity → Miami → any city.
-        const userCity = (profile?.homeCity || '').toLowerCase();
+        // Priority: user's local hub → home city → Miami → any city.
+        const userCity = (profile?.localHub || profile?.homeCity || '').toLowerCase();
         const petSnap = await getDocs(query(collection(db, 'pets'), where('isPublic', '==', true), limit(50)));
         const allPublic = petSnap.docs
           .map(d => ({ id: d.id, ...d.data() } as PetData))
@@ -161,6 +163,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       setNewLastName(profile.lastName ?? '');
       setNewBio(profile.bio ?? '');
       setNewCity(profile.homeCity ?? '');
+      setNewLocalHub(profile.localHub ?? '');
       setNewHandle(profile.username ?? '');
       // Mirror the Navbar fallback: when the Firestore profile has no photo
       // yet, fall back to the auth photoURL (e.g. Google sign-in avatar) so
@@ -205,6 +208,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       displayName,
       bio: newBio,
       homeCity: newCity,
+      localHub: newLocalHub,
       photoURL: newPhotoURL,
       updatedAt: now,
     }, { merge: true });
@@ -340,6 +344,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                     placeholder="e.g. Barcelona"
                     className="luxury-input h-11 w-full text-sm font-medium"
                   />
+                  <p className="text-[10px] text-stone-400 ml-1">Where you live (free text).</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">Local Hub</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {HUB_CITIES.map((h) => {
+                      const selected = newLocalHub === h.id;
+                      return (
+                        <button
+                          key={h.id}
+                          type="button"
+                          onClick={() => setNewLocalHub(selected ? '' : h.id)}
+                          className={cn(
+                            'px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all inline-flex items-center gap-1',
+                            selected ? 'bg-charcoal text-white border-charcoal' : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300',
+                          )}
+                        >
+                          <span aria-hidden="true">{h.emoji}</span> {h.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-stone-400 ml-1">Your Hey Lola community city — can differ from where you live.</p>
                 </div>
 
                 <div className="space-y-1">
@@ -725,7 +753,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                    <div className="space-y-2">
                     <p className="text-base font-light text-stone-400 italic leading-snug">{t.dashboard.noSpots}</p>
                     <button onClick={onExplore} className="text-[10px] font-black uppercase tracking-[0.3em] text-charcoal hover:tracking-[0.4em] transition-all">
-                        Discover {profile?.homeCity?.trim() || 'new places'}
+                        Discover {hubLabel(profile?.localHub) || profile?.homeCity?.trim() || 'new places'}
                     </button>
                    </div>
                 </div>

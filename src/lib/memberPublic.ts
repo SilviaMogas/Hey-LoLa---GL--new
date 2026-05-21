@@ -27,7 +27,8 @@ export function buildMemberPublicCard(uid: string, profile: Partial<UserProfile>
     || 'Member').trim();
   const card: MemberPublicCard = { uid, name, optIn };
   if (profile?.photoURL) card.photo = profile.photoURL;
-  if (profile?.homeCity) card.city = profile.homeCity;
+  const city = profile?.localHub || profile?.homeCity;
+  if (city) card.city = city;
   if (profile?.bio) card.bio = profile.bio;
   if (profile?.interests && profile.interests.length) card.interests = profile.interests;
   return card;

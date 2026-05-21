@@ -63,7 +63,8 @@ export function buildPetPublicCard(
   if (ownerName) card.ownerName = ownerName;
   if (profile?.username) card.ownerHandle = profile.username;
   if (profile?.photoURL) card.ownerPhoto = profile.photoURL;
-  if (profile?.homeCity) card.ownerCity = profile.homeCity;
+  const ownerCity = profile?.localHub || profile?.homeCity;
+  if (ownerCity) card.ownerCity = ownerCity;
   if (profile?.bio) card.ownerBio = profile.bio;
   return card;
 }

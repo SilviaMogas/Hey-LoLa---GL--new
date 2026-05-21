@@ -5,7 +5,7 @@ interface BrandLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
   variant?: 'black' | 'white' | 'orange';
-  /** Render only the circular HL mark instead of the full wordmark */
+  /** Render only the square HL mark instead of the full wordmark */
   mark?: boolean;
   title?: string;
 }
@@ -54,7 +54,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         className={cn('w-auto aspect-square block transition-transform duration-300 transform-gpu', heightClass, className)}
       >
         <title>{title}</title>
-        <circle cx="32" cy="32" r="32" fill={colors.mark} />
+        <rect width="64" height="64" fill={colors.mark} />
         <text
           x="32"
           y="44"

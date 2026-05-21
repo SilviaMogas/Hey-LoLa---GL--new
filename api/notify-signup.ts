@@ -5,14 +5,13 @@ import { sendSignupEmails } from '../src/lib/email/index.js';
 //   Body: { userId: string }
 //
 // Called by the client right after a new account is created via Auth.tsx —
-// both the email/password flow and the Google OAuth flow. The server pulls
-// the canonical record from Firebase Auth (via Admin SDK) and the profile
-// from /users/{userId}; it never trusts the request body for recipient data.
+// both the email/password flow and the Google OAuth flow. Also re-triggered
+// when the user clicks "Resend link" on /verify-email.
 //
-// Sends a branded welcome to the new user + an internal alert to ADMIN_INBOX.
-// Best-effort: failures here never roll back the signup itself.
-
-const RECENT_WINDOW_MS = 10 * 60 * 1000;
+// CONTRACT: Always attempt to deliver via Resend. No replay window, no
+// Firebase fallback, no clever skipping. The Firebase default verification
+// email lands in spam and is unacceptable, so this endpoint owns the entire
+// signup-email lifecycle.
 
 export default async function handler(req: any, res: any) {
   console.log('[notify-signup] step=start', { method: req.method });
@@ -78,16 +77,10 @@ export default async function handler(req: any, res: any) {
     firstName: profile.firstName,
   });
 
-  // Replay protection: only fire when the user was JUST created. Uses the
-  // profile's createdAt (ISO string written by Auth.tsx + provisionGoogleUser).
-  const createdMs = Date.parse(String(profile.createdAt || '')) || 0;
-  if (createdMs && Date.now() - createdMs > RECENT_WINDOW_MS) {
-    const ageMin = Math.round((Date.now() - createdMs) / 60000);
-    console.warn('[notify-signup] exit=not-recent', { ageMin, windowMin: RECENT_WINDOW_MS / 60000 });
-    res.status(409).json({ success: false, error: 'Signup is not recent.', ageMin });
-    return;
-  }
-  console.log('[notify-signup] step=recency-check-ok');
+  // No replay window — this endpoint must work whenever the user clicks
+  // Resend Link on /verify-email, even days after signup. The branded
+  // Resend email is the SOLE verification path; there is no Firebase
+  // fallback by design.
 
   // Detect signup method from the provider data Firebase tracks on the
   // user record. `google.com` (sole or first provider) → OAuth; otherwise

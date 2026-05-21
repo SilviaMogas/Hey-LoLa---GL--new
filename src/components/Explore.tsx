@@ -43,25 +43,27 @@ interface ExploreProps {
   onRequireAuth: (action?: () => void, title?: string, message?: string) => void;
   /** City detected from auth profile or geo signals. null = visitor is not in
    *  Barcelona/NYC/Miami; we render a generic "Start exploring" headline. */
-  initialCity?: 'miami' | 'barcelona' | 'nyc' | null;
+  initialCity?: 'miami' | 'barcelona' | 'nyc' | 'toronto' | 'dc' | null;
   /** When false the heart on each card opens the upgrade modal instead of
    *  toggling a favorite (free tier can't save). */
   canSave?: boolean;
   onRequireUpgrade?: () => void;
 }
 
-type CityId = 'miami' | 'barcelona' | 'nyc';
+type CityId = 'miami' | 'barcelona' | 'nyc' | 'toronto' | 'dc';
 type ContinentId = 'europe' | 'americas' | 'asia' | 'middleEast' | 'oceania';
 
 const CITIES: Record<CityId, { name: string; center: { lat: number; lng: number }; continent: ContinentId }> = {
   miami: { name: 'Miami', center: { lat: 25.7617, lng: -80.1918 }, continent: 'americas' },
   barcelona: { name: 'Barcelona', center: { lat: 41.3851, lng: 2.1734 }, continent: 'europe' },
-  nyc: { name: 'New York City', center: { lat: 40.7128, lng: -74.0060 }, continent: 'americas' }
+  nyc: { name: 'New York City', center: { lat: 40.7128, lng: -74.0060 }, continent: 'americas' },
+  toronto: { name: 'Toronto', center: { lat: 43.6532, lng: -79.3832 }, continent: 'americas' },
+  dc: { name: 'Washington DC', center: { lat: 38.9072, lng: -77.0369 }, continent: 'americas' }
 };
 
 const COMING_SOON: Record<ContinentId, string[]> = {
   europe: ['Paris', 'London', 'Lisbon', 'Berlin', 'Rome'],
-  americas: ['Washington DC', 'Toronto', 'Mexico City', 'Buenos Aires', 'Los Angeles'],
+  americas: ['Mexico City', 'Buenos Aires', 'Los Angeles'],
   asia: ['Tokyo', 'Singapore', 'Seoul', 'Bangkok'],
   middleEast: ['Dubai', 'Tel Aviv'],
   oceania: ['Sydney', 'Melbourne']
@@ -554,8 +556,9 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
   // homepage CityCard links so a click lands on the right city.
   const cityParam = (() => {
     const raw = searchParams.get('city')?.toLowerCase();
-    if (raw === 'miami' || raw === 'nyc' || raw === 'barcelona') return raw;
+    if (raw === 'miami' || raw === 'nyc' || raw === 'barcelona' || raw === 'toronto' || raw === 'dc') return raw;
     if (raw === 'newyork' || raw === 'new-york') return 'nyc';
+    if (raw === 'washington' || raw === 'washington-dc') return 'dc';
     return null;
   })();
   const startCity: CityId = cityParam ?? (initialCity ?? null) ?? 'barcelona';

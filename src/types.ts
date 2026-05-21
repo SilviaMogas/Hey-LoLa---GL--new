@@ -246,7 +246,7 @@ export interface Place {
   name: string;
   category: PlaceCategory;
   tags?: PlaceCategory[];
-  city: 'Miami' | 'New York City' | 'Barcelona';
+  city: 'Miami' | 'New York City' | 'Toronto' | 'Washington DC' | 'Barcelona';
   neighborhood?: string;
   description: string;
   utility: string;

@@ -8,7 +8,7 @@ export interface CommunityGroup {
   id: string;
   name: string;
   category: GroupCategory;
-  city: 'Miami' | 'NYC' | 'Barcelona' | 'Global';
+  city: 'Miami' | 'NYC' | 'Toronto' | 'Washington DC' | 'Barcelona' | 'Global';
   members: number;
   cadence: string;
   description: string;
@@ -69,6 +69,30 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
     description: 'Dog parents in Barcelona. Beach walks, plaça meetups, dog-friendly terrazas and travel tips.',
     emoji: '🇪🇸',
     subtopics: ['Presentations', 'Playas & parques', 'Terrazas dog-friendly', 'Veterinarios', 'Quedadas', 'Viajar con perro'],
+  },
+  {
+    id: 'tor-pack',
+    name: 'Toronto Crew',
+    category: 'social',
+    city: 'Toronto',
+    members: 0,
+    cadence: 'Open',
+    access: 'open',
+    description: 'Dog parents in Toronto. Ravine walks, patio meetups, off-leash parks and winter-ready tips for life with a dog.',
+    emoji: '🍁',
+    subtopics: ['Presentations', 'Parks & ravines', 'Patios & cafés', 'Vets & grooming', 'Playdates', 'Winter tips'],
+  },
+  {
+    id: 'dc-pack',
+    name: 'Washington DC Crew',
+    category: 'social',
+    city: 'Washington DC',
+    members: 0,
+    cadence: 'Open',
+    access: 'open',
+    description: 'Dog parents in Washington DC. Mall strolls, neighbourhood meetups, dog-friendly patios and local tips.',
+    emoji: '🏛️',
+    subtopics: ['Presentations', 'Parks & trails', 'Cafés & patios', 'Vets & grooming', 'Playdates', 'Neighbourhoods'],
   },
   {
     id: 'founders-circle',

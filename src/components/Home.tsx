@@ -18,7 +18,7 @@ interface HomeProps {
   onCommunity?: () => void;
   onConcierge?: (name: string) => void;
   /** City-specific shortcut used by the three CityCards. */
-  onExploreCity?: (city: 'miami' | 'nyc' | 'barcelona') => void;
+  onExploreCity?: (city: 'miami' | 'nyc' | 'barcelona' | 'toronto' | 'dc') => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge, onExploreCity }) => {
@@ -151,6 +151,12 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
             <CityCard name="Barcelona" status="Launching soon" image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('barcelona')} />
           </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+            <CityCard name="Toronto" status="Launching soon" image="https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('toronto')} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }}>
+            <CityCard name="Washington DC" status="Launching soon" image="https://images.unsplash.com/photo-1501466044931-62695aada8e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('dc')} />
+          </motion.div>
         </div>
 
         <div className="pt-12 sm:pt-12 md:pt-12 space-y-6 sm:space-y-8 border-t border-stone-100">
@@ -160,7 +166,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-8 md:gap-8 max-w-5xl mx-auto">
-            {['Toronto', 'Dubai', 'Paris', 'Singapore'].map((city, i) => (
+            {['London', 'Dubai', 'Paris', 'Singapore'].map((city, i) => (
               <motion.button
                 key={city}
                 type="button"

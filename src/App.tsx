@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './lib/useAuth';
 import { isAdminEmail } from './lib/admin';
-import { detectCity } from './lib/geo';
+import { detectCity, type SupportedCity } from './lib/geo';
 import { canSavePlaces } from './lib/membership';
 import { paths, buildPath } from './lib/routes';
 import { ProtectedRoute, AdminRoute, GuestOnlyRoute } from './lib/guards';
@@ -129,7 +129,7 @@ function AppContent() {
   const [activePetIndex, setActivePetIndex] = useState(0);
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [activeDm, setActiveDm] = useState<{ otherUid: string; otherName: string; otherPhoto?: string; petName?: string } | null>(null);
-  const [detectedCity, setDetectedCity] = useState<'miami' | 'barcelona' | 'nyc' | null | undefined>(undefined);
+  const [detectedCity, setDetectedCity] = useState<SupportedCity | null | undefined>(undefined);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [communityMode, setCommunityMode] = useState<'community' | 'support'>('community');
   const [pendingAuthAction, setPendingAuthAction] = useState<{ action: () => void; message: string; title: string } | null>(null);

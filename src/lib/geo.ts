@@ -9,7 +9,7 @@
  *   2. IP geolocation via ipapi.co (free, anonymous, cached for 24h).
  *   3. The browser timezone, as a last-resort heuristic.
  */
-export type SupportedCity = 'miami' | 'barcelona' | 'nyc';
+export type SupportedCity = 'miami' | 'barcelona' | 'nyc' | 'toronto' | 'dc';
 
 const CACHE_KEY = 'hl_detected_city_v1';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -27,6 +27,11 @@ const HOME_CITY_MAP: Record<string, SupportedCity> = {
   manhattan: 'nyc',
   brooklyn: 'nyc',
   barcelona: 'barcelona',
+  toronto: 'toronto',
+  'washington dc': 'dc',
+  'washington d.c.': 'dc',
+  washington: 'dc',
+  dc: 'dc',
 };
 
 const cityFromString = (raw: string | undefined | null): SupportedCity | null => {
@@ -38,7 +43,11 @@ const cityFromString = (raw: string | undefined | null): SupportedCity | null =>
 const cityFromTimezone = (tz: string | undefined): SupportedCity | null => {
   if (!tz) return null;
   if (tz === 'Europe/Madrid' || tz === 'Europe/Andorra' || tz === 'Europe/Paris') return 'barcelona';
-  if (tz === 'America/New_York' || tz === 'America/Toronto') return 'nyc';
+  if (tz === 'America/Toronto') return 'toronto';
+  // Washington DC shares the US Eastern zone with NYC, so timezone alone
+  // can't tell them apart — default Eastern to NYC; DC is resolved by the
+  // user's saved homeCity or IP city instead.
+  if (tz === 'America/New_York') return 'nyc';
   return null;
 };
 

@@ -172,6 +172,9 @@ export interface UserProfile {
   statusUpdatedAt?: string;
   /** ISO timestamps of handle changes — used to enforce max 2 changes / 30 days. */
   usernameChangedAt?: string[];
+  /** Founding Member — unlocks the closed Founders' Circle community. Set by
+   *  admin / billing; not writable from the client (see firestore.rules). */
+  foundingMember?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,14 +1,22 @@
 export type GroupCategory = 'walks' | 'training' | 'social' | 'travel' | 'wellness' | 'community';
 
+/** Open = any signed-in member can join. Founder = only Founding Members
+ *  (profile.foundingMember === true) or admins can enter. */
+export type GroupAccess = 'open' | 'founder';
+
 export interface CommunityGroup {
   id: string;
   name: string;
   category: GroupCategory;
-  city: 'Miami' | 'NYC' | 'Barcelona';
+  city: 'Miami' | 'NYC' | 'Barcelona' | 'Global';
   members: number;
   cadence: string;
   description: string;
   emoji: string;
+  /** Defaults to 'open' when omitted. */
+  access?: GroupAccess;
+  /** Conversation sub-topics surfaced inside the group room. */
+  subtopics?: string[];
 }
 
 export const CATEGORY_META: Record<GroupCategory, { label: string; color: string; accent: string }> = {
@@ -21,30 +29,57 @@ export const CATEGORY_META: Record<GroupCategory, { label: string; color: string
 };
 
 /**
- * The Community page intentionally starts with a small, curated pair
- * of city packs — one per active city. They're open to any signed-in
- * member. More sub-groups (training, wellness, rescue circles…) can
- * be added later as the community grows.
+ * City crews are open to any signed-in member. The Founders' Circle is a
+ * closed space gated to Founding Members. Each group has its own room
+ * (/community/{id}) with sub-topics to organise the conversation.
  */
 export const COMMUNITY_GROUPS: CommunityGroup[] = [
   {
     id: 'mia-pack',
-    name: 'Crew in Miami',
+    name: 'Miami Crew',
     category: 'social',
     city: 'Miami',
     members: 0,
     cadence: 'Open',
+    access: 'open',
     description: 'Dog parents in Miami. Café spots, beach mornings, weekend brunches and walking buddies.',
-    emoji: '',
+    emoji: '🌴',
+    subtopics: ['Beaches & parks', 'Cafés & brunch', 'Vets & grooming', 'Playdates', 'Travel tips'],
   },
   {
     id: 'nyc-pack',
-    name: 'NYC Vibes',
+    name: 'NYC Crew',
     category: 'social',
     city: 'NYC',
     members: 0,
     cadence: 'Open',
+    access: 'open',
     description: 'Dog parents in New York. Park loops, neighbourhood meetups and city-friendly tips for life with a dog.',
-    emoji: '',
+    emoji: '🗽',
+    subtopics: ['Parks & runs', 'Neighbourhood meetups', 'Vets & grooming', 'Playdates', 'Apartment life'],
+  },
+  {
+    id: 'bcn-pack',
+    name: 'Barcelona Crew',
+    category: 'social',
+    city: 'Barcelona',
+    members: 0,
+    cadence: 'Open',
+    access: 'open',
+    description: 'Dog parents in Barcelona. Beach walks, plaça meetups, dog-friendly terrazas and travel tips.',
+    emoji: '🇪🇸',
+    subtopics: ['Playas & parques', 'Terrazas dog-friendly', 'Veterinarios', 'Quedadas', 'Viajar con perro'],
+  },
+  {
+    id: 'founders-circle',
+    name: "Founders' Circle",
+    category: 'community',
+    city: 'Global',
+    members: 0,
+    cadence: 'Founders only',
+    access: 'founder',
+    description: 'A private space for Hey Lola Founding Members. Shape the roadmap, unlock exclusive perks and meet the inner circle.',
+    emoji: '✨',
+    subtopics: ['Roadmap & feedback', 'Exclusive perks', 'Founder events', 'Introduce yourself'],
   },
 ];

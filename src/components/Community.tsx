@@ -579,10 +579,12 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
 
 function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const meta = CATEGORY_META[group.category];
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Founders' Circle is closed unless the viewer is a Founding Member.
+  const locked = group.access === 'founder' && !profile?.foundingMember;
 
   // Reflect existing membership so a returning member sees 'Open room'
   // straight away instead of a stale 'Join group' that double-writes a
@@ -611,6 +613,8 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
 
   const handleJoin = async () => {
     if (!user) { navigate(paths.login); return; }
+    // Closed group → send non-founders to the membership page instead of joining.
+    if (locked) { navigate(paths.club); return; }
     if (busy) return;
     // Already a member → just open the room.
     if (joined) { openRoom(); return; }
@@ -652,8 +656,18 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
           <p className={`text-[9px] font-black uppercase tracking-[0.25em] ${meta.accent} mb-1`}>{meta.label}</p>
           <h3 className="text-xl font-serif italic leading-tight">{group.name}</h3>
         </div>
+        {group.access === 'founder' && (
+          <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.2em] bg-charcoal text-white rounded-full px-2.5 py-1">Founders</span>
+        )}
       </header>
       <p className="text-sm text-stone-500 font-light leading-relaxed">{group.description}</p>
+      {group.subtopics && group.subtopics.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {group.subtopics.map((s) => (
+            <span key={s} className="text-[9px] font-bold tracking-wide text-stone-500 bg-stone-50 border border-stone-100 rounded-full px-2.5 py-1">{s}</span>
+          ))}
+        </div>
+      )}
       <footer className="flex items-center justify-between pt-1 text-[10px] font-black uppercase tracking-[0.25em] text-stone-400">
         <span className="inline-flex items-center gap-1.5">
           <MapPin size={10} /> {group.city} · {group.cadence}
@@ -670,9 +684,11 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       >
         {busy
           ? <><Loader2 size={11} className="animate-spin" /> Joining…</>
-          : joined
-            ? <>Open room <ArrowRight size={11} /></>
-            : <>Join group <ArrowRight size={11} /></>}
+          : locked
+            ? <>Founders only <ArrowRight size={11} /></>
+            : joined
+              ? <>Open room <ArrowRight size={11} /></>
+              : <>Join group <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );

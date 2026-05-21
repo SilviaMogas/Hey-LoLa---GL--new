@@ -10,8 +10,7 @@ View your app in AI Studio: https://ai.studio/apps/041ff40c-7f72-4aad-a12c-bcd06
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
@@ -26,7 +25,7 @@ Two parallel paths can promote a venue to `Verified`:
 1. **Public claim** (any signed-in user) — opens the dialog from a listing,
    submits a claim, admin reviews in the back office.
 2. **Email-link claim** (admin-driven outreach) — admin clicks `Invite to
-   verify` in the back office, the venue receives an email, clicks the
+verify` in the back office, the venue receives an email, clicks the
    `/claim-listing/{token}` link, fills the claim form. Admin reviews.
 
 ### Auto-approval by domain match
@@ -35,6 +34,7 @@ If the contact email used in the claim form **ends with the venue's
 website domain** (e.g. `info@coralgablesanimalhospital.com` for the venue
 whose website is `coralgablesanimalhospital.com`), the claim is approved
 **automatically**:
+
 - `verificationStatus` → `verified`
 - `status` → `Verified`
 - `partnerStatus` → `active_partner`

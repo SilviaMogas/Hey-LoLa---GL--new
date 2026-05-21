@@ -220,7 +220,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
           changedAt: profile?.usernameChangedAt,
           countAsChange: true,
         });
-        if (!res.ok) { setHandleError(res.reason); return; }
+        if (!res.ok) { setHandleError('reason' in res ? res.reason : 'No se pudo guardar el handle.'); return; }
       }
       closeForm();
     })()

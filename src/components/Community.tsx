@@ -10,6 +10,10 @@ import {
   Plus,
   Send,
   Loader2,
+  Sparkles,
+  Gift,
+  Trophy,
+  Award,
 } from 'lucide-react';
 import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';

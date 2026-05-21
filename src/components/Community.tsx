@@ -252,11 +252,10 @@ export const Community: React.FC<CommunityProps> = (_props) => {
           </section>
         )}
 
-        {/* Groups — only surfaced to signed-in members. While we're
-            curating the first packs we keep the section out of sight
-            for anonymous visitors instead of teasing them with content
-            they can't join. */}
-        {user && (
+        {/* Groups — visible to everyone so the community feels alive on
+            arrival. Anonymous visitors can browse the city crews; tapping
+            Join routes them to sign-in (handled in GroupCard). */}
+        {(
           <section aria-labelledby="groups-heading" className="pb-12">
             <header className="flex items-end justify-between gap-4 mb-5">
               <div>

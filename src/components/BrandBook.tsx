@@ -47,6 +47,22 @@ const ICON_VARIANTS: LogoVariant[] = [
   { label: 'Icon · Accent',   surface: 'bg-bone',     textTone: 'orange', mark: true },
 ];
 
+interface MascotAsset {
+  label: string;
+  src: string;
+  surface: string;
+  transparent?: boolean;
+  dark?: boolean;
+}
+
+// Mascot + wordmark lockups. PNGs live in /public/brand and are exported
+// from the master illustration (see brand-assets/).
+const MASCOT_ASSETS: MascotAsset[] = [
+  { label: 'Transparent', src: '/brand/heylola-mascot-transparent.png', surface: 'bg-white',    transparent: true },
+  { label: 'On Light',    src: '/brand/heylola-mascot-white.png',       surface: 'bg-white' },
+  { label: 'On Dark',     src: '/brand/heylola-mascot-black.png',       surface: 'bg-charcoal', dark: true },
+];
+
 export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby="brandbook-heading">
@@ -104,6 +120,17 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {ICON_VARIANTS.map((v) => (
             <LogoTile key={v.label} variant={v} />
+          ))}
+        </div>
+
+        {/* Mascot + Logo */}
+        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 mt-12 mb-1">Mascot + Logo</h3>
+        <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl mb-4">
+          Lola, our mascot, paired with the wordmark. Use the transparent version over photography, the light version on white surfaces and the dark version on charcoal.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {MASCOT_ASSETS.map((m) => (
+            <MascotTile key={m.label} asset={m} />
           ))}
         </div>
       </section>
@@ -375,6 +402,52 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
             <Download size={9} /> PNG
           </button>
         </div>
+      </div>
+    </article>
+  );
+}
+
+function MascotTile({ asset }: { asset: MascotAsset }) {
+  const isDark = !!asset.dark;
+  const filename = `heylola-mascot-${asset.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+  const pillClass = isDark
+    ? 'bg-white/10 text-white/70 hover:bg-white/20'
+    : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10';
+  return (
+    <article className={`rounded-2xl ${asset.surface} border ${isDark ? 'border-white/10' : 'border-stone-200'} flex flex-col aspect-[4/5] relative overflow-hidden`}>
+      {asset.transparent && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            backgroundColor: '#fff',
+            backgroundImage:
+              'linear-gradient(45deg,#eceae6 25%,transparent 25%),linear-gradient(-45deg,#eceae6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eceae6 75%),linear-gradient(-45deg,transparent 75%,#eceae6 75%)',
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0,0 10px,10px -10px,-10px 0',
+          }}
+        />
+      )}
+      <div className="flex-1 flex items-center justify-center px-5 py-6 min-h-0 relative z-10">
+        <img
+          src={asset.src}
+          alt={`Hey Lola mascot with wordmark — ${asset.label}`}
+          loading="lazy"
+          className="w-auto h-full max-h-full object-contain"
+        />
+      </div>
+      <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1 relative z-10">
+        <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
+          {asset.label}
+        </span>
+        <a
+          href={asset.src}
+          download={filename}
+          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${pillClass}`}
+          aria-label={`Download mascot ${asset.label} PNG`}
+        >
+          <Download size={9} /> PNG
+        </a>
       </div>
     </article>
   );

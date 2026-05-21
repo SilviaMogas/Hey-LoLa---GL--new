@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Layout, Section32, Heading2, Body14, KeyValueTable, Muted12 } from './_components/Layout';
+import { Layout, Section32, Heading2, Body14, KeyValueTable, Muted12 } from './_components/Layout.js';
 
 export interface OnboardingPetParentAdminProps {
   firstName: string;

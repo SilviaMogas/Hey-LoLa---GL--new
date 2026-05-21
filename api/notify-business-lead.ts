@@ -1,5 +1,5 @@
-import { getAdminDb } from './_admin';
-import { sendBusinessLeadEmails } from '../src/lib/email';
+import { getAdminDb } from './_admin.js';
+import { sendBusinessLeadEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-business-lead
 //   Body: { leadId: string }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Layout, Section32, Heading1, Body14, CtaButton, Quote } from './_components/Layout';
+import { Layout, Section32, Heading1, Body14, CtaButton, Quote } from './_components/Layout.js';
 
 export interface FoundationInterestConfirmationProps {
   contactName?: string;

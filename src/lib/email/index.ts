@@ -19,7 +19,7 @@ export {
   sendWaitlistEmails,
   sendBusinessLeadEmails,
   sendSignupEmails,
-} from './senders';
+} from './senders.js';
 
 export type {
   SendVenueInviteOptions,
@@ -33,6 +33,6 @@ export type {
   WaitlistEmailOpts,
   BusinessLeadEmailOpts,
   SignupEmailOpts,
-} from './senders';
+} from './senders.js';
 
-export type { SendResult } from './transport';
+export type { SendResult } from './transport.js';

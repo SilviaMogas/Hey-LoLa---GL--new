@@ -1,8 +1,8 @@
 import { getAuth } from 'firebase-admin/auth';
 import { randomBytes } from 'crypto';
-import { sendVenueInviteEmail } from '../src/lib/email';
-import { isAdminEmail } from '../src/lib/admin';
-import { getAdminApp, getAdminDb } from './_admin';
+import { sendVenueInviteEmail } from '../src/lib/email/index.js';
+import { isAdminEmail } from '../src/lib/admin.js';
+import { getAdminApp, getAdminDb } from './_admin.js';
 
 // Admin endpoint: issue a venue invitation.
 //

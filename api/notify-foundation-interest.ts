@@ -1,5 +1,5 @@
-import { getAdminDb, appUrl } from './_admin';
-import { sendFoundationInterestEmails } from '../src/lib/email';
+import { getAdminDb, appUrl } from './_admin.js';
+import { sendFoundationInterestEmails } from '../src/lib/email/index.js';
 
 // Public endpoint called by the client immediately after a foundation_interest
 // document is created from a rescue passport. We re-read the document via the

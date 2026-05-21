@@ -1,5 +1,5 @@
-import { getAdminDb, getAdminAuth, appUrl } from './_admin';
-import { sendGroupJoinEmails } from '../src/lib/email';
+import { getAdminDb, getAdminAuth, appUrl } from './_admin.js';
+import { sendGroupJoinEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-group-join
 //   Body: { membershipId: string }

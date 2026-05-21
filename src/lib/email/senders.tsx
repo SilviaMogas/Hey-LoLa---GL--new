@@ -1,30 +1,30 @@
 import * as React from 'react';
 import { render } from '@react-email/render';
 
-import { sendOne, ADMIN_INBOX, SendResult } from './transport';
+import { sendOne, ADMIN_INBOX, SendResult } from './transport.js';
 
 // React Email templates — one component per "audience × workflow".
-import VenueInvite from '../../../emails/venue-invite';
-import PartnerApplicationConfirmation from '../../../emails/partner-application-confirmation';
-import PartnerApplicationAdmin from '../../../emails/partner-application-admin';
-import FoundationInterestConfirmation from '../../../emails/foundation-interest-confirmation';
-import FoundationInterestAdmin from '../../../emails/foundation-interest-admin';
-import GroupJoinConfirmation from '../../../emails/group-join-confirmation';
-import GroupJoinAdmin from '../../../emails/group-join-admin';
-import VenueClaimConfirmation from '../../../emails/venue-claim-confirmation';
-import VenueClaimAdmin from '../../../emails/venue-claim-admin';
-import OnboardingPetParentConfirmation from '../../../emails/onboarding-pet-parent-confirmation';
-import OnboardingPetParentAdmin from '../../../emails/onboarding-pet-parent-admin';
-import OnboardingAnimalLoverConfirmation from '../../../emails/onboarding-animal-lover-confirmation';
-import OnboardingAnimalLoverAdmin from '../../../emails/onboarding-animal-lover-admin';
-import VenueIntakeConfirmation from '../../../emails/venue-intake-confirmation';
-import VenueIntakeAdmin from '../../../emails/venue-intake-admin';
-import WaitlistConfirmation from '../../../emails/waitlist-confirmation';
-import WaitlistAdmin from '../../../emails/waitlist-admin';
-import BusinessLeadConfirmation from '../../../emails/business-lead-confirmation';
-import BusinessLeadAdmin from '../../../emails/business-lead-admin';
-import SignupConfirmation from '../../../emails/signup-confirmation';
-import SignupAdmin from '../../../emails/signup-admin';
+import VenueInvite from '../../../emails/venue-invite.js';
+import PartnerApplicationConfirmation from '../../../emails/partner-application-confirmation.js';
+import PartnerApplicationAdmin from '../../../emails/partner-application-admin.js';
+import FoundationInterestConfirmation from '../../../emails/foundation-interest-confirmation.js';
+import FoundationInterestAdmin from '../../../emails/foundation-interest-admin.js';
+import GroupJoinConfirmation from '../../../emails/group-join-confirmation.js';
+import GroupJoinAdmin from '../../../emails/group-join-admin.js';
+import VenueClaimConfirmation from '../../../emails/venue-claim-confirmation.js';
+import VenueClaimAdmin from '../../../emails/venue-claim-admin.js';
+import OnboardingPetParentConfirmation from '../../../emails/onboarding-pet-parent-confirmation.js';
+import OnboardingPetParentAdmin from '../../../emails/onboarding-pet-parent-admin.js';
+import OnboardingAnimalLoverConfirmation from '../../../emails/onboarding-animal-lover-confirmation.js';
+import OnboardingAnimalLoverAdmin from '../../../emails/onboarding-animal-lover-admin.js';
+import VenueIntakeConfirmation from '../../../emails/venue-intake-confirmation.js';
+import VenueIntakeAdmin from '../../../emails/venue-intake-admin.js';
+import WaitlistConfirmation from '../../../emails/waitlist-confirmation.js';
+import WaitlistAdmin from '../../../emails/waitlist-admin.js';
+import BusinessLeadConfirmation from '../../../emails/business-lead-confirmation.js';
+import BusinessLeadAdmin from '../../../emails/business-lead-admin.js';
+import SignupConfirmation from '../../../emails/signup-confirmation.js';
+import SignupAdmin from '../../../emails/signup-admin.js';
 
 // `@react-email/render` returns either `string` or `Promise<string>` depending
 // on the version. Wrap to always await — keeps callers consistent.

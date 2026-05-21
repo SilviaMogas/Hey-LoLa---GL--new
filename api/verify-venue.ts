@@ -1,5 +1,5 @@
 import { timingSafeEqual } from 'crypto';
-import { getAdminDb } from './_admin';
+import { getAdminDb } from './_admin.js';
 
 // Server-side endpoint for the click-to-verify email-link flow.
 //

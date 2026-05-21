@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Layout, Section32, Body14, CtaButton } from './_components/Layout';
+import { Layout, Section32, Body14, CtaButton } from './_components/Layout.js';
 
 export interface GroupJoinConfirmationProps {
   firstName: string;

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": false,
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false
+  },
+  "include": [
+    "src/lib/email/**/*.ts",
+    "src/lib/email/**/*.tsx",
+    "emails/**/*.tsx",
+    "emails/**/*.ts"
+  ]
+}

@@ -49,19 +49,22 @@ const ICON_VARIANTS: LogoVariant[] = [
 
 interface MascotAsset {
   label: string;
-  src: string;
   surface: string;
   transparent?: boolean;
   dark?: boolean;
+  /** Dark variant places the mascot on a white card so the line art stays legible. */
+  card?: boolean;
+  logoVariant: 'black' | 'white';
 }
 
-// Mascot + wordmark lockups. PNGs live in /public/brand and are exported
-// from the master illustration (see brand-assets/).
+// Master mascot cutout (the dog only, transparent). The wordmark is rendered
+// live below it via <BrandLogo> so the logo is always the real brand mark.
+const MASCOT_CUTOUT = '/brand/heylola-mascot-cutout.png';
+
 const MASCOT_ASSETS: MascotAsset[] = [
-  { label: 'Transparent',   src: '/brand/heylola-mascot-transparent.png', surface: 'bg-white',    transparent: true },
-  { label: 'On Light',      src: '/brand/heylola-mascot-white.png',       surface: 'bg-white' },
-  { label: 'On Dark',       src: '/brand/heylola-mascot-black.png',       surface: 'bg-charcoal', dark: true },
-  { label: 'On Dark · Card', src: '/brand/heylola-mascot-black-card.png', surface: 'bg-charcoal', dark: true },
+  { label: 'Transparent', surface: 'bg-white',    transparent: true, logoVariant: 'black' },
+  { label: 'On Light',    surface: 'bg-white',                       logoVariant: 'black' },
+  { label: 'On Dark',     surface: 'bg-charcoal', dark: true, card: true, logoVariant: 'white' },
 ];
 
 export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
@@ -129,7 +132,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl mb-4">
           Lola, our mascot, paired with the wordmark. Use the transparent version over photography, the light version on white surfaces and the dark version on charcoal.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {MASCOT_ASSETS.map((m) => (
             <MascotTile key={m.label} asset={m} />
           ))}
@@ -410,10 +413,18 @@ function LogoTile({ variant }: { variant: LogoVariant }) {
 
 function MascotTile({ asset }: { asset: MascotAsset }) {
   const isDark = !!asset.dark;
-  const filename = `heylola-mascot-${asset.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
   const pillClass = isDark
     ? 'bg-white/10 text-white/70 hover:bg-white/20'
     : 'bg-charcoal/5 text-stone-500 hover:bg-charcoal/10';
+  const mascotImg = (
+    <img
+      src={MASCOT_CUTOUT}
+      alt="Hey Lola mascot"
+      loading="lazy"
+      className="w-auto object-contain"
+      style={{ maxHeight: 170 }}
+    />
+  );
   return (
     <article className={`rounded-2xl ${asset.surface} border ${isDark ? 'border-white/10' : 'border-stone-200'} flex flex-col aspect-[4/5] relative overflow-hidden`}>
       {asset.transparent && (
@@ -429,23 +440,24 @@ function MascotTile({ asset }: { asset: MascotAsset }) {
           }}
         />
       )}
-      <div className="flex-1 flex items-center justify-center px-5 py-6 min-h-0 relative z-10">
-        <img
-          src={asset.src}
-          alt={`Hey Lola mascot with wordmark — ${asset.label}`}
-          loading="lazy"
-          className="w-auto h-full max-h-full object-contain"
-        />
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 py-6 min-h-0 relative z-10">
+        {asset.card ? (
+          <div className="bg-white rounded-2xl p-3 flex items-center justify-center shadow-sm">{mascotImg}</div>
+        ) : (
+          mascotImg
+        )}
+        {/* The real brand wordmark, rendered live. */}
+        <BrandLogo size="lg" variant={asset.logoVariant} />
       </div>
       <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1 relative z-10">
         <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>
           {asset.label}
         </span>
         <a
-          href={asset.src}
-          download={filename}
+          href={MASCOT_CUTOUT}
+          download="heylola-mascot.png"
           className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] px-2.5 py-1 rounded-full transition-colors ${pillClass}`}
-          aria-label={`Download mascot ${asset.label} PNG`}
+          aria-label="Download mascot PNG"
         >
           <Download size={9} /> PNG
         </a>

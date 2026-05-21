@@ -1,6 +1,152 @@
 import { Place } from '../types';
 
 export const curatedPlaces: Omit<Place, 'id'>[] = [
+  // ── Toronto (seed — Pending verification) ──────────────────────────
+  {
+    "name": "Trinity Bellwoods Park",
+    "category": "Parks / green areas",
+    "city": "Toronto",
+    "neighborhood": "Trinity Bellwoods",
+    "description": "Sprawling park with a popular off-leash dog bowl where the local pack gathers.",
+    "utility": "The city's best-known meetup spot for dog parents.",
+    "status": "Pending verification",
+    "lat": 43.6473,
+    "lng": -79.4137,
+    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "High Park Off-Leash Dog Area",
+    "category": "Parks / green areas",
+    "city": "Toronto",
+    "neighborhood": "High Park",
+    "description": "Toronto's largest park with a dedicated off-leash area and shaded trails.",
+    "utility": "Plenty of space for big runs and socialising.",
+    "status": "Pending verification",
+    "lat": 43.6465,
+    "lng": -79.4637,
+    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Cherry Beach (Off-Leash)",
+    "category": "Beaches",
+    "city": "Toronto",
+    "neighborhood": "Port Lands",
+    "description": "Lakeside off-leash beach where dogs can swim in Lake Ontario.",
+    "utility": "One of the few spots in the city for an off-leash swim.",
+    "status": "Pending verification",
+    "lat": 43.6376,
+    "lng": -79.3441,
+    "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Boxcar Social Harbourfront",
+    "category": "Dog-friendly cafes",
+    "city": "Toronto",
+    "neighborhood": "Harbourfront",
+    "description": "Coffee and wine bar with a lakeside patio that welcomes dogs.",
+    "utility": "Relaxed patio for a coffee after a waterfront walk.",
+    "status": "Pending verification",
+    "lat": 43.6389,
+    "lng": -79.3789,
+    "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Bellwoods Brewery",
+    "category": "Dog-friendly restaurants",
+    "city": "Toronto",
+    "neighborhood": "Ossington",
+    "description": "Craft brewery and bottle shop with a dog-friendly patio.",
+    "utility": "Easy-going patio for a bite and a beer with your pup.",
+    "status": "Pending verification",
+    "lat": 43.6471,
+    "lng": -79.4203,
+    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Tom & Sawyer Pet Food",
+    "category": "Pet shops",
+    "city": "Toronto",
+    "neighborhood": "Leslieville",
+    "description": "Local shop specialising in fresh, gently-cooked meals for dogs.",
+    "utility": "Great for fresh food and knowledgeable advice.",
+    "status": "Pending verification",
+    "lat": 43.6627,
+    "lng": -79.3389,
+    "image": "https://images.unsplash.com/photo-1601758174039-71b21851fb01?auto=format&fit=crop&w=400&q=80"
+  },
+  // ── Washington DC (seed — Pending verification) ────────────────────
+  {
+    "name": "Congressional Cemetery (Off-Leash)",
+    "category": "Parks / green areas",
+    "city": "Washington DC",
+    "neighborhood": "Capitol Hill",
+    "description": "Historic grounds with a popular members' off-leash dog-walking program.",
+    "utility": "Safe, fenced, social — a DC dog community staple.",
+    "status": "Pending verification",
+    "lat": 38.8819,
+    "lng": -76.9797,
+    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Shaw Dog Park",
+    "category": "Parks / green areas",
+    "city": "Washington DC",
+    "neighborhood": "Shaw",
+    "description": "Fenced neighbourhood dog park with separate areas for big and small dogs.",
+    "utility": "Reliable off-leash spot in the heart of the city.",
+    "status": "Pending verification",
+    "lat": 38.9085,
+    "lng": -77.0212,
+    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Meridian Hill Park",
+    "category": "Parks / green areas",
+    "city": "Washington DC",
+    "neighborhood": "Columbia Heights",
+    "description": "Terraced park with fountains and wide lawns popular for on-leash strolls.",
+    "utility": "Scenic walks and weekend people-and-dog watching.",
+    "status": "Pending verification",
+    "lat": 38.9217,
+    "lng": -77.0356,
+    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Dacha Beer Garden",
+    "category": "Dog-friendly restaurants",
+    "city": "Washington DC",
+    "neighborhood": "Shaw",
+    "description": "Beloved open-air beer garden that famously welcomes dogs.",
+    "utility": "Spacious, social patio — a go-to for dog parents.",
+    "status": "Pending verification",
+    "lat": 38.9166,
+    "lng": -77.0223,
+    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "The Wydown Coffee Bar",
+    "category": "Dog-friendly cafes",
+    "city": "Washington DC",
+    "neighborhood": "14th Street",
+    "description": "Specialty coffee bar with a sidewalk patio that welcomes pups.",
+    "utility": "Quick, friendly stop on a 14th Street walk.",
+    "status": "Pending verification",
+    "lat": 38.9180,
+    "lng": -77.0316,
+    "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    "name": "Wagtime Pet Spa & Boutique",
+    "category": "Pet shops",
+    "city": "Washington DC",
+    "neighborhood": "Logan Circle",
+    "description": "Neighbourhood pet boutique and grooming spot with quality supplies.",
+    "utility": "Local favourite for treats, gear and grooming.",
+    "status": "Pending verification",
+    "lat": 38.9087,
+    "lng": -77.0290,
+    "image": "https://images.unsplash.com/photo-1601758174039-71b21851fb01?auto=format&fit=crop&w=400&q=80"
+  },
   {
     "name": "Parc de la Ciutadella",
     "category": "Parks / green areas",

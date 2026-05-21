@@ -4,6 +4,17 @@ export type GroupCategory = 'walks' | 'training' | 'social' | 'travel' | 'wellne
  *  (profile.foundingMember === true) or admins can enter. */
 export type GroupAccess = 'open' | 'founder';
 
+/** Used to group the crews into continent sections in the UI. */
+export type Continent = 'Americas' | 'Europe' | 'Global';
+
+export const CONTINENT_ORDER: Continent[] = ['Americas', 'Europe', 'Global'];
+
+export const CONTINENT_META: Record<Continent, { label: string; emoji: string }> = {
+  Americas: { label: 'Americas', emoji: '🌎' },
+  Europe: { label: 'Europe', emoji: '🌍' },
+  Global: { label: 'Global', emoji: '✨' },
+};
+
 export interface CommunityGroup {
   id: string;
   name: string;
@@ -17,6 +28,8 @@ export interface CommunityGroup {
   access?: GroupAccess;
   /** Conversation sub-topics surfaced inside the group room. */
   subtopics?: string[];
+  /** Continent the city belongs to — drives the grouped UI sections. */
+  continent?: Continent;
 }
 
 export const CATEGORY_META: Record<GroupCategory, { label: string; color: string; accent: string }> = {
@@ -36,9 +49,10 @@ export const CATEGORY_META: Record<GroupCategory, { label: string; color: string
 export const COMMUNITY_GROUPS: CommunityGroup[] = [
   {
     id: 'mia-pack',
-    name: 'Miami Crew',
+    name: 'Miami 🌴',
     category: 'social',
     city: 'Miami',
+    continent: 'Americas',
     members: 0,
     cadence: 'Open',
     access: 'open',
@@ -48,9 +62,10 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'nyc-pack',
-    name: 'NYC Crew',
+    name: 'New York 🗽',
     category: 'social',
     city: 'NYC',
+    continent: 'Americas',
     members: 0,
     cadence: 'Open',
     access: 'open',
@@ -60,9 +75,10 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'bcn-pack',
-    name: 'Barcelona Crew',
+    name: 'Barcelona 🌊',
     category: 'social',
     city: 'Barcelona',
+    continent: 'Europe',
     members: 0,
     cadence: 'Open',
     access: 'open',
@@ -72,9 +88,10 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'tor-pack',
-    name: 'Toronto Crew',
+    name: 'Toronto 🍁',
     category: 'social',
     city: 'Toronto',
+    continent: 'Americas',
     members: 0,
     cadence: 'Open',
     access: 'open',
@@ -84,9 +101,10 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'dc-pack',
-    name: 'Washington DC Crew',
+    name: 'Washington DC 🏛️',
     category: 'social',
     city: 'Washington DC',
+    continent: 'Americas',
     members: 0,
     cadence: 'Open',
     access: 'open',
@@ -96,9 +114,10 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
   },
   {
     id: 'founders-circle',
-    name: "Founders' Circle",
+    name: "Founders' Circle ✨",
     category: 'community',
     city: 'Global',
+    continent: 'Global',
     members: 0,
     cadence: 'Founders only',
     access: 'founder',

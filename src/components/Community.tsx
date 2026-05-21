@@ -15,7 +15,7 @@ import {
   Trophy,
   Award,
 } from 'lucide-react';
-import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
+import { COMMUNITY_GROUPS, CATEGORY_META, CONTINENT_ORDER, CONTINENT_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
@@ -274,11 +274,22 @@ export const Community: React.FC<CommunityProps> = (_props) => {
               </a>
             </header>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {COMMUNITY_GROUPS.map((g, i) => (
-                <GroupCard key={g.id} group={g} delay={i * 0.04} />
-              ))}
-            </div>
+            {CONTINENT_ORDER.map((cont) => {
+              const groups = COMMUNITY_GROUPS.filter((g) => (g.continent ?? 'Global') === cont);
+              if (groups.length === 0) return null;
+              return (
+                <div key={cont} className="mb-8 last:mb-0">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400 mb-3 inline-flex items-center gap-2">
+                    <span aria-hidden="true">{CONTINENT_META[cont].emoji}</span> {CONTINENT_META[cont].label}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 auto-rows-fr">
+                    {groups.map((g, i) => (
+                      <GroupCard key={g.id} group={g} delay={i * 0.04} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </section>
         )}
 
@@ -669,7 +680,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay }}
-      className="rounded-2xl border border-stone-100 bg-white p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col gap-3"
+      className="h-full rounded-2xl border border-stone-100 bg-white p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col gap-3"
     >
       <header className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
@@ -700,7 +711,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
         type="button"
         onClick={handleJoin}
         disabled={busy}
-        className="mt-2 inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="mt-auto inline-flex items-center justify-center gap-2 h-9 rounded-lg bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-charcoal/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {busy
           ? <><Loader2 size={11} className="animate-spin" /> Joining…</>

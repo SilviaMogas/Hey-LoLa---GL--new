@@ -58,9 +58,10 @@ interface MascotAsset {
 // Mascot + wordmark lockups. PNGs live in /public/brand and are exported
 // from the master illustration (see brand-assets/).
 const MASCOT_ASSETS: MascotAsset[] = [
-  { label: 'Transparent', src: '/brand/heylola-mascot-transparent.png', surface: 'bg-white',    transparent: true },
-  { label: 'On Light',    src: '/brand/heylola-mascot-white.png',       surface: 'bg-white' },
-  { label: 'On Dark',     src: '/brand/heylola-mascot-black.png',       surface: 'bg-charcoal', dark: true },
+  { label: 'Transparent',   src: '/brand/heylola-mascot-transparent.png', surface: 'bg-white',    transparent: true },
+  { label: 'On Light',      src: '/brand/heylola-mascot-white.png',       surface: 'bg-white' },
+  { label: 'On Dark',       src: '/brand/heylola-mascot-black.png',       surface: 'bg-charcoal', dark: true },
+  { label: 'On Dark · Card', src: '/brand/heylola-mascot-black-card.png', surface: 'bg-charcoal', dark: true },
 ];
 
 export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
@@ -128,7 +129,7 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
         <p className="text-sm text-stone-500 font-light italic leading-relaxed max-w-2xl mb-4">
           Lola, our mascot, paired with the wordmark. Use the transparent version over photography, the light version on white surfaces and the dark version on charcoal.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {MASCOT_ASSETS.map((m) => (
             <MascotTile key={m.label} asset={m} />
           ))}

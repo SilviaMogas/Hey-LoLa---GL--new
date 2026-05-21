@@ -44,7 +44,7 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
     access: 'open',
     description: 'Dog parents in Miami. Café spots, beach mornings, weekend brunches and walking buddies.',
     emoji: '🌴',
-    subtopics: ['Beaches & parks', 'Cafés & brunch', 'Vets & grooming', 'Playdates', 'Travel tips'],
+    subtopics: ['Presentations', 'Beaches & parks', 'Cafés & brunch', 'Vets & grooming', 'Playdates', 'Travel tips'],
   },
   {
     id: 'nyc-pack',
@@ -56,7 +56,7 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
     access: 'open',
     description: 'Dog parents in New York. Park loops, neighbourhood meetups and city-friendly tips for life with a dog.',
     emoji: '🗽',
-    subtopics: ['Parks & runs', 'Neighbourhood meetups', 'Vets & grooming', 'Playdates', 'Apartment life'],
+    subtopics: ['Presentations', 'Parks & runs', 'Neighbourhood meetups', 'Vets & grooming', 'Playdates', 'Apartment life'],
   },
   {
     id: 'bcn-pack',
@@ -68,7 +68,7 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
     access: 'open',
     description: 'Dog parents in Barcelona. Beach walks, plaça meetups, dog-friendly terrazas and travel tips.',
     emoji: '🇪🇸',
-    subtopics: ['Playas & parques', 'Terrazas dog-friendly', 'Veterinarios', 'Quedadas', 'Viajar con perro'],
+    subtopics: ['Presentations', 'Playas & parques', 'Terrazas dog-friendly', 'Veterinarios', 'Quedadas', 'Viajar con perro'],
   },
   {
     id: 'founders-circle',
@@ -80,6 +80,6 @@ export const COMMUNITY_GROUPS: CommunityGroup[] = [
     access: 'founder',
     description: 'A private space for Hey Lola Founding Members. Shape the roadmap, unlock exclusive perks and meet the inner circle.',
     emoji: '✨',
-    subtopics: ['Roadmap & feedback', 'Exclusive perks', 'Founder events', 'Introduce yourself'],
+    subtopics: ['Presentations', 'Roadmap & feedback', 'Exclusive perks', 'Founder events'],
   },
 ];

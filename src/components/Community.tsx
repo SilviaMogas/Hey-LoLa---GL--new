@@ -18,6 +18,7 @@ import {
 import { COMMUNITY_GROUPS, CATEGORY_META, type CommunityGroup } from '../data/communityGroups';
 import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
+import { isAdminEmail } from '../lib/admin';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { paths } from '../lib/routes';
@@ -42,6 +43,8 @@ export interface FeedPost {
   city?: string;
   body: string;
   spot?: string;
+  /** Conversation topic within a group room (e.g. "Presentations"). */
+  topic?: string;
   likes: number;
   replies: number;
   timeAgo: string;
@@ -583,8 +586,8 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
   const navigate = useNavigate();
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
-  // Founders' Circle is closed unless the viewer is a Founding Member.
-  const locked = group.access === 'founder' && !profile?.foundingMember;
+  // Founders' Circle is closed unless the viewer is a Founding Member or admin.
+  const locked = group.access === 'founder' && !profile?.foundingMember && !isAdminEmail(user?.email);
 
   // Reflect existing membership so a returning member sees 'Open room'
   // straight away instead of a stale 'Join group' that double-writes a
@@ -619,11 +622,21 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
     // Already a member → just open the room.
     if (joined) { openRoom(); return; }
     setBusy(true);
+    // Safe, public-facing display fields denormalised onto the membership
+    // doc so the group room can render its human members without reading
+    // private /users docs (which the rules block for non-owners).
+    const memberName = profile?.displayName
+      ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+      ?? user.displayName
+      ?? 'Member';
     try {
       const ref = await addDoc(collection(db, 'group_memberships'), {
         userId: user.uid,
         groupId: group.id,
         groupName: group.name,
+        userName: memberName,
+        userPhoto: profile?.photoURL ?? user.photoURL ?? '',
+        userCity: profile?.homeCity ?? '',
         joinedAt: serverTimestamp(),
       });
       setJoined(true);
@@ -717,6 +730,7 @@ export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Re
         city: data.city as string | undefined,
         body: String(data.body ?? ''),
         spot: data.spot as string | undefined,
+        topic: data.topic as string | undefined,
         likes: Number(data.likes ?? 0),
         replies: Number(data.replies ?? 0),
         timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',

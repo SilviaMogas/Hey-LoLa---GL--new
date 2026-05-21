@@ -78,28 +78,30 @@ export default async function handler(req: any, res: any) {
 
   // For email/password signups, generate the Firebase verification link
   // server-side and embed it as the primary CTA in our branded welcome —
-  // this lets us send ONE email instead of two. If link generation fails,
-  // we report confirmationDelivered:false so the client falls back to
-  // Firebase's default sendEmailVerification(). For Google signups the
-  // address is already verified by Google, so the link is not needed.
+  // this lets us send ONE email instead of two. We do NOT fall back to
+  // Firebase's default sendEmailVerification if generation fails: the
+  // ugly Firebase email lands in spam and defeats the purpose. Instead
+  // we surface the actual failure reason so Vercel function logs (and
+  // the response body) make the problem diagnosable.
   let verifyUrl: string | undefined;
+  let verifyUrlError: string | undefined;
   if (signupMethod === 'email' && !userRecord.emailVerified) {
     try {
       verifyUrl = await auth.generateEmailVerificationLink(email, {
         url: `${appUrl(req)}/dashboard`,
         handleCodeInApp: false,
       });
-    } catch (err) {
-      console.warn('notify-signup: generateEmailVerificationLink failed', err);
-      // Bail before sending — without a working verification link our
-      // welcome email is misleading. Client will fall back to Firebase.
-      res.status(200).json({
-        success: true,
-        confirmationDelivered: false,
-        alertDelivered: false,
-        skippedReason: 'Could not generate verification link.',
+    } catch (err: any) {
+      verifyUrlError = err?.message || err?.code || String(err);
+      console.error('notify-signup: generateEmailVerificationLink failed', {
+        userId,
+        appUrl: appUrl(req),
+        message: verifyUrlError,
       });
-      return;
+      // Continue without the verify CTA. The welcome email still goes out,
+      // and the user can re-trigger verification via the Resend Link button
+      // on /verify-email once the underlying config (Authorized Domains,
+      // APP_URL env, etc.) is fixed.
     }
   }
 
@@ -117,9 +119,26 @@ export default async function handler(req: any, res: any) {
     verifyUrl,
   });
 
+  if (!result.confirmation.delivered) {
+    console.error('notify-signup: confirmation email failed to deliver', {
+      userId,
+      to: email,
+      skippedReason: result.confirmation.skippedReason,
+    });
+  }
+  if (!result.alert.delivered) {
+    console.error('notify-signup: admin alert failed to deliver', {
+      userId,
+      skippedReason: result.alert.skippedReason,
+    });
+  }
+
   res.status(200).json({
     success: true,
     confirmationDelivered: result.confirmation.delivered,
     alertDelivered: result.alert.delivered,
+    confirmationReason: result.confirmation.skippedReason,
+    alertReason: result.alert.skippedReason,
+    verifyUrlError,
   });
 }

@@ -134,6 +134,8 @@ export const PetProfile: React.FC = () => {
   }
 
   const subtitle = [card.breed, card.sex].filter(Boolean).join(' · ');
+  // Pronoun for the "Meet ___" eyebrow, from the pet's sex.
+  const pronoun = card.sex === 'Male' ? 'him' : card.sex === 'Female' ? 'her' : 'them';
 
   return (
     <div className="bg-white text-charcoal font-boutique min-h-screen">
@@ -164,6 +166,9 @@ export const PetProfile: React.FC = () => {
               : <span className="text-5xl font-serif italic text-stone-300">{card.name[0]?.toUpperCase() || '🐾'}</span>}
           </div>
           <div className="space-y-1">
+            <span className="block text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">
+              Meet {pronoun}
+            </span>
             <h1 className="text-4xl sm:text-5xl font-serif italic tracking-tight leading-[0.95]">
               {card.name}<span className="brand-dot" aria-hidden="true" />
             </h1>
@@ -218,8 +223,8 @@ export const PetProfile: React.FC = () => {
           </section>
         )}
 
-        {/* Furry parent ficha */}
-        {(card.ownerName || card.ownerHandle) && (
+        {/* Furry parent ficha — always shown when we know the owner. */}
+        {card.ownerId && (
           <section className="pb-16">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2 mb-3">
               <PawPrint size={11} /> Furry parent

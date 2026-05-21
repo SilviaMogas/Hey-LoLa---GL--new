@@ -9,6 +9,7 @@ import { isAdminEmail } from '../lib/admin';
 import { COMMUNITY_GROUPS } from '../data/communityGroups';
 import { paths } from '../lib/routes';
 import { SEO } from '../lib/seo';
+import { seedPostsFor } from '../data/seedPosts';
 import {
   FeedItem,
   PostComposer,
@@ -121,11 +122,15 @@ export const CommunityGroup: React.FC = () => {
     return () => { cancelled = true; };
   }, [groupId, locked, user]);
 
-  // Posts shown for the active topic. Untagged/legacy posts bucket into the
-  // first topic ("Presentations") so nothing disappears.
+  // Pinned founder welcome / starter posts for this group (seed, non-editable).
+  const seeded = useMemo(() => (group ? seedPostsFor(group.id) : []), [group]);
+
+  // Posts shown for the active topic — founder seed posts pinned first, then
+  // live posts. Untagged/legacy posts bucket into the first topic
+  // ("Presentations") so nothing disappears.
   const visiblePosts = useMemo(
-    () => livePosts.filter((p) => (p.topic ?? topics[0]) === activeTopic),
-    [livePosts, activeTopic, topics],
+    () => [...seeded, ...livePosts].filter((p) => (p.topic ?? topics[0]) === activeTopic),
+    [seeded, livePosts, activeTopic, topics],
   );
 
   // Unknown group id → bounce back to /community.

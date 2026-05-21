@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Lock, MapPin, Users } from 'lucide-react';
-import { collection, getDocs, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
@@ -47,6 +47,8 @@ export const CommunityGroup: React.FC = () => {
   const { user, profile } = useAuth();
   const [livePosts, setLivePosts] = useState<FeedPost[]>([]);
   const [members, setMembers] = useState<GroupMember[]>([]);
+  const [joined, setJoined] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   const group = COMMUNITY_GROUPS.find((g) => g.id === groupId);
 
@@ -121,6 +123,55 @@ export const CommunityGroup: React.FC = () => {
     return () => { cancelled = true; };
   }, [groupId, locked, user]);
 
+  // Reflect existing membership so the header shows Join vs Joined.
+  useEffect(() => {
+    if (!user || !groupId || locked) { setJoined(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(query(
+          collection(db, 'group_memberships'),
+          where('userId', '==', user.uid),
+          where('groupId', '==', groupId),
+          limit(1),
+        ));
+        if (!cancelled) setJoined(!snap.empty);
+      } catch { /* best effort */ }
+    })();
+    return () => { cancelled = true; };
+  }, [user, groupId, locked]);
+
+  const handleJoin = async () => {
+    if (!group) return;
+    if (!user) { navigate(paths.login); return; }
+    if (joining || joined) return;
+    setJoining(true);
+    const memberName = profile?.displayName
+      || [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+      || user.displayName || 'Member';
+    try {
+      const ref = await addDoc(collection(db, 'group_memberships'), {
+        userId: user.uid,
+        groupId: group.id,
+        groupName: group.name,
+        userName: memberName,
+        userPhoto: profile?.photoURL ?? user.photoURL ?? '',
+        userCity: profile?.localHub ?? profile?.homeCity ?? '',
+        joinedAt: serverTimestamp(),
+      });
+      setJoined(true);
+      void fetch('/api/notify-group-join', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ membershipId: ref.id }),
+      }).catch(() => { /* email best-effort */ });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
+    } finally {
+      setJoining(false);
+    }
+  };
+
   // Posts shown for the active topic. Untagged/legacy posts bucket into the
   // first topic ("Presentations") so nothing disappears. Founder welcome
   // posts are real Firestore docs (seeded via scripts/seed_community_posts.mjs)
@@ -187,6 +238,22 @@ export const CommunityGroup: React.FC = () => {
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 inline-flex items-center gap-2 pt-1">
               <MapPin size={10} /> {group.city} · {group.cadence}
             </p>
+            {!locked && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleJoin}
+                  disabled={joining || joined}
+                  className={`inline-flex items-center gap-2 h-9 px-4 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${
+                    joined
+                      ? 'bg-[#6E8C5D]/10 text-[#6E8C5D] cursor-default'
+                      : 'bg-charcoal text-white hover:bg-charcoal/80'
+                  } disabled:opacity-70`}
+                >
+                  {joining ? 'Joining…' : joined ? '✓ Joined' : <>Join {group.name}</>}
+                </button>
+              </div>
+            )}
           </div>
         </motion.header>
 

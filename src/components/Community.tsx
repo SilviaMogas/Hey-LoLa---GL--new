@@ -716,7 +716,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
         {busy
           ? <><Loader2 size={11} className="animate-spin" /> Joining…</>
           : locked
-            ? <>Founders only <ArrowRight size={11} /></>
+            ? <>Join with membership <ArrowRight size={11} /></>
             : joined
               ? <>Open room <ArrowRight size={11} /></>
               : <>Join group <ArrowRight size={11} /></>}

@@ -6,44 +6,22 @@ import { Resend } from 'resend';
 // envelope, list-unsubscribe header) and nothing else.
 //
 // Env:
-//   RESEND_API_KEY   required for actual delivery
-//   EMAIL_FROM       optional; defaults to "Hey Lola <hey@heylola.co>"
-//   EMAIL_REPLY_TO   optional; defaults to "hey@heylola.co"
+//   RESEND_API_KEY      required for actual delivery
+//   EMAIL_FROM          optional; defaults to "Hey Lola <hey@heylola.co>"
+//   EMAIL_REPLY_TO      optional; defaults to "hey@heylola.co"
+//   ADMIN_INBOX_EMAIL   optional; overrides the destination for admin alerts.
+//                       Set this when you want admin notifications to go to
+//                       a different inbox (staging, QA, personal review).
 
 export const DEFAULT_FROM = 'Hey Lola <hey@heylola.co>';
 export const DEFAULT_REPLY_TO = 'hey@heylola.co';
-export const ADMIN_INBOX = 'hey@heylola.co';
+export const ADMIN_INBOX = process.env.ADMIN_INBOX_EMAIL?.trim() || 'hey@heylola.co';
 
 export interface SendResult {
   delivered: boolean;
   /** Reason for not delivering (missing API key, provider error, exception). */
   skippedReason?: string;
   providerMessageId?: string;
-}
-
-/**
- * Test-mode redirect. When EMAIL_TEST_MODE=true and the matching test inbox
- * is configured, every outgoing email is rerouted away from the real
- * recipient so designers/copywriters can review templates without spamming
- * users. The original recipient is preserved in the subject line so the
- * inbox makes it obvious which "real" address would have received it.
- *
- *   ADMIN_INBOX  → TEST_ADMIN_EMAIL  (admin alerts)
- *   anything else → TEST_USER_EMAIL  (autoresponders)
- *
- * If EMAIL_TEST_MODE is unset OR the target test address is unset, the
- * email goes to its real recipient. We deliberately require BOTH the
- * gate flag AND the address so a stray env var alone never reroutes.
- */
-function maybeRedirect(originalTo: string): { to: string; redirected: boolean } {
-  if (process.env.EMAIL_TEST_MODE !== 'true') {
-    return { to: originalTo, redirected: false };
-  }
-  const target = originalTo === ADMIN_INBOX
-    ? process.env.TEST_ADMIN_EMAIL?.trim()
-    : process.env.TEST_USER_EMAIL?.trim();
-  if (!target) return { to: originalTo, redirected: false };
-  return { to: target, redirected: true };
 }
 
 /**
@@ -64,14 +42,11 @@ export async function sendOne(
   const replyTo = process.env.EMAIL_REPLY_TO || DEFAULT_REPLY_TO;
   const resend = new Resend(apiKey);
 
-  const { to: actualTo, redirected } = maybeRedirect(to);
-  const actualSubject = redirected ? `[TEST → ${to}] ${subject}` : subject;
-
   try {
     const r = await resend.emails.send({
       from,
-      to: actualTo,
-      subject: actualSubject,
+      to,
+      subject,
       html,
       text,
       replyTo,

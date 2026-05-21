@@ -5,15 +5,14 @@
  *
  *   npm run email:test
  *
- * Requires in .env.local:
+ * Requires in .env (or .env.local):
  *   RESEND_API_KEY=re_xxx
- *   EMAIL_TEST_MODE=true
- *   TEST_USER_EMAIL=designer@example.com    ← all "user-facing" emails land here
- *   TEST_ADMIN_EMAIL=ops@example.com        ← all "admin alert" emails land here
+ *   TEST_USER_EMAIL=designer@example.com    ← all autoresponders land here
  *
- * The user + admin inboxes can be the same address. Every email arrives
- * with a `[TEST → original-recipient]` subject prefix so you can tell at a
- * glance which "real" address would have received it.
+ * Optional:
+ *   ADMIN_INBOX_EMAIL=ops@example.com       ← override the admin alert
+ *                                             destination (defaults to
+ *                                             hey@heylola.co).
  */
 
 import 'dotenv/config';
@@ -31,7 +30,7 @@ import {
   sendSignupEmails,
 } from '../src/lib/email';
 
-const { TEST_USER_EMAIL, TEST_ADMIN_EMAIL, EMAIL_TEST_MODE, RESEND_API_KEY } = process.env;
+const { TEST_USER_EMAIL, ADMIN_INBOX_EMAIL, RESEND_API_KEY } = process.env;
 
 // ─── pre-flight ─────────────────────────────────────────────────────────────
 
@@ -40,22 +39,22 @@ const fatal = (msg: string) => {
   process.exit(1);
 };
 
-if (!RESEND_API_KEY) fatal('RESEND_API_KEY is not set in .env.local — no email can leave the machine.');
-if (EMAIL_TEST_MODE !== 'true') fatal('EMAIL_TEST_MODE must be exactly "true" in .env.local.');
-if (!TEST_USER_EMAIL) fatal('TEST_USER_EMAIL is not set in .env.local.');
-if (!TEST_ADMIN_EMAIL) fatal('TEST_ADMIN_EMAIL is not set in .env.local.');
+if (!RESEND_API_KEY) fatal('RESEND_API_KEY is not set — no email can leave the machine.');
+if (!TEST_USER_EMAIL) fatal('TEST_USER_EMAIL is not set. Add it to .env so autoresponders land in your inbox during testing.');
+
+const adminInbox = ADMIN_INBOX_EMAIL?.trim() || 'hey@heylola.co';
 
 console.log('\n\x1b[1mHey Lola — email test run\x1b[0m');
 console.log('─'.repeat(60));
-console.log(`User inbox:   ${TEST_USER_EMAIL}`);
-console.log(`Admin inbox:  ${TEST_ADMIN_EMAIL}`);
+console.log(`User inbox (autoresponders):  ${TEST_USER_EMAIL}`);
+console.log(`Admin inbox (alerts):         ${adminInbox}`);
 console.log('─'.repeat(60));
 
-// Sample addresses used inside the email body (so the recipient column /
-// "[TEST → ...]" prefix shows realistic data). These NEVER actually receive
-// a real email — the transport redirects everything to the TEST_* inboxes.
-const SAMPLE_USER_EMAIL = 'sample-applicant@example.com';
-const SAMPLE_BUSINESS_EMAIL = 'partnerships@acmepet.com';
+// Plug TEST_USER_EMAIL into every "user-facing" recipient slot so the test
+// inbox actually receives the autoresponders. Admin alerts naturally route
+// to ADMIN_INBOX_EMAIL (or the default hey@heylola.co).
+const SAMPLE_USER_EMAIL = TEST_USER_EMAIL;
+const SAMPLE_BUSINESS_EMAIL = TEST_USER_EMAIL;
 
 interface TestCase {
   name: string;
@@ -253,7 +252,7 @@ const green = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
 const dim = (s: string) => `\x1b[2m${s}\x1b[0m`;
 
-function summarise(label: string, r: any): { delivered: boolean; reason?: string } {
+function summarise(r: any): { delivered: boolean; reason?: string } {
   if (r && typeof r === 'object') {
     if ('delivered' in r) return { delivered: !!r.delivered, reason: r.skippedReason };
     // two-email response { confirmation, alert }
@@ -286,7 +285,7 @@ for (let i = 0; i < cases.length; i++) {
   process.stdout.write(`${c.name.padEnd(56)}  `);
   try {
     const r = await c.run();
-    const { delivered, reason } = summarise(c.name, r);
+    const { delivered, reason } = summarise(r);
     if (delivered) {
       totalSent += c.emails;
       console.log(green(`✓ ${c.emails} sent`));

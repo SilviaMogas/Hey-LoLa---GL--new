@@ -74,19 +74,19 @@ Add to `.env.local`:
 
 ```bash
 RESEND_API_KEY="re_xxx"                         # required — emails actually leave
-EMAIL_TEST_MODE="true"                          # master switch (must be exactly "true")
 TEST_USER_EMAIL="designer@example.com"          # autoresponders land here
-TEST_ADMIN_EMAIL="ops@example.com"              # admin alerts land here
+ADMIN_INBOX_EMAIL="ops@example.com"             # optional — overrides the
+                                                # admin alert destination
+                                                # (default: hey@heylola.co)
 ```
 
-User and admin can be the same inbox. The address strings inside the email
-body (e.g. "Sam Rivera <sam@bowwowbistro.com>") stay as the realistic sample
-values — only the actual envelope `To:` is rerouted, and the original
-recipient is preserved in the subject as `[TEST → original@address]`.
+The test script substitutes `TEST_USER_EMAIL` into every "user-facing"
+recipient slot in the sample data so you receive every autoresponder. Admin
+alerts go to `ADMIN_INBOX_EMAIL` if set, otherwise to `hey@heylola.co`.
 
-> ⚠️ Never set `EMAIL_TEST_MODE=true` in production env vars. The gate is
-> double-locked (needs both `EMAIL_TEST_MODE=true` AND a configured test
-> address), but treat the test mode as a developer-only feature.
+> ⚠️ `ADMIN_INBOX_EMAIL` also affects real form submissions while the app is
+> running — `npm run dev` will route every admin alert to whatever address
+> is configured. Unset it (or leave it empty) for production.
 
 ### Run the test
 
@@ -99,8 +99,8 @@ You'll see something like:
 ```
 Hey Lola — email test run
 ────────────────────────────────────────────────────────────
-User inbox:   designer@example.com
-Admin inbox:  ops@example.com
+User inbox (autoresponders):  designer@example.com
+Admin inbox (alerts):         ops@example.com
 ────────────────────────────────────────────────────────────
 01 · Venue Invite (admin → venue)              ✓ 1 sent
 02 · Partner Application                       ✓ 2 sent
@@ -121,13 +121,6 @@ Sent: 23    Failed: 0
 Twelve scenarios, twenty-three emails total. Resend's free plan caps at
 100/day so you can run the full suite ~4 times daily without hitting the
 limit.
-
-### Test the cross-workflow redirect when the app is running too
-
-The redirect also applies to **real form submissions** while
-`EMAIL_TEST_MODE=true` is on — submit any form in `npm run dev` and the
-resulting emails land in your test inboxes too. Disable the gate when you
-need real users to receive real emails again.
 
 ### Troubleshooting
 

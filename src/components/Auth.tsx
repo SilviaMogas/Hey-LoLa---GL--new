@@ -114,12 +114,20 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       batch.set(doc(db, 'usernames', finalUsername), { uid: user.uid });
       await batch.commit();
       // Branded welcome + admin alert. Only the new-user branch fires this
-      // (returning Google users skip it). Endpoint detects Google vs.
-      // email via Firebase Auth providerData on the server side.
+      // (returning Google users skip it). Pass form-derived data so the
+      // endpoint can send via Resend even if Firebase Admin SDK is broken.
       void fetch('/api/notify-signup', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid }),
+        body: JSON.stringify({
+          userId: user.uid,
+          email: user.email,
+          firstName: nameParts[0] || '',
+          lastName: nameParts.slice(1).join(' ') || undefined,
+          username: finalUsername,
+          userType: 'Dog Owner',
+          signupMethod: 'google',
+        }),
       }).catch(() => { /* email is best-effort */ });
       track('signup_completed', { method: 'google' });
       onSuccess(true);
@@ -294,10 +302,22 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         // the "Resend link" button on /verify-email; the underlying
         // delivery failure should be diagnosed in Vercel function logs and
         // env-var configuration, not papered over with the ugly default.
+        // Pass the form data so the endpoint can send via Resend even if
+        // Firebase Admin SDK is misconfigured server-side (the client has
+        // the canonical email/name from the form input itself).
         void fetch('/api/notify-signup', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ userId: user.uid }),
+          body: JSON.stringify({
+            userId: user.uid,
+            email,
+            firstName,
+            lastName,
+            username: usernameKey,
+            userType,
+            referredBy: referralCode.trim().toUpperCase() || undefined,
+            signupMethod: 'email',
+          }),
         }).catch(() => { /* email is best-effort */ });
         track('signup_completed', { method: 'email', userType });
         onSuccess(true);

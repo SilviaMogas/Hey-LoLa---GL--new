@@ -12,7 +12,9 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "email": "email dev --dir emails --port 3500",
-    "email:test": "tsx scripts/test-emails.ts"
+    "email:test": "tsx scripts/test-emails.ts",
+    "build:emails": "tsc -p tsconfig.emit.json",
+    "vercel-build": "npm run build:emails && npm run build"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",

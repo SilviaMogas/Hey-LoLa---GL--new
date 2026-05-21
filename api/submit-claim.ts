@@ -1,7 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { timingSafeEqual } from 'crypto';
-import { getAdminDb, appUrl } from './_admin';
-import { sendVenueClaimEmails } from '../src/lib/email';
+import { getAdminDb, appUrl } from './_admin.js';
+import { sendVenueClaimEmails } from '../src/lib/email/index.js';
 
 // Public endpoint backing the /claim-listing/{token} page.
 //

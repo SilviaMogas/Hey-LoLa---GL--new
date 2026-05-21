@@ -1,5 +1,5 @@
-import { getAdminAuth, getAdminDb, appUrl } from './_admin';
-import { sendSignupEmails } from '../src/lib/email';
+import { getAdminAuth, getAdminDb, appUrl } from './_admin.js';
+import { sendSignupEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-signup
 //   Body: { userId: string }

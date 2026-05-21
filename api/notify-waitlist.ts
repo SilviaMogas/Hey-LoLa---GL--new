@@ -1,5 +1,5 @@
-import { getAdminDb } from './_admin';
-import { sendWaitlistEmails } from '../src/lib/email';
+import { getAdminDb } from './_admin.js';
+import { sendWaitlistEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-waitlist
 //   Body: { entryId: string }

@@ -1,5 +1,5 @@
-import { getAdminDb } from './_admin';
-import { sendPartnerApplicationEmails } from '../src/lib/email';
+import { getAdminDb } from './_admin.js';
+import { sendPartnerApplicationEmails } from '../src/lib/email/index.js';
 
 // Public endpoint called by the client immediately after a partner_application
 // document is created from /partners/onboard. We re-read the document from

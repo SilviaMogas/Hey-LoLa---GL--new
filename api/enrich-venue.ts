@@ -11,8 +11,8 @@
 // Does not bypass auth, paywalls, robots.txt blocks, or captchas.
 
 import { getAuth } from 'firebase-admin/auth';
-import { isAdminEmail } from '../src/lib/admin';
-import { getAdminApp, getAdminDb } from './_admin';
+import { isAdminEmail } from '../src/lib/admin.js';
+import { getAdminApp, getAdminDb } from './_admin.js';
 
 const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
 const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;

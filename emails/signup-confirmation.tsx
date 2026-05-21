@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Layout, Section32, Heading1, Body14, CtaButton, Muted12 } from './_components/Layout';
+import { Layout, Section32, Heading1, Body14, CtaButton, Muted12 } from './_components/Layout.js';
 
 export interface SignupConfirmationProps {
   firstName: string;

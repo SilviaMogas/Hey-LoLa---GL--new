@@ -1,5 +1,5 @@
-import { getAdminDb } from './_admin';
-import { sendVenueIntakeEmails } from '../src/lib/email';
+import { getAdminDb } from './_admin.js';
+import { sendVenueIntakeEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-venue-claim
 //   Body: { claimId: string }

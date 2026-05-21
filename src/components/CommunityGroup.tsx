@@ -304,28 +304,36 @@ export const CommunityGroup: React.FC = () => {
               </section>
             )}
 
-            {/* Topics — horizontal filter bar. "Presentations" leads. */}
-            <nav aria-label="Topics" className="-mx-5 px-5 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none pb-5">
-              <ul className="flex gap-2">
-                {topics.map((t) => {
-                  const active = t === activeTopic;
-                  return (
-                    <li key={t}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTopic(t)}
-                        className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] transition-colors border ${
-                          active
-                            ? 'bg-charcoal text-white border-charcoal'
-                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300 hover:text-charcoal'
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+            {/* Topics — pretty, accessible filter bar. "Presentations" leads. */}
+            <nav aria-label="Topics" className="pb-5">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 mb-2.5">Topics</p>
+              <div className="-mx-5 px-5 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none">
+                <ul className="flex gap-2">
+                  {topics.map((t) => {
+                    const active = t === activeTopic;
+                    const count = livePosts.filter((p) => (p.topic ?? topics[0]) === t).length;
+                    return (
+                      <li key={t}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTopic(t)}
+                          aria-pressed={active}
+                          className={`whitespace-nowrap rounded-full pl-4 pr-3 h-9 inline-flex items-center gap-2 text-[11px] font-bold tracking-wide transition-all border ${
+                            active
+                              ? 'bg-charcoal text-white border-charcoal shadow-sm'
+                              : 'bg-white text-stone-600 border-stone-200 hover:border-charcoal/40 hover:text-charcoal'
+                          }`}
+                        >
+                          {t}
+                          {count > 0 && (
+                            <span className={`text-[10px] font-black rounded-full px-1.5 min-w-[18px] text-center ${active ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'}`}>{count}</span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </nav>
 
             {/* Composer + thread for the active topic. */}

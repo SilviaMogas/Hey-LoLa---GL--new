@@ -1015,6 +1015,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-black tracking-widest text-stone-300">Your Local Hub</label>
                 <p className="text-[11px] text-stone-400 -mt-1">Pick the Hey Lola city you want to be part of. It doesn't have to be where you live.</p>
+                <p className="text-[11px] text-brand-orange/90 -mt-1">Your free plan includes one Local Hub. You can switch city once a year, or upgrade to join more.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {HUB_CITIES.map((h) => {
                     const selected = userProfileData.localHub === h.id;

@@ -367,7 +367,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                       );
                     })}
                   </div>
-                  <p className="text-[10px] text-stone-400 ml-1">Your Hey Lola community city — can differ from where you live.</p>
+                  <p className="text-[10px] text-stone-400 ml-1">Your Hey Lola community city, can differ from where you live.</p>
+                  <p className="text-[10px] text-brand-orange/90 ml-1">Free plan includes one hub. Switch city once a year, or upgrade to join more.</p>
                 </div>
 
                 <div className="space-y-1">

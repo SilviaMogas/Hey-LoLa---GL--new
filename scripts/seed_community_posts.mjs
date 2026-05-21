@@ -105,10 +105,31 @@ const GROUPS = [
   },
 ];
 
-const POSTS = GROUPS.flatMap((g) => [
-  { groupId: g.groupId, groupName: g.groupName, city: g.city, topic: 'Presentations', body: g.welcome },
-  ...Object.entries(g.starters).map(([topic, body]) => ({ groupId: g.groupId, groupName: g.groupName, city: g.city, topic, body })),
+const FOUNDER_POSTS = GROUPS.flatMap((g) => [
+  { as: 'founder', groupId: g.groupId, groupName: g.groupName, city: g.city, topic: 'Presentations', body: g.welcome },
+  ...Object.entries(g.starters).map(([topic, body]) => ({ as: 'founder', groupId: g.groupId, groupName: g.groupName, city: g.city, topic, body })),
 ]);
+
+// Hey Lola — the concierge voice. Helpful, warm, brand assistant. Posts
+// alongside the founder. Avatar is the Lola mascot served from /public.
+const CONCIERGE = { author: 'Hey Lola', handle: 'heylola', avatar: '/HeyLola.Lola.1.png', badge: 'Concierge' };
+
+const CONCIERGE_POSTS = [
+  { as: 'concierge', groupId: 'mia-pack', groupName: 'Miami 🌴', city: 'Miami', topic: 'Vets & grooming',
+    body: "Hey Lola here!! 🐾 Quick tip: save your vet's number right in your dog's passport so it's one tap away when you need it. Want me to suggest trusted vets near you? Just ask! 💛" },
+  { as: 'concierge', groupId: 'nyc-pack', groupName: 'New York 🗽', city: 'NYC', topic: 'Apartment life',
+    body: "Hey Lola here!! 🏙️ City hack: keep a chew toy by the door so elevator waits turn into calm time. Need building-friendly gear ideas? I'm on it! 🐾" },
+  { as: 'concierge', groupId: 'tor-pack', groupName: 'Toronto 🍁', city: 'Toronto', topic: 'Winter tips',
+    body: "Hey Lola here!! ❄️ Paw care 101: wipe paws after salty sidewalks and try a balm before walks. Want a full winter checklist? Say the word! 🐾" },
+  { as: 'concierge', groupId: 'dc-pack', groupName: 'Washington DC 🏛️', city: 'Washington DC', topic: 'Parks & trails',
+    body: "Hey Lola here!! 🏛️ Trail day coming up? Pack water, a collapsible bowl and poop bags. Want my favourite DC dog trails? Ask away! 🐾" },
+  { as: 'concierge', groupId: 'bcn-pack', groupName: 'Barcelona 🌊', city: 'Barcelona', topic: 'Viajar con perro',
+    body: "¡Hola, soy Hey Lola!! ✈️ Consejo: lleva siempre la cartilla y el chip al día para viajar sin sustos. ¿Quieres una checklist de viaje? ¡Pídemela! 🐾" },
+  { as: 'concierge', groupId: 'founders-circle', groupName: "Founders' Circle ✨", city: 'Global', topic: 'Exclusive perks',
+    body: "Hey Lola here!! 🎁 Your Founding Member perks grow as we do. Tell us what would make membership unforgettable and I'll take it straight to the team! 💛" },
+];
+
+const POSTS = [...FOUNDER_POSTS, ...CONCIERGE_POSTS];
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -139,16 +160,18 @@ async function main() {
       if (u.username) handle = u.username;
     }
   } catch { /* best effort */ }
-  console.log(`Authoring posts as ${author} (@${handle}, uid ${uid})${avatar ? ' with profile photo' : ' (no photo found, using monogram)'}`);
+  console.log(`Founder posts as ${author} (@${handle}, uid ${uid})${avatar ? ' with profile photo' : ' (no photo found, using monogram)'}`);
+  console.log(`Concierge posts as ${CONCIERGE.author} (@${CONCIERGE.handle})`);
   let n = 0;
   for (const p of POSTS) {
-    const id = `founder_${p.groupId}_${slug(p.topic)}`;
+    const isConcierge = p.as === 'concierge';
+    const id = `${isConcierge ? 'concierge' : 'founder'}_${p.groupId}_${slug(p.topic)}`;
     await db.collection('posts').doc(id).set({
-      userId: uid,
-      author,
-      handle,
-      avatar,
-      badge: AUTHOR.badge,
+      userId: uid, // owned by the admin account; display fields below set the voice
+      author: isConcierge ? CONCIERGE.author : author,
+      handle: isConcierge ? CONCIERGE.handle : handle,
+      avatar: isConcierge ? CONCIERGE.avatar : avatar,
+      badge: isConcierge ? CONCIERGE.badge : AUTHOR.badge,
       body: p.body,
       city: p.city,
       topic: p.topic,
@@ -159,9 +182,9 @@ async function main() {
       createdAt: FieldValue.serverTimestamp(),
     }, { merge: true });
     n += 1;
-    console.log(`  · ${p.groupId} / ${p.topic}`);
+    console.log(`  · ${isConcierge ? '[concierge]' : '[founder]'} ${p.groupId} / ${p.topic}`);
   }
-  console.log(`Done. ${n} founder posts written.`);
+  console.log(`Done. ${n} posts written (founder + concierge).`);
 }
 
 main().catch((err) => { console.error('seed_community_posts failed:', err); process.exit(1); });

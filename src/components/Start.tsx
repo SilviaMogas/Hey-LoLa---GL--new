@@ -250,7 +250,7 @@ const PetParentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     }
     setBusy(true);
     try {
-      await addDoc(collection(db, 'onboarding_submissions'), {
+      const docRef = await addDoc(collection(db, 'onboarding_submissions'), {
         type: 'pet_parent',
         status: 'new',
         source: 'website_start_page',
@@ -264,6 +264,11 @@ const PetParentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         instagram: data.instagram.trim() || null,
         foundingClubInterest: data.foundingClubInterest,
       });
+      void fetch('/api/notify-onboarding', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ submissionId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       onSuccess();
     } catch (err: any) {
       console.error(err);
@@ -331,7 +336,7 @@ const AnimalLoverForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     }
     setBusy(true);
     try {
-      await addDoc(collection(db, 'onboarding_submissions'), {
+      const docRef = await addDoc(collection(db, 'onboarding_submissions'), {
         type: 'animal_lover',
         status: 'new',
         source: 'website_start_page',
@@ -343,6 +348,11 @@ const AnimalLoverForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
         instagram: data.instagram.trim() || null,
         interests,
       });
+      void fetch('/api/notify-onboarding', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ submissionId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       onSuccess();
     } catch (err: any) {
       console.error(err);
@@ -426,7 +436,7 @@ const VenueForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     }
     setBusy(true);
     try {
-      await addDoc(collection(db, 'venue_claims'), {
+      const docRef = await addDoc(collection(db, 'venue_claims'), {
         businessName: data.businessName.trim(),
         category: data.category,
         city: data.city.trim(),
@@ -446,6 +456,11 @@ const VenueForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         source: 'website_start_page',
         createdAt: serverTimestamp(),
       });
+      void fetch('/api/notify-venue-claim', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ claimId: docRef.id }),
+      }).catch(() => { /* email is best-effort */ });
       onSuccess();
     } catch (err: any) {
       console.error(err);

@@ -1,5 +1,5 @@
 import { getAdminDb, getAdminAuth, appUrl } from './_admin';
-import { sendGroupJoinEmail } from '../src/lib/email';
+import { sendGroupJoinEmails } from '../src/lib/email';
 
 // POST /api/notify-group-join
 //   Body: { membershipId: string }
@@ -87,12 +87,16 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const result = await sendGroupJoinEmail({
+  const result = await sendGroupJoinEmails({
     to: email,
     name,
     groupName,
     groupUrl: `${appUrl(req)}/community/${groupId}`,
   });
 
-  res.status(200).json({ success: true, delivered: result.delivered });
+  res.status(200).json({
+    success: true,
+    confirmationDelivered: result.confirmation.delivered,
+    alertDelivered: result.alert.delivered,
+  });
 }

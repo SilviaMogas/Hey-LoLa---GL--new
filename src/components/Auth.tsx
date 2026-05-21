@@ -114,6 +114,14 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       });
       batch.set(doc(db, 'usernames', finalUsername), { uid: user.uid });
       await batch.commit();
+      // Branded welcome + admin alert. Only the new-user branch fires this
+      // (returning Google users skip it). Endpoint detects Google vs.
+      // email via Firebase Auth providerData on the server side.
+      void fetch('/api/notify-signup', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid }),
+      }).catch(() => { /* email is best-effort */ });
       track('signup_completed', { method: 'google' });
       onSuccess(true);
     } else {
@@ -190,7 +198,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
             setError('Please fill out all fields.');
             return;
           }
-          await addDoc(collection(db, 'business_leads'), {
+          const docRef = await addDoc(collection(db, 'business_leads'), {
             businessName,
             contactRole,
             location: businessLocation,
@@ -199,6 +207,11 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
             status: 'new',
             createdAt: new Date().toISOString(),
           });
+          void fetch('/api/notify-business-lead', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ leadId: docRef.id }),
+          }).catch(() => { /* email is best-effort */ });
           track('business_inquiry_sent');
           setInquirySent(true);
           return;
@@ -274,7 +287,27 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         batch.set(doc(db, 'usernames', usernameKey), { uid: user.uid });
         await batch.commit();
         await updateProfile(user, { displayName });
-        await sendEmailVerification(user);
+        // Single-email guarantee: try the branded Hey Lola welcome first
+        // (it embeds the Firebase verification link generated server-side
+        // via Admin SDK). If the endpoint can't deliver — Resend missing,
+        // verification link generation failed, network error — fall back
+        // to Firebase's default sendEmailVerification so the user ALWAYS
+        // gets exactly one verification email.
+        let confirmationDelivered = false;
+        try {
+          const r = await fetch('/api/notify-signup', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ userId: user.uid }),
+          });
+          if (r.ok) {
+            const body = await r.json().catch(() => null);
+            confirmationDelivered = !!body?.confirmationDelivered;
+          }
+        } catch { /* network blip; fall through to Firebase */ }
+        if (!confirmationDelivered) {
+          try { await sendEmailVerification(user); } catch { /* swallow — user can re-request later */ }
+        }
         track('signup_completed', { method: 'email', userType });
         onSuccess(true);
       } else if (mode === 'login') {

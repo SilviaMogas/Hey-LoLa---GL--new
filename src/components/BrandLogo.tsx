@@ -97,8 +97,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         <tspan fill={colors.word}>HeyLola</tspan>
       </text>
       {/* Brand full-stop: a SQUARE, not a round period — matches the
-          .brand-dot square used after every heading. Sits on the baseline. */}
-      <rect x="123" y="21.5" width="8.5" height="8.5" fill={colors.dot} />
+          .brand-dot square used after every heading. Small clearance after
+          the italic word, sitting on the baseline. */}
+      <rect x="124" y="21" width="9" height="9" fill={colors.dot} />
     </svg>
   );
 };

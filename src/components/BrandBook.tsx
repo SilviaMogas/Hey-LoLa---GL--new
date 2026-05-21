@@ -447,7 +447,7 @@ function MascotTile({ asset }: { asset: MascotAsset }) {
           mascotImg
         )}
         {/* The real brand wordmark, rendered live. */}
-        <BrandLogo size="lg" variant={asset.logoVariant} />
+        <BrandLogo size="2xl" variant={asset.logoVariant} className="w-[60%] max-w-[150px] !h-auto" />
       </div>
       <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1 relative z-10">
         <span className={`text-[9px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-white/50' : 'text-stone-400'}`}>

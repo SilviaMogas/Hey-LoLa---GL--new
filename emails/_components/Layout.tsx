@@ -41,7 +41,18 @@ export function BrandLogo({ size = 32 }: { size?: number }) {
         }}
       >
         <span style={{ color: '#0A0A0A' }}>Hey</span>
-        <span style={{ color: '#F28C33' }}>Lola.</span>
+        <span style={{ color: '#F28C33' }}>Lola</span>
+        {/* Brand full-stop: a SQUARE, not a round period. */}
+        <span
+          style={{
+            display: 'inline-block',
+            width: '0.24em',
+            height: '0.24em',
+            marginLeft: '0.04em',
+            backgroundColor: '#F28C33',
+            verticalAlign: 'baseline',
+          }}
+        />
       </Text>
     </Link>
   );

@@ -91,10 +91,14 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         fontWeight="900"
         fontStyle="italic"
         letterSpacing="-0.04em"
+        textLength="120"
+        lengthAdjust="spacing"
       >
         <tspan fill={colors.word}>HeyLola</tspan>
-        <tspan fill={colors.dot}>.</tspan>
       </text>
+      {/* Brand full-stop: a SQUARE, not a round period — matches the
+          .brand-dot square used after every heading. Sits on the baseline. */}
+      <rect x="123" y="21.5" width="8.5" height="8.5" fill={colors.dot} />
     </svg>
   );
 };

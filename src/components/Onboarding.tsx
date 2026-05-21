@@ -5,6 +5,7 @@ import { paths } from '../lib/routes';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { syncPetPublicCard } from '../lib/petPublic';
 import { ArrowRight, ArrowLeft, PawPrint, ShieldCheck, Weight, Calendar, Info, Loader2, Camera, X, MapPin } from 'lucide-react';
 import { cn, compressDataUrl } from '../lib/utils';
 import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
@@ -114,12 +115,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
       
       if (!isPetLover) {
         // Save Pet
-        await addDoc(collection(db, 'pets'), {
+        const petPayload = {
           ...petData,
           type: finalPetType,
           userId,
           createdAt: new Date().toISOString()
-        });
+        };
+        const petRef = await addDoc(collection(db, 'pets'), petPayload);
+        // Mirror a safe public card so the pet gets a shareable profile.
+        void syncPetPublicCard(petRef.id, petPayload, profile);
       }
 
       // Update User Profile — only write profile fields that are non-empty so we

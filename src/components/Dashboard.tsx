@@ -12,6 +12,9 @@ import { curatedPlaces } from '../data/curatedPlaces';
 import { getTier } from '../lib/membership';
 import { getMembershipDerived } from '../lib/levels';
 import { setHandle, normalizeHandle, changesRemaining } from '../lib/handle';
+import { syncPetPublicCard } from '../lib/petPublic';
+import { useNavigate } from 'react-router-dom';
+import { buildPath } from '../lib/routes';
 
 interface DashboardProps {
   user: any;
@@ -33,7 +36,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
   const { t } = useTranslation();
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [localPets, setLocalPets] = useState<PetData[]>([]);
+
+  // Backfill public profile cards for the owner's own pets so existing pets
+  // (created before public profiles existed) get a shareable /pet/:id page
+  // without a manual re-save. Best-effort — never blocks.
+  useEffect(() => {
+    if (!user || !pets || pets.length === 0) return;
+    pets.forEach((p) => { if (p.id) void syncPetPublicCard(p.id, p, profile); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, pets.length, profile?.username]);
   const [petOwners, setPetOwners] = useState<Record<string, { name: string; photoURL: string }>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [newFirstName, setNewFirstName] = useState('');
@@ -606,18 +619,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                       transition={{ delay: i * 0.06 }}
                       className="bg-white rounded-2xl overflow-hidden group flex flex-col border border-stone-100 shadow-sm hover:shadow-md transition-all duration-300"
                     >
-                       <div className="aspect-square relative overflow-hidden bg-stone-50/60">
+                       <button
+                          type="button"
+                          onClick={() => pet.id && navigate(buildPath.petProfile(pet.id))}
+                          className="aspect-square relative overflow-hidden bg-stone-50/60 block w-full"
+                          aria-label={`View ${pet.name}'s profile`}
+                       >
                           <img
                             src={pet.photoURL || 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=400&q=80'}
                             alt={pet.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                       </div>
+                       </button>
                        <div className="p-3 space-y-2 flex-1 flex flex-col">
-                          <div className="space-y-0.5">
+                          <button
+                             type="button"
+                             onClick={() => pet.id && navigate(buildPath.petProfile(pet.id))}
+                             className="space-y-0.5 text-left hover:opacity-70 transition-opacity"
+                          >
                              <h4 className="text-base font-serif italic tracking-tight text-charcoal/90">{pet.name}</h4>
-                             <span className="text-[9px] font-black uppercase font-sans tracking-[0.2em] text-stone-400">{pet.breed || pet.type}</span>
-                          </div>
+                             <span className="text-[9px] font-black uppercase font-sans tracking-[0.2em] text-stone-400 block">{pet.breed || pet.type}</span>
+                          </button>
 
                           {pet.hobbies && (
                              <p className="text-sm text-stone-500 font-light italic leading-snug tracking-tight line-clamp-2">"{pet.hobbies}"</p>

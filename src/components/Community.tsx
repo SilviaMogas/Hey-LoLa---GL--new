@@ -21,7 +21,7 @@ import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
-import { paths } from '../lib/routes';
+import { paths, buildPath } from '../lib/routes';
 import type { PetData } from '../types';
 
 const COMMUNITY_BREADCRUMBS = [
@@ -112,6 +112,7 @@ const LEADERBOARD: LeaderboardEntry[] = [];
 
 export const Community: React.FC<CommunityProps> = (_props) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [, setLivePosts] = useState<FeedPost[]>([]);
   const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
 
@@ -212,6 +213,12 @@ export const Community: React.FC<CommunityProps> = (_props) => {
                     key={p.id}
                     className="snap-start shrink-0 w-[180px] sm:w-[200px] rounded-2xl bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] overflow-hidden hover:shadow-lg transition-shadow"
                   >
+                   <button
+                     type="button"
+                     onClick={() => p.id && navigate(buildPath.petProfile(p.id))}
+                     className="w-full text-left"
+                     aria-label={`View ${p.name || 'this pet'}'s profile`}
+                   >
                     <div className="aspect-square bg-stone-50 overflow-hidden">
                       {p.photoURL ? (
                         <img
@@ -237,6 +244,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
                         </p>
                       )}
                     </div>
+                   </button>
                   </li>
                 ))}
               </ul>

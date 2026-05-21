@@ -10,6 +10,8 @@ import { DOG_BREEDS, CAT_BREEDS } from '../data/breeds';
 import { VACCINES_BY_COUNTRY } from '../lib/vaccines';
 import { useNavigate } from 'react-router-dom';
 import { paths } from '../lib/routes';
+import { useAuth } from '../lib/useAuth';
+import { syncPetPublicCard } from '../lib/petPublic';
 
 // De-duplicated vaccine names for the edit-form suggestions (datalist).
 const VACCINE_SUGGESTIONS = Array.from(
@@ -25,6 +27,7 @@ interface PassportProps {
 
 export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMemberPlan, ownerIsAdmin = false }) => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editedData, setEditedData] = useState<PetData>(() => ({
@@ -89,6 +92,8 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
         await updateDoc(petRef, { ...editedData });
         setPetData(editedData);
         setIsEditing(false);
+        // Keep the public profile card in sync with safe fields only.
+        void syncPetPublicCard(petData.id, { ...editedData, userId: editedData.userId || petData.userId }, profile);
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `pets/${petData.id}`);

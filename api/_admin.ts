@@ -19,10 +19,15 @@ let cachedApp: App | null = null;
  * Defensive parser for the private key env var. Different hosts store
  * multi-line PEMs in slightly different ways and we've been burned by
  * silent corruption (Vercel strips backslashes, dotenv keeps quotes,
- * etc.). Handles every common variant we've seen.
+ * UI prepends BOM, etc.). Handles every common variant we've seen.
  */
 function parsePrivateKey(raw: string): string {
-  let key = raw.trim();
+  let key = raw;
+
+  // Strip UTF-8 BOM if present at the start.
+  if (key.charCodeAt(0) === 0xFEFF) key = key.slice(1);
+
+  key = key.trim();
 
   // Strip surrounding double/single quotes if the user pasted the JSON
   // value with its quotes attached.
@@ -31,13 +36,17 @@ function parsePrivateKey(raw: string): string {
   }
 
   // Base64-encoded PEM fallback. If the value doesn't start with -----BEGIN
-  // and looks base64-ish, try to decode it. This is the safest way to ship
-  // a multi-line key through a single-line env var.
-  if (!key.startsWith('-----BEGIN') && /^[A-Za-z0-9+/=]+$/.test(key.slice(0, 64).replace(/\s/g, ''))) {
-    try {
-      const decoded = Buffer.from(key, 'base64').toString('utf8');
-      if (decoded.startsWith('-----BEGIN')) key = decoded;
-    } catch { /* fall through */ }
+  // and the whole thing looks base64-ish (ignoring whitespace), try to
+  // decode. This is the safest way to ship a multi-line key through a
+  // single-line env var.
+  if (!key.startsWith('-----BEGIN')) {
+    const stripped = key.replace(/\s/g, '');
+    if (/^[A-Za-z0-9+/=]+$/.test(stripped) && stripped.length > 1000) {
+      try {
+        const decoded = Buffer.from(stripped, 'base64').toString('utf8');
+        if (decoded.includes('-----BEGIN')) key = decoded;
+      } catch { /* fall through */ }
+    }
   }
 
   // Convert literal `\n` escape sequences to real newlines. (No-op if the
@@ -45,7 +54,18 @@ function parsePrivateKey(raw: string): string {
   if (key.includes('\\n')) key = key.replace(/\\n/g, '\n');
 
   // Normalise Windows-style line endings.
-  key = key.replace(/\r\n/g, '\n');
+  key = key.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Trim any garbage before the BEGIN marker (BOM, whitespace, stray
+  // characters from copy-paste). Some Vercel deploys silently truncate
+  // or insert characters before the first PEM line — this rescues those.
+  const beginIdx = key.indexOf('-----BEGIN PRIVATE KEY-----');
+  if (beginIdx > 0) key = key.slice(beginIdx);
+
+  // Standardise the trailing newline after the END marker.
+  const endMarker = '-----END PRIVATE KEY-----';
+  const endIdx = key.indexOf(endMarker);
+  if (endIdx > -1) key = key.slice(0, endIdx + endMarker.length) + '\n';
 
   return key;
 }
@@ -77,6 +97,10 @@ export function getAdminApp(): App {
   const firstMarker = privateKey.startsWith('-----BEGIN');
   const lastMarker = privateKey.trim().endsWith('-----END PRIVATE KEY-----');
   const lineCount = privateKey.split('\n').length;
+  // first40 should be "-----BEGIN PRIVATE KEY-----\nMIIEv..." for a valid PEM.
+  // last40 should be "...AB\n-----END PRIVATE KEY-----\n". These markers are
+  // structural (public) so logging them does not leak the key material.
+  const visualise = (s: string) => s.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
   console.log('[admin] privateKey parsed:', {
     rawLength: pemFromEnv.length,
     parsedLength: privateKey.length,
@@ -85,6 +109,8 @@ export function getAdminApp(): App {
     hasEndMarker: lastMarker,
     hasRealNewlines: privateKey.includes('\n'),
     hasLiteralBackslashN: privateKey.includes('\\n'),
+    first40: visualise(privateKey.slice(0, 40)),
+    last40: visualise(privateKey.slice(-40)),
   });
 
   if (!firstMarker || !lastMarker) {

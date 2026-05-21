@@ -21,101 +21,113 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const { userId } = (req.body || {}) as { userId?: string };
+  // Accept fallback fields from the body so the endpoint can send via
+  // Resend even if Firebase Admin is misconfigured. The client (Auth.tsx)
+  // already has these from the signup form — the only reason we previously
+  // re-fetched from Firebase Auth was to avoid trusting client input. For
+  // a brand-new signup the client IS the source of truth.
+  const body = (req.body || {}) as {
+    userId?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    userType?: string;
+    referredBy?: string;
+    signupMethod?: 'email' | 'google';
+  };
+  const { userId } = body;
   if (!userId || typeof userId !== 'string') {
     console.warn('[notify-signup] exit=missing-userId');
     res.status(400).json({ success: false, error: 'userId is required.' });
     return;
   }
-  console.log('[notify-signup] step=have-userId', { userId });
+  console.log('[notify-signup] step=have-userId', {
+    userId,
+    bodyEmail: body.email,
+    bodyFirstName: body.firstName,
+    bodySignupMethod: body.signupMethod,
+  });
 
-  let db: ReturnType<typeof getAdminDb>;
-  let auth: ReturnType<typeof getAdminAuth>;
+  // Firebase Admin is OPTIONAL from here on. If it fails (bad credentials,
+  // wrong env vars, revoked key, etc.) we still attempt to send the Resend
+  // welcome using the body data — because Firebase being broken cannot
+  // block our transactional email.
+  let db: ReturnType<typeof getAdminDb> | null = null;
+  let auth: ReturnType<typeof getAdminAuth> | null = null;
   try {
     db = getAdminDb();
     auth = getAdminAuth();
-  } catch (err) {
-    console.error('[notify-signup] exit=admin-init-failed', err);
-    res.status(500).json({ success: false, error: 'Server is not configured.' });
-    return;
-  }
-  console.log('[notify-signup] step=admin-init-ok');
-
-  // Pull authoritative email + emailVerified from Firebase Auth.
-  let userRecord;
-  try {
-    userRecord = await auth.getUser(userId);
+    console.log('[notify-signup] step=admin-init-ok');
   } catch (err: any) {
-    console.warn('[notify-signup] exit=user-not-found', { userId, message: err?.message || err?.code });
-    res.status(404).json({ success: false, error: 'User not found.' });
-    return;
-  }
-  console.log('[notify-signup] step=user-loaded', {
-    email: userRecord.email,
-    emailVerified: userRecord.emailVerified,
-    providers: (userRecord.providerData || []).map((p) => p.providerId),
-  });
-
-  const email = userRecord.email || '';
-  if (!email || !email.includes('@')) {
-    console.warn('[notify-signup] exit=no-email');
-    res.status(422).json({ success: false, error: 'User has no usable email.' });
-    return;
+    console.warn('[notify-signup] admin-init failed (continuing with body data):', err?.message || err);
   }
 
-  // Pull profile-side fields from /users/{userId}.
+  // Try to pull canonical email from Firebase Auth, but fall back to body.
+  let canonicalEmail: string | undefined;
+  let canonicalEmailVerified = false;
+  let providers: string[] = [];
+  let canonicalDisplayName: string | undefined;
+  if (auth) {
+    try {
+      const userRecord = await auth.getUser(userId);
+      canonicalEmail = userRecord.email || undefined;
+      canonicalEmailVerified = !!userRecord.emailVerified;
+      providers = (userRecord.providerData || []).map((p) => p.providerId);
+      canonicalDisplayName = userRecord.displayName || undefined;
+      console.log('[notify-signup] step=user-loaded-from-auth', {
+        email: canonicalEmail,
+        emailVerified: canonicalEmailVerified,
+        providers,
+      });
+    } catch (err: any) {
+      console.warn('[notify-signup] auth.getUser failed (falling back to body):', err?.message || err?.code);
+    }
+  }
+
+  const email = canonicalEmail || body.email;
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    console.warn('[notify-signup] exit=no-email-anywhere', { canonicalEmail, bodyEmail: body.email });
+    res.status(422).json({ success: false, error: 'No usable email — pass `email` in the body or fix Firebase Admin credentials.' });
+    return;
+  }
+
+  // Profile lookup is best-effort.
   let profile: any = {};
-  try {
-    const snap = await db.collection('users').doc(userId).get();
-    if (snap.exists) profile = snap.data() || {};
-  } catch (err) {
-    console.warn('[notify-signup] profile lookup failed', err);
+  if (db) {
+    try {
+      const snap = await db.collection('users').doc(userId).get();
+      if (snap.exists) profile = snap.data() || {};
+      console.log('[notify-signup] step=profile-loaded', {
+        firstName: profile.firstName,
+        createdAt: profile.createdAt,
+      });
+    } catch (err) {
+      console.warn('[notify-signup] profile lookup failed', err);
+    }
   }
-  console.log('[notify-signup] step=profile-loaded', {
-    hasProfile: !!profile,
-    createdAt: profile.createdAt,
-    firstName: profile.firstName,
-  });
 
-  // No replay window — this endpoint must work whenever the user clicks
-  // Resend Link on /verify-email, even days after signup. The branded
-  // Resend email is the SOLE verification path; there is no Firebase
-  // fallback by design.
+  // Decide signup method: prefer Firebase-detected providers, then body hint.
+  const signupMethod: 'email' | 'google' =
+    providers.includes('google.com') && !providers.includes('password')
+      ? 'google'
+      : (body.signupMethod === 'google' ? 'google' : 'email');
 
-  // Detect signup method from the provider data Firebase tracks on the
-  // user record. `google.com` (sole or first provider) → OAuth; otherwise
-  // we treat it as email/password (matches what Auth.tsx writes).
-  const providers = (userRecord.providerData || []).map((p) => p.providerId);
-  const signupMethod: 'email' | 'google' = providers.includes('google.com') && !providers.includes('password')
-    ? 'google'
-    : 'email';
-
-  // For email/password signups, generate the Firebase verification link
-  // server-side and embed it as the primary CTA in our branded welcome —
-  // this lets us send ONE email instead of two. We do NOT fall back to
-  // Firebase's default sendEmailVerification if generation fails: the
-  // ugly Firebase email lands in spam and defeats the purpose. Instead
-  // we surface the actual failure reason so Vercel function logs (and
-  // the response body) make the problem diagnosable.
+  // Generate the Firebase verification link if the user is unverified and
+  // signed up with email/password. Failure here is NON-FATAL — the welcome
+  // email still goes out, just without the verify CTA.
   let verifyUrl: string | undefined;
   let verifyUrlError: string | undefined;
-  if (signupMethod === 'email' && !userRecord.emailVerified) {
+  if (auth && signupMethod === 'email' && !canonicalEmailVerified) {
     try {
       verifyUrl = await auth.generateEmailVerificationLink(email, {
         url: `${appUrl(req)}/dashboard`,
         handleCodeInApp: false,
       });
+      console.log('[notify-signup] step=verifyUrl-generated');
     } catch (err: any) {
       verifyUrlError = err?.message || err?.code || String(err);
-      console.error('notify-signup: generateEmailVerificationLink failed', {
-        userId,
-        appUrl: appUrl(req),
-        message: verifyUrlError,
-      });
-      // Continue without the verify CTA. The welcome email still goes out,
-      // and the user can re-trigger verification via the Resend Link button
-      // on /verify-email once the underlying config (Authorized Domains,
-      // APP_URL env, etc.) is fixed.
+      console.error('[notify-signup] generateEmailVerificationLink failed (sending welcome without link):', verifyUrlError);
     }
   }
 
@@ -128,14 +140,14 @@ export default async function handler(req: any, res: any) {
   let result;
   try {
     result = await sendSignupEmails({
-      firstName: String(profile.firstName || userRecord.displayName?.split(' ')[0] || ''),
-      lastName: typeof profile.lastName === 'string' ? profile.lastName : undefined,
+      firstName: String(profile.firstName || body.firstName || canonicalDisplayName?.split(' ')[0] || ''),
+      lastName: profile.lastName || body.lastName,
       email,
-      username: typeof profile.username === 'string' ? profile.username : undefined,
-      userType: typeof profile.userType === 'string' ? profile.userType : undefined,
+      username: profile.username || body.username,
+      userType: profile.userType || body.userType,
       signupMethod,
-      emailVerified: !!userRecord.emailVerified,
-      referredBy: typeof profile.referredBy === 'string' ? profile.referredBy : undefined,
+      emailVerified: canonicalEmailVerified,
+      referredBy: profile.referredBy || body.referredBy,
       dashboardUrl: `${appUrl(req)}/dashboard`,
       userId,
       verifyUrl,

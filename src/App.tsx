@@ -505,14 +505,20 @@ function AppContent() {
               <ProtectedRoute>
                 <FadeIn><VerifyEmail email={user?.email || ''} onResend={async () => {
                   // Re-trigger the branded Hey Lola welcome via Resend
-                  // (same endpoint used at signup). NO Firebase fallback —
-                  // the goal is to NEVER send the default Firebase verify
-                  // email, which lands in spam.
+                  // (same endpoint used at signup). Pass profile data so
+                  // the endpoint can send even if Firebase Admin is broken.
                   if (!auth.currentUser) return;
                   await fetch('/api/notify-signup', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ userId: auth.currentUser.uid }),
+                    body: JSON.stringify({
+                      userId: auth.currentUser.uid,
+                      email: auth.currentUser.email,
+                      firstName: profile?.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
+                      lastName: profile?.lastName,
+                      username: profile?.username,
+                      signupMethod: 'email',
+                    }),
                   }).catch(() => { /* swallow — UI shows generic "Sending..." */ });
                 }} /></FadeIn>
               </ProtectedRoute>

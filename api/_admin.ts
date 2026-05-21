@@ -101,16 +101,23 @@ export function getAdminApp(): App {
   // last40 should be "...AB\n-----END PRIVATE KEY-----\n". These markers are
   // structural (public) so logging them does not leak the key material.
   const visualise = (s: string) => s.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-  console.log('[admin] privateKey parsed:', {
-    rawLength: pemFromEnv.length,
-    parsedLength: privateKey.length,
-    lineCount,
+
+  // Fingerprint = first 16 hex of SHA-256(parsedKey). Identifies the key
+  // uniquely without leaking it. Compare across environments (.env vs
+  // Vercel dashboard) to detect mismatched keys.
+  const { createHash } = require('crypto') as typeof import('crypto');
+  const keyFingerprint = createHash('sha256').update(privateKey).digest('hex').slice(0, 16);
+
+  console.log('[admin] credentials loaded:', {
+    projectId,
+    clientEmail,
+    keyFingerprint,
+    privateKeyLength: privateKey.length,
     hasBeginMarker: firstMarker,
     hasEndMarker: lastMarker,
-    hasRealNewlines: privateKey.includes('\n'),
-    hasLiteralBackslashN: privateKey.includes('\\n'),
     first40: visualise(privateKey.slice(0, 40)),
     last40: visualise(privateKey.slice(-40)),
+    databaseId: process.env.FIREBASE_DATABASE_ID || '(default)',
   });
 
   if (!firstMarker || !lastMarker) {

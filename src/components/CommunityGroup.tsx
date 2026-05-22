@@ -195,7 +195,7 @@ export const CommunityGroup: React.FC = () => {
   if (!group) {
     return (
       <div className="max-w-3xl mx-auto px-5 sm:px-6 py-16 text-center font-boutique">
-        <h1 className="text-3xl font-serif italic tracking-tight">Group not found<span className="brand-dot" aria-hidden="true" /></h1>
+        <h1 className="text-3xl font-serif italic tracking-tight">Hub not found<span className="brand-dot" aria-hidden="true" /></h1>
         <button
           type="button"
           onClick={() => navigate(paths.community)}

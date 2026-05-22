@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star, Heart, Bone } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
@@ -23,6 +24,8 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub, onCreators, onCommunity, onConcierge, onExploreCity }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const goToCreatorApply = () => navigate('/creators#apply');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -242,7 +245,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             className="luxury-card p-8 sm:p-6 md:p-8 lg:p-8 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-8 group hover:scale-[1.01] cursor-pointer bg-white"
-            onClick={() => setShowApplyModal(true)}
+            onClick={goToCreatorApply}
           >
             <div className="space-y-6 md:space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-3 text-stone-400 text-[10px] font-black uppercase tracking-[0.3em]">
@@ -253,8 +256,11 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                 <p className="text-base sm:text-lg md:text-xl text-stone-400 font-light italic tracking-tight">{t.blog.participateDesc}</p>
               </div>
             </div>
-            <button className="luxury-button-primary w-full lg:w-auto px-10 md:px-16 h-14 md:h-16 lg:h-14 text-[11px] shrink-0 shadow-xl md:shadow-2xl">
-              {t.blog.cta}
+            <button
+              onClick={(e) => { e.stopPropagation(); goToCreatorApply(); }}
+              className="luxury-button-primary w-full lg:w-auto px-10 md:px-16 h-14 md:h-16 lg:h-14 text-[11px] shrink-0 shadow-xl md:shadow-2xl"
+            >
+              {t.blog.ctaButton}
             </button>
           </motion.div>
         </div>

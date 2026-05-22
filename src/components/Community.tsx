@@ -260,17 +260,17 @@ export const Community: React.FC<CommunityProps> = (_props) => {
             <header className="flex items-end justify-between gap-4 mb-5">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 inline-flex items-center gap-2">
-                  <Users size={11} /> Groups for you
+                  <Users size={11} /> Hubs for you
                 </span>
                 <h2 id="groups-heading" className="text-2xl sm:text-3xl font-serif italic tracking-tight mt-1">
                   Find your pack<span className="brand-dot" aria-hidden="true" />
                 </h2>
               </div>
               <a
-                href="mailto:hey@heylola.co?subject=Suggest%20a%20community%20group"
+                href="mailto:hey@heylola.co?subject=Suggest%20a%20community%20hub"
                 className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-500 hover:text-charcoal transition-colors"
               >
-                <Plus size={11} /> Suggest a group
+                <Plus size={11} /> Suggest a hub
               </a>
             </header>
 
@@ -729,7 +729,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
             ? <>Join with membership <ArrowRight size={11} /></>
             : joined
               ? <>Open room <ArrowRight size={11} /></>
-              : <>Join group <ArrowRight size={11} /></>}
+              : <>Join hub <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );

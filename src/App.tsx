@@ -66,6 +66,7 @@ const Passport = lazyWithReload(() => import('./components/Passport').then(m => 
 const Onboarding = lazyWithReload(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
 const Admin = lazyWithReload(() => import('./components/Admin').then(m => ({ default: m.Admin })));
 const Blog = lazyWithReload(() => import('./components/Blog').then(m => ({ default: m.Blog })));
+const BlogArticle = lazyWithReload(() => import('./components/BlogArticle').then(m => ({ default: m.BlogArticle })));
 const VerifyEmail = lazyWithReload(() => import('./components/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
 const VerifyVenue = lazyWithReload(() => import('./components/VerifyVenue').then(m => ({ default: m.VerifyVenue })));
 const ClaimListing = lazyWithReload(() => import('./components/ClaimListing').then(m => ({ default: m.ClaimListing })));
@@ -371,6 +372,9 @@ function AppContent() {
             } />
             <Route path={paths.blog} element={
               <FadeIn><Blog onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
+            <Route path={paths.blogArticle} element={
+              <FadeIn><BlogArticle /></FadeIn>
             } />
             <Route path={paths.faq} element={
               <FadeIn><Faq onBack={() => navigate(paths.home)} /></FadeIn>

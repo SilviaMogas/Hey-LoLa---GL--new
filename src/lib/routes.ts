@@ -15,6 +15,7 @@ export const paths = {
   home: '/',
   about: '/about',
   blog: '/blog',
+  blogArticle: '/blog/:slug',
   faq: '/faq',
   privacy: '/privacy',
   terms: '/terms',
@@ -63,6 +64,7 @@ export const paths = {
 /** Builders for routes that take params. Always go through these — don't
  *  hand-craft path strings, the type system will not catch typos. */
 export const buildPath = {
+  blogArticle: (slug: string) => `/blog/${encodeURIComponent(slug)}`,
   venue: (slug: string) => `/venue/${encodeURIComponent(slug)}`,
   foundationDogPassport: (slug: string) => `/foundation/dogs/${encodeURIComponent(slug)}`,
   verifyVenue: (placeId: string, token: string) =>

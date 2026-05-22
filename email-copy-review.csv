@@ -1,0 +1,217 @@
+Workflow,Email #,Audience,Trigger,Recipient,Subject,Preview Text,Heading,Body,CTA Button Label
+Venue Invite,1 of 1,User,Admin invites a venue from the Back Office to claim its listing,Venue contact email,Your Hey Lola listing is ready to claim,"Claim your [venueName] listing on Hey Lola",Join the Hey Lola Partner Network,"Hi [venueName] team,
+
+We are reaching out from Hey Lola, a trust-first platform for pet lovers discovering pet-friendly places, services and experiences across different cities.
+
+Your venue has been listed on Hey Lola because it appears to be relevant for our community of pet owners and animal lovers.
+
+We would love to invite you to claim and verify your listing for free as part of our early Hey Lola Partner Network.
+
+By joining, you can:
+- Confirm that your business information is accurate.
+- Show pet owners that your venue is officially recognised by Hey Lola.
+- Build trust with potential visitors.
+- Increase visibility among a highly relevant pet-loving audience.
+- Highlight your pet-friendly policies, services or conditions.
+- Join an early partner ecosystem before we launch premium features.
+
+For now, joining and verifying your listing is completely free.
+
+[CTA]
+
+Or paste this link in your browser: [link]
+
+Once submitted, our team will review the information before marking your venue as verified.",Claim your listing
+Partner Application,1 of 2,User,Business applies to the Partner Network from /partners/onboard,Contact email,Welcome to the Hey Lola Partner Network,"Welcome to the Hey Lola Partner Network, [businessName]",Welcome to the Hey Lola Partner Network,"Hi [contactName],
+
+Thank you for applying to join the Hey Lola Partner Network as [businessName].
+
+Our team will review your application within 1–2 business days. Once verified, your venue will be featured on Hey Lola's curated city guide and your perk will be available to our members.
+
+In the meantime, reach us anytime at hey@heylola.co.
+
+Welcome aboard,
+The Hey Lola Team",—
+Partner Application,2 of 2,Admin,Business applies to the Partner Network from /partners/onboard,hey@heylola.co,"New partner application — [businessName]","New partner application — [businessName]",New partner application,"A new application is waiting in the back office.
+
+[Table: Business, Contact (+role), Email, City]
+
+App ID: [id]
+Open Admin → Partner Apps to review.",—
+Foundation Interest,1 of 2,User,User expresses interest in adopting a rescue dog,User email,"Hey Lola — Your interest in [dogName]","Your interest in [dogName] — Hey Lola Foundation",Thank you for showing interest in [dogName],"Hi [contactName],
+
+Thank you for expressing interest in [dogName] through the Hey Lola Foundation.
+
+> This is not an adoption application. It is a warm signal that connects you with [partnerName] so they can guide you through their official process.
+
+We have forwarded your details to the partner and to our team. Someone will be in touch within 1–2 business days.
+
+[CTA]
+
+With love,
+The Hey Lola Foundation",View [dogName]'s passport
+Foundation Interest,2 of 2,Admin,User expresses interest in adopting a rescue dog,hey@heylola.co,"New interest — [dogName] ([partnerName])","New interest — [dogName]",New rescue passport interest,"Someone just expressed interest in a Foundation dog.
+
+[Table: Dog, Passport, From, Phone]
+
+> [user message]
+
+Interest ID: [id]
+Open Admin → Foundation → Interest inbox to manage status.",—
+Group Join,1 of 2,User,User joins a community group room (Crew),User email,Welcome to [groupName],Welcome to [groupName],—,"Hi [firstName],
+
+You're in — welcome to [groupName].
+
+Drop in to introduce yourself, share a spot, or just lurk:
+
+[CTA]
+
+See you in the pack,
+The Hey Lola Team",Open [groupName]
+Group Join,2 of 2,Admin,User joins a community group room (Crew),hey@heylola.co,"New group join — [groupName]","New group join — [groupName]",New community group join,"Someone just joined a group room.
+
+[Table: Group, Member, Room]",—
+Venue Claim,1 of 2,User,Business claims a listing (3 entry points: public / partner-link / admin-invite),Claimant email,"Thanks — your [businessName] claim is in review","Thanks — your [businessName] claim is in review",Your claim is in review,"Hi [firstName],
+
+Thanks for submitting a claim for [businessName].
+
+Our team reviews each request manually. You'll hear back from us within one week with the next steps to verify the listing.
+
+In the meantime, if you need anything, reply to this email or write to hey@heylola.co.
+
+Hey Lola",—
+Venue Claim,2 of 2,Admin,Business claims a listing,hey@heylola.co,"[Claim] [businessName] ([placeName])","New venue claim — [businessName]",New venue claim,"A claim is waiting for manual review.
+
+[Table: Place, Business, Claimant, Email, Listing]
+
+> [claimant message]
+
+Review in Admin → Onboarding → Venue claims.",—
+Onboarding Pet Parent,1 of 2,User,Pet owner submits the /start form,User email,Welcome to Hey Lola — you're on the list,Welcome to Hey Lola — you're on the list,Welcome to Hey Lola,"Hi [firstName],
+
+Welcome to Hey Lola from [city] — your details are in.
+
+We'll let you know as soon as early access opens in your city so you and [petName] can dive in first.
+
+If you ever want to reach us, just reply to this email or write to hey@heylola.co.
+
+With love,
+The Hey Lola Team
+
+(Note: [city] and [petName] only appear if provided)",—
+Onboarding Pet Parent,2 of 2,Admin,Pet owner submits the /start form,hey@heylola.co,"New Pet Parent signup — [firstName] ([city])","New Pet Parent signup — [firstName]",New Pet Parent signup,"Submitted from the public /start page.
+
+[Table: Name, Email, City, Instagram, Pet (+type), Founding Club]
+
+Submission ID: [id]",—
+Onboarding Animal Lover,1 of 2,User,Person without pet submits the /start form (Animal Lover branch),User email,Welcome to Hey Lola — you're on the list,Welcome to the Hey Lola community,Welcome to Hey Lola,"Hi [firstName],
+
+Welcome to the Hey Lola community from [city]. No pet required — just a soft spot for them.
+
+We'll keep you posted on what's brewing — perks, events, rescue stories from our Foundation, and ways to get involved.
+
+If you ever want to reach us, just reply to this email or write to hey@heylola.co.
+
+With love,
+The Hey Lola Team",—
+Onboarding Animal Lover,2 of 2,Admin,Person without pet submits the /start form,hey@heylola.co,"New Animal Lover signup — [firstName] ([city])","New Animal Lover signup — [firstName]",New Animal Lover signup,"Submitted from the public /start page.
+
+[Table: Name, Email, City, Instagram, Interests]
+
+Submission ID: [id]",—
+Venue Intake,1 of 2,User,Business submits from the public /start form (Venue branch),Business email,"Thanks — [businessName] is in our review queue","Thanks — [businessName] is in our review queue",Your venue intake is in,"Hi [firstName],
+
+Thank you for submitting [businessName] to Hey Lola.
+
+Our team reviews each venue intake manually. You can expect a reply within 5 business days with the next steps to verify and confirm your perk.
+
+(Note: 'and confirm your perk' only appears if perk interest was declared)
+
+If you need anything, reply to this email or write to hey@heylola.co.
+
+Hey Lola",—
+Venue Intake,2 of 2,Admin,Business submits from the public /start form,hey@heylola.co,"[Venue intake] [businessName] — [city]","New venue intake — [businessName]",New venue intake,"Submitted from the public /start page.
+
+[Table: Business, Category, City, Address, Website, Instagram, Contact, Email, Phone, Pet-friendly, Perk interest]
+
+> [business notes]
+
+Claim ID: [id]
+Review in Admin → Onboarding → Venue claims.",—
+Waitlist,1 of 2,User,User joins waitlist from the WaitlistModal,User email,You're on the Hey Lola waitlist,You're on the Hey Lola waitlist,You're on the list,"Hi [firstName],
+
+Welcome to the Hey Lola [plan] waitlist.
+
+We'll notify you as soon as early access opens in [city].
+
+In the meantime, follow along at heylola.co or reply to this email if you have any questions about plans, perks or anything else.
+
+With love,
+The Hey Lola Team",—
+Waitlist,2 of 2,Admin,User joins waitlist from the WaitlistModal,hey@heylola.co,"New waitlist signup — [firstName] ([city])","New waitlist signup — [firstName]",New waitlist signup,"Submitted from the WaitlistModal on heylola.co.
+
+[Table: Name, Email, City, Plan, Dog (+type)]
+
+> Perks of interest: [perks]
+
+Entry ID: [id]",—
+Business Lead,1 of 2,User,Business sends a B2B inquiry from the Business branch of signup,Business contact email,Thanks for reaching out — Hey Lola for [businessName],Thanks for reaching out — Hey Lola for [businessName],Thanks for reaching out,"Hi there,
+
+Thanks for reaching out to Hey Lola on behalf of [businessName].
+
+We've passed your inquiry to our partnerships team. Someone will follow up within 2 business days to talk through how Hey Lola can work for you.
+
+If you need anything sooner, reply to this email or write to hey@heylola.co.
+
+The Hey Lola Team",—
+Business Lead,2 of 2,Admin,Business sends a B2B inquiry,hey@heylola.co,"[B2B lead] [businessName] — [location]","New B2B inquiry — [businessName]",New B2B inquiry,"Submitted from the Business branch of /signup.
+
+[Table: Business, Email, Role, Location]
+
+> Reason: [contact reason]
+
+Lead ID: [id]
+Review in Admin → CRM → Inbound.",—
+Signup (email + password),1 of 2,User,User creates account with email/password,User email,Welcome to Hey Lola,"Welcome to Hey Lola, [firstName]",Welcome to Hey Lola,"Hi [firstName],
+
+Your account is ready. Welcome to a community that treats pets like the family they are.
+
+One last step — tap the button below to confirm your email address. That unlocks your dashboard, perks and the community.
+
+[CTA]
+
+Or paste this link in your browser: [verification link]
+
+After verifying, you'll land on your dashboard with the next steps: finish your profile, explore the city guide, and join the community.
+
+Need anything? Just reply to this email or write to hey@heylola.co.
+
+With love,
+The Hey Lola Team",Verify your email
+Signup (email + password),2 of 2,Admin,User creates account with email/password,hey@heylola.co,"New signup — [firstName]","New signup — [firstName] [lastName]",New Hey Lola account,"A new user just finished signup. They land in the onboarding flow next.
+
+[Table: Name, Email, Method, Verified, Username, User type, Referred by]
+
+User ID: [id]
+Review in Admin → CRM → Members.",—
+Signup (Google OAuth),1 of 2,User,User creates account with Google,User email,Welcome to Hey Lola,"Welcome to Hey Lola, [firstName]",Welcome to Hey Lola,"Hi [firstName],
+
+Your account is ready. Welcome to a community that treats pets like the family they are.
+
+Here's what you can do next:
+- Finish your profile. Tell us about your pet so we can tailor recommendations.
+- Explore the city guide. Verified pet-friendly places, perks and partners.
+- Join the community. Local crews share spots, walks and rescue stories.
+
+[CTA]
+
+Need anything? Just reply to this email or write to hey@heylola.co.
+
+With love,
+The Hey Lola Team",Open your dashboard
+Signup (Google OAuth),2 of 2,Admin,User creates account with Google,hey@heylola.co,"New signup — [firstName] (Google)","New signup — [firstName] [lastName]",New Hey Lola account,"A new user just finished signup. They land in the onboarding flow next.
+
+[Table: Name, Email, Method (Google OAuth), Verified, Username, User type, Referred by]
+
+User ID: [id]
+Review in Admin → CRM → Members.",—

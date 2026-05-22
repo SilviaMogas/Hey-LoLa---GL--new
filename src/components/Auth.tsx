@@ -311,20 +311,21 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         // fails, the Firebase email above already covers verification.
         // Pass the form data so the endpoint can send even if the Admin SDK
         // is misconfigured (the client has the canonical email/name).
-        void fetch('/api/notify-signup', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.uid,
-            email,
-            firstName,
-            lastName,
-            username: usernameKey,
-            userType,
-            referredBy: referralCode.trim().toUpperCase() || undefined,
-            signupMethod: 'email',
-          }),
-        }).catch(() => { /* email is best-effort */ });
+        // DISABLED: was duplicating the Firebase-native verification email above.
+        // void fetch('/api/notify-signup', {
+        //   method: 'POST',
+        //   headers: { 'content-type': 'application/json' },
+        //   body: JSON.stringify({
+        //     userId: user.uid,
+        //     email,
+        //     firstName,
+        //     lastName,
+        //     username: usernameKey,
+        //     userType,
+        //     referredBy: referralCode.trim().toUpperCase() || undefined,
+        //     signupMethod: 'email',
+        //   }),
+        // }).catch(() => { /* email is best-effort */ });
         track('signup_completed', { method: 'email', userType });
         onSuccess(true);
       } else if (mode === 'login') {

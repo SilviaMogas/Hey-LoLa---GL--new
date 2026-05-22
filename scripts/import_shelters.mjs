@@ -13,6 +13,10 @@
 // docs directly) to add/update real dogs as Hey Lola onboards them.
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { randomUUID } from 'node:crypto';
+
+// Base URL used to build the shareable shelter edit links.
+const BASE = (process.env.APP_URL || 'https://heylola.co').replace(/\/$/, '');
 
 const env = (k) => process.env[k] || '';
 const projectId = env('FIREBASE_ADMIN_PROJECT_ID');
@@ -86,13 +90,24 @@ const SHELTERS = [
 ];
 
 async function main() {
-  let n = 0;
+  const links = [];
   for (const s of SHELTERS) {
     await db.collection('shelters').doc(s.id).set({ ...s, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-    n += 1;
+    // Generate (or rotate) the shelter's private edit token + shareable link.
+    const token = randomUUID().replace(/-/g, '');
+    await db.collection('shelter_secrets').doc(s.id).set({ token, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    const link = `${BASE}/shelter/${s.id}?t=${token}`;
+    links.push({ name: s.name, link });
     console.log(`  · ${s.name} (${s.dogs.length} dogs)`);
   }
-  console.log(`Done. ${n} shelters written to Firestore.`);
+  console.log(`\nDone. ${SHELTERS.length} shelters written.\n`);
+  console.log('================  EDIT LINKS — give one to each shelter  ================');
+  for (const l of links) {
+    console.log(`\n${l.name}:\n${l.link}`);
+  }
+  console.log('\n=========================================================================');
+  console.log('Each shelter can edit ONLY their own profile + dogs from their link.');
+  console.log('Re-run this script to rotate tokens (old links stop working).');
 }
 
 main().catch((err) => { console.error('import_shelters failed:', err); process.exit(1); });

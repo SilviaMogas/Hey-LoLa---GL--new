@@ -9,6 +9,7 @@ import { isAdminEmail } from '../lib/admin';
 import { COMMUNITY_GROUPS } from '../data/communityGroups';
 import { paths } from '../lib/routes';
 import { SEO } from '../lib/seo';
+import { seedPostsFor } from '../data/seedPosts';
 import {
   FeedItem,
   PostComposer,
@@ -172,13 +173,22 @@ export const CommunityGroup: React.FC = () => {
     }
   };
 
+  // Pinned founder + concierge welcome/starter posts (client-side). They are
+  // suppressed automatically once the same message exists as a real Firestore
+  // post (i.e. after the admin seed script runs), so they never duplicate.
+  const seeded = useMemo(() => {
+    if (!group) return [] as FeedPost[];
+    const liveBodies = new Set(livePosts.map((p) => p.body.trim()));
+    return seedPostsFor(group.id).filter((s) => !liveBodies.has(s.body.trim()));
+  }, [group, livePosts]);
+
+  const allPosts = useMemo(() => [...seeded, ...livePosts], [seeded, livePosts]);
+
   // Posts shown for the active topic. Untagged/legacy posts bucket into the
-  // first topic ("Presentations") so nothing disappears. Founder welcome
-  // posts are real Firestore docs (seeded via scripts/seed_community_posts.mjs)
-  // so they appear here like any other post and can be replied to.
+  // first topic ("Presentations") so nothing disappears.
   const visiblePosts = useMemo(
-    () => livePosts.filter((p) => (p.topic ?? topics[0]) === activeTopic),
-    [livePosts, activeTopic, topics],
+    () => allPosts.filter((p) => (p.topic ?? topics[0]) === activeTopic),
+    [allPosts, activeTopic, topics],
   );
 
   // Unknown group id → bounce back to /community.
@@ -311,7 +321,7 @@ export const CommunityGroup: React.FC = () => {
                 <ul className="flex gap-2">
                   {topics.map((t) => {
                     const active = t === activeTopic;
-                    const count = livePosts.filter((p) => (p.topic ?? topics[0]) === t).length;
+                    const count = allPosts.filter((p) => (p.topic ?? topics[0]) === t).length;
                     return (
                       <li key={t}>
                         <button

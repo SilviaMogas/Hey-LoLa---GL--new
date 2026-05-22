@@ -468,11 +468,21 @@ export function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAutho
               <span className="text-[10px] text-stone-400">@{post.handle}</span>
             )}
             {post.badge && (
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 bg-stone-50 border border-stone-100 px-2 py-0.5 rounded-full">
+              <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full border ${
+                post.badge === 'Founder'
+                  ? 'text-brand-orange bg-brand-orange/10 border-brand-orange/20'
+                  : post.badge === 'Concierge'
+                    ? 'text-[#6E8C5D] bg-[#F7F9F5] border-[#e3ece0]'
+                    : 'text-stone-400 bg-stone-50 border-stone-100'
+              }`}>
                 {post.badge}
               </span>
             )}
-            <span className="text-[10px] text-stone-400 font-medium">· {post.timeAgo}</span>
+            {post.timeAgo === 'pinned' ? (
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 inline-flex items-center gap-1">📌 Pinned</span>
+            ) : (
+              <span className="text-[10px] text-stone-400 font-medium">· {post.timeAgo}</span>
+            )}
           </div>
           {post.city && (
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 mt-1 inline-flex items-center gap-1">

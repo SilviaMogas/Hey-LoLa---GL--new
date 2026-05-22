@@ -127,6 +127,36 @@
     -->
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
+
+    <!-- No-JS fallback: gives crawlers and scrapers that don't run JavaScript
+         (and visitors with JS disabled) real, indexable content. The SPA above
+         replaces this the moment React mounts. Keep the copy in sync with the
+         home hero. -->
+    <noscript>
+      <main style="max-width:720px;margin:0 auto;padding:48px 24px;font-family:Georgia,'Times New Roman',serif;color:#111;line-height:1.6;">
+        <h1 style="font-size:2rem;font-style:italic;margin:0 0 12px;">Hey Lola — Your Dog's Lifestyle Concierge</h1>
+        <p style="font-size:1.05rem;color:#444;margin:0 0 20px;">
+          Hey Lola is a boutique lifestyle concierge for modern dog parents. Organise your dog's essentials,
+          discover trusted dog-friendly places, join a local community of dog lovers, and access curated local
+          perks — across Miami, New York, Toronto, Washington DC and Barcelona.
+        </p>
+        <h2 style="font-size:1.1rem;margin:24px 0 8px;">Explore Hey Lola</h2>
+        <ul style="margin:0 0 20px;padding-left:20px;">
+          <li><a href="/explore" style="color:#C4622D;">Discover dog-friendly places near you</a></li>
+          <li><a href="/community" style="color:#C4622D;">Join your city's dog-parent community</a></li>
+          <li><a href="/foundation" style="color:#C4622D;">The Hey Lola Foundation &amp; adoptable rescue dogs</a></li>
+          <li><a href="/club" style="color:#C4622D;">Become a member</a></li>
+          <li><a href="/perks" style="color:#C4622D;">Member perks</a></li>
+          <li><a href="/partners" style="color:#C4622D;">For partners &amp; venues</a></li>
+          <li><a href="/faq" style="color:#C4622D;">Frequently asked questions</a></li>
+        </ul>
+        <p style="font-size:0.95rem;color:#666;">
+          Hey Lola works best with JavaScript enabled. Please enable JavaScript, or contact us at
+          <a href="mailto:hey@heylola.co" style="color:#C4622D;">hey@heylola.co</a>.
+        </p>
+      </main>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

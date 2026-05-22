@@ -110,6 +110,8 @@ export const organizationSchema = {
   areaServed: [
     { '@type': 'City', name: 'Miami' },
     { '@type': 'City', name: 'New York City' },
+    { '@type': 'City', name: 'Toronto' },
+    { '@type': 'City', name: 'Washington, D.C.' },
     { '@type': 'City', name: 'Barcelona' },
   ],
 };
@@ -130,7 +132,7 @@ export const serviceSchema = {
   '@type': 'Service',
   serviceType: 'Lifestyle concierge for dog parents',
   provider: { '@id': `${SITE.origin}/#organization` },
-  areaServed: ['Miami', 'New York City', 'Barcelona'],
+  areaServed: ['Miami', 'New York City', 'Toronto', 'Washington, D.C.', 'Barcelona'],
   description: SITE.defaultDescription,
   offers: {
     '@type': 'AggregateOffer',

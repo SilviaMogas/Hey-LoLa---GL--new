@@ -27,6 +27,7 @@ export const paths = {
   /** Founder Deals dashboard — stealth / admin-only until promoted live. */
   founderDeals: '/perks/deals',
   foundation: '/foundation',
+  foundationShelter: '/foundation/shelter/:shelterId',
   foundationDogs: '/foundation/dogs',
   foundationDogPassport: '/foundation/dogs/:slug',
   club: '/club',
@@ -67,6 +68,7 @@ export const buildPath = {
   blogArticle: (slug: string) => `/blog/${encodeURIComponent(slug)}`,
   venue: (slug: string) => `/venue/${encodeURIComponent(slug)}`,
   foundationDogPassport: (slug: string) => `/foundation/dogs/${encodeURIComponent(slug)}`,
+  foundationShelter: (shelterId: string) => `/foundation/shelter/${encodeURIComponent(shelterId)}`,
   verifyVenue: (placeId: string, token: string) =>
     `/verify/${encodeURIComponent(placeId)}/${encodeURIComponent(token)}`,
   claimListing: (token: string) => `/claim-listing/${encodeURIComponent(token)}`,

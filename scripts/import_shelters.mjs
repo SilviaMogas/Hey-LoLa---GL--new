@@ -14,24 +14,52 @@
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 // Base URL used to build the shareable shelter edit links.
 const BASE = (process.env.APP_URL || 'https://heylola.co').replace(/\/$/, '');
 
 const env = (k) => process.env[k] || '';
-const projectId = env('FIREBASE_ADMIN_PROJECT_ID');
-const clientEmail = env('FIREBASE_ADMIN_CLIENT_EMAIL');
-const pemFromEnv = env('FIREBASE_ADMIN_PRIVATE_KEY');
 const databaseId = env('FIREBASE_DATABASE_ID');
 
-if (!projectId || !clientEmail || !pemFromEnv) {
-  console.error('Missing FIREBASE_ADMIN_PROJECT_ID / FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY');
-  process.exit(1);
+// Robust private-key parser: tolerates surrounding quotes, literal "\n",
+// real newlines, CRLF and base64-encoded PEM. Mirrors api/_admin.ts so the
+// script never trips on how PowerShell/bash store the multi-line key.
+function parsePrivateKey(raw) {
+  let key = raw;
+  if (key.charCodeAt(0) === 0xFEFF) key = key.slice(1);
+  key = key.trim();
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) key = key.slice(1, -1);
+  if (!key.startsWith('-----BEGIN')) {
+    const stripped = key.replace(/\s/g, '');
+    if (/^[A-Za-z0-9+/=]+$/.test(stripped) && stripped.length > 1000) {
+      try { const decoded = Buffer.from(stripped, 'base64').toString('utf8'); if (decoded.includes('-----BEGIN')) key = decoded; } catch { /* ignore */ }
+    }
+  }
+  if (key.includes('\\n')) key = key.replace(/\\n/g, '\n');
+  return key.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-const app = initializeApp({
-  credential: cert({ projectId, clientEmail, privateKey: pemFromEnv.replace(/\\n/g, '\n') }),
-});
+// EASIEST path: point GOOGLE_APPLICATION_CREDENTIALS (or SERVICE_ACCOUNT_FILE)
+// at your downloaded service-account JSON file — no key copy-pasting at all.
+// Fallback: the three FIREBASE_ADMIN_* env vars (key parsed robustly above).
+const keyFile = env('GOOGLE_APPLICATION_CREDENTIALS') || env('SERVICE_ACCOUNT_FILE');
+let credential;
+if (keyFile) {
+  const sa = JSON.parse(readFileSync(keyFile, 'utf8'));
+  credential = cert({ projectId: sa.project_id, clientEmail: sa.client_email, privateKey: sa.private_key });
+} else {
+  const projectId = env('FIREBASE_ADMIN_PROJECT_ID');
+  const clientEmail = env('FIREBASE_ADMIN_CLIENT_EMAIL');
+  const pemFromEnv = env('FIREBASE_ADMIN_PRIVATE_KEY');
+  if (!projectId || !clientEmail || !pemFromEnv) {
+    console.error('Set GOOGLE_APPLICATION_CREDENTIALS to your service-account JSON file path, OR set FIREBASE_ADMIN_PROJECT_ID / FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY.');
+    process.exit(1);
+  }
+  credential = cert({ projectId, clientEmail, privateKey: parsePrivateKey(pemFromEnv) });
+}
+
+const app = initializeApp({ credential });
 const db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
 
 // Source of truth mirrors src/data/sheltersSeed.ts (real dogs scraped from each

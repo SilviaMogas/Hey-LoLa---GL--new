@@ -75,16 +75,27 @@ export const FoundationShelters: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {SHELTERS.map((shelter) => (
           <article key={shelter.id} className="rounded-[1.5rem] border border-stone-100 bg-white p-5 sm:p-6 space-y-4">
-            <header className="flex items-start justify-between gap-3 border-b border-stone-100 pb-3">
-              <div>
-                <h3 className="text-xl font-serif italic leading-tight">{shelter.name}</h3>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 mt-1 inline-flex items-center gap-1">
-                  <MapPin size={9} /> {shelter.city}
-                </p>
+            <header className="border-b border-stone-100 pb-3 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-serif italic leading-tight">{shelter.name}</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 mt-1 inline-flex items-center gap-1">
+                    <MapPin size={9} /> {shelter.city}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.2em] text-[#6E8C5D] bg-[#F7F9F5] rounded-full px-2.5 py-1">
+                  {shelter.dogs.length} {shelter.dogs.length === 1 ? 'dog' : 'dogs'}
+                </span>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#6E8C5D] bg-[#F7F9F5] rounded-full px-2.5 py-1">
-                {shelter.dogs.length} {shelter.dogs.length === 1 ? 'dog' : 'dogs'}
-              </span>
+              <p className="text-xs text-stone-500 font-light leading-relaxed">{shelter.blurb}</p>
+              <a
+                href={shelter.website}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 hover:text-charcoal transition-colors"
+              >
+                See all dogs ↗
+              </a>
             </header>
 
             <ul className="space-y-3">

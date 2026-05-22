@@ -127,7 +127,13 @@ export default function App() {
     }
   }, []);
 
-  if (!unlocked) {
+  // Routes that bypass the ComingSoon gate — shareable shelter passports
+  // need to render for anyone who follows a direct link (rescue partners
+  // distribute these via their own channels).
+  const path = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isAlwaysPublic = /^\/foundation(\/|$)/.test(path);
+
+  if (!unlocked && !isAlwaysPublic) {
     return (
       <ErrorBoundary>
         <ComingSoon onUnlock={() => setUnlocked(true)} />
@@ -455,6 +461,16 @@ function AppContent() {
               </DraftRoute>
             } />
             <Route path={paths.foundation} element={
+              <FadeIn>
+                <Foundation
+                  onBack={() => navigate(paths.home)}
+                  onPartners={() => navigate(paths.partners)}
+                  onJoin={() => navigate(paths.signup)}
+                  onSeeDogs={() => navigate(paths.foundationDogs)}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.foundationShelter} element={
               <FadeIn>
                 <Foundation
                   onBack={() => navigate(paths.home)}

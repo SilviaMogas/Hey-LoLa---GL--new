@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Heart, Loader2, MapPin, PawPrint, X } from 'lucide-react';
 import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
 import { DEFAULT_SHELTERS } from '../data/sheltersSeed';
+import { buildPath, paths } from '../lib/routes';
 
 const DOG_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
 
@@ -30,26 +31,32 @@ export const FoundationShelters: React.FC = () => {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCity, setActiveCity] = useState('new-york');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [openShelterId, setOpenShelterId] = useState<string | null>(() => searchParams.get('shelter'));
+  const [searchParams] = useSearchParams();
+  const { shelterId: shelterIdParam } = useParams<{ shelterId?: string }>();
+  const navigate = useNavigate();
+  // URL param (new path) wins over the legacy ?shelter=… query string.
+  const openShelterId = shelterIdParam ?? searchParams.get('shelter');
   const [selected, setSelected] = useState<Selected | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
-  /** Each shelter gets its own shareable URL: /foundation?shelter=<id>. */
+  // Backward compat: if anyone follows the legacy `/foundation?shelter=<id>`
+  // link, redirect once to the new canonical path so the address bar matches.
+  useEffect(() => {
+    const legacy = searchParams.get('shelter');
+    if (legacy && !shelterIdParam) {
+      navigate(buildPath.foundationShelter(legacy), { replace: true });
+    }
+  }, [searchParams, shelterIdParam, navigate]);
+
+  /** Each shelter gets its own shareable URL: /foundation/shelter/<id>. */
   const openShelterById = (id: string) => {
-    setOpenShelterId(id);
-    const next = new URLSearchParams(searchParams);
-    next.set('shelter', id);
-    setSearchParams(next);
+    navigate(buildPath.foundationShelter(id));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const closeShelter = () => {
-    setOpenShelterId(null);
-    const next = new URLSearchParams(searchParams);
-    next.delete('shelter');
-    setSearchParams(next);
+    navigate(paths.foundation);
   };
 
   useEffect(() => {

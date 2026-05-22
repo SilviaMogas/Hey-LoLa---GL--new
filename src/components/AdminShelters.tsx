@@ -3,6 +3,7 @@ import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
+import { DEFAULT_SHELTERS } from '../data/sheltersSeed';
 
 /**
  * Admin CRUD for the Foundation `shelters` collection. Lets Hey Lola add /
@@ -16,6 +17,7 @@ export const AdminShelters: React.FC = () => {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const [links, setLinks] = useState<Record<string, string>>({});
 
   const shareLink = async (i: number) => {
@@ -97,19 +99,48 @@ export const AdminShelters: React.FC = () => {
     }
   };
 
+  // One-click seed: writes the default partner shelters + their dogs into
+  // Firestore from the browser (no service-account key, no terminal). After
+  // this you can "Share edit link" for each shelter. Re-running refreshes them.
+  const loadDefaults = async () => {
+    if (!confirm('Load the 5 default shelters (Bobbi, AMA, Animal Haven, etc.) with their dogs into Firestore? This refreshes any with the same id.')) return;
+    setSeeding(true);
+    try {
+      for (const s of DEFAULT_SHELTERS) {
+        await setDoc(doc(db, 'shelters', s.id), { ...s, updatedAt: serverTimestamp() }, { merge: true });
+      }
+      await load();
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'shelters');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   if (loading) return <div className="col-span-full py-10 text-center"><Loader2 className="mx-auto animate-spin text-stone-300" /></div>;
 
   return (
     <div className="col-span-full space-y-5">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-black uppercase tracking-[0.3em] text-stone-400">Foundation shelters</h3>
-        <button
-          type="button"
-          onClick={() => setShelters((prev) => [...prev, blankShelter()])}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-charcoal/80"
-        >
-          <Plus size={14} /> Add shelter
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={loadDefaults}
+            disabled={seeding}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-white text-charcoal border border-stone-200 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-stone-50 disabled:opacity-50"
+            title="Load the default partner shelters + dogs into Firestore"
+          >
+            {seeding ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Load shelters
+          </button>
+          <button
+            type="button"
+            onClick={() => setShelters((prev) => [...prev, blankShelter()])}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-charcoal text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-charcoal/80"
+          >
+            <Plus size={14} /> Add shelter
+          </button>
+        </div>
       </div>
 
       {shelters.map((s, i) => (

@@ -14,20 +14,25 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
-    // 1. Check localStorage
+    // The language a visitor starts in is locked for the whole session and
+    // every future visit: we read the saved choice if there is one, otherwise
+    // detect once from the browser and immediately persist it. After this runs
+    // the language never changes on its own — only an explicit toggle does.
     const savedLang = localStorage.getItem('heylola_lang') as Language;
-    if (savedLang && (savedLang === 'en' || savedLang === 'es')) {
+    if (savedLang === 'en' || savedLang === 'es') {
       setLanguageState(savedLang);
-    } else {
-      // 2. Detect browser language
-      const browserLang = navigator.language.split('-')[0];
-      if (browserLang === 'es') {
-        setLanguageState('es');
-      } else {
-        setLanguageState('en');
-      }
+      return;
     }
+    const browserLang = navigator.language.split('-')[0];
+    const detected: Language = browserLang === 'es' ? 'es' : 'en';
+    setLanguageState(detected);
+    try { localStorage.setItem('heylola_lang', detected); } catch { /* ignore */ }
   }, []);
+
+  // Keep the document language in sync for accessibility and SEO.
+  useEffect(() => {
+    if (typeof document !== 'undefined') document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

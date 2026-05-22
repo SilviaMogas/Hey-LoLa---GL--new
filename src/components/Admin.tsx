@@ -8,6 +8,7 @@ import { cn } from '../lib/utils';
 import { OnboardingAdminPanel } from './OnboardingAdminPanel';
 import { VenueOutreachPanel } from './VenueOutreachPanel';
 import { AdminFoundation } from './AdminFoundation';
+import { AdminShelters } from './AdminShelters';
 import { AdminFeatureFlags } from './AdminFeatureFlags';
 import { AdminCRM } from './AdminCRM';
 
@@ -37,7 +38,7 @@ const PLACE_STATUSES: PlaceStatus[] = [
 const RESERVATION_PROVIDERS: ReservationProvider[] = ['None', 'OpenTable', 'Direct', 'Other'];
 const BOOKING_STATUSES: BookingStatus[] = ['Not available', 'Pending', 'Active'];
 
-type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'features' | 'crm';
+type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'shelters' | 'features' | 'crm';
 
 interface AdminProps {
   onBack?: () => void;
@@ -421,6 +422,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
               {([
                 ['places', 'Places'],
                 ['foundation', 'Foundation'],
+                ['shelters', 'Shelters'],
                 ['crm', 'CRM'],
                 ['outreach', 'Outreach'],
                 ['claims', stats.pendingClaims > 0 ? `Claims (${stats.pendingClaims})` : 'Claims'],
@@ -599,6 +601,8 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
 
       {activeTab === 'foundation' ? (
         <AdminFoundation />
+      ) : activeTab === 'shelters' ? (
+        <AdminShelters />
       ) : activeTab === 'features' ? (
         <AdminFeatureFlags />
       ) : activeTab === 'crm' ? (

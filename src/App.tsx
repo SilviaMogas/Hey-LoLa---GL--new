@@ -37,6 +37,7 @@ const Explore = lazy(() => import('./components/Explore').then(m => ({ default: 
 const Community = lazy(() => import('./components/Community').then(m => ({ default: m.Community })));
 const CommunityGroup = lazy(() => import('./components/CommunityGroup').then(m => ({ default: m.CommunityGroup })));
 const PetProfile = lazy(() => import('./components/PetProfile').then(m => ({ default: m.PetProfile })));
+const ShelterPortal = lazy(() => import('./components/ShelterPortal').then(m => ({ default: m.ShelterPortal })));
 const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const Passport = lazy(() => import('./components/Passport').then(m => ({ default: m.Passport })));
 const Onboarding = lazy(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
@@ -484,6 +485,11 @@ function AppContent() {
             <Route path={paths.petProfile} element={
               <FadeIn className="px-4 sm:px-6 py-6">
                 <PetProfile />
+              </FadeIn>
+            } />
+            <Route path={paths.shelterPortal} element={
+              <FadeIn>
+                <ShelterPortal />
               </FadeIn>
             } />
             <Route path={paths.venue} element={<VenueRoute />} />

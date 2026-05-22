@@ -279,9 +279,20 @@ service cloud.firestore {
     // ────────── FOUNDATION SHELTERS (public directory) ──────────
     // Partner shelters and their adoptable dogs (real Hey Lola profiles),
     // managed by admins. Public read so the /foundation page shows them live.
+    // Shelters edit their own profile/dogs via the token-gated server
+    // endpoint /api/shelter-update (Admin SDK, bypasses these rules).
     match /shelters/{shelterId} {
       allow read:  if true;
       allow write: if isAdmin();
+    }
+
+    // ────────── SHELTER SECRETS (per-shelter edit token) ──────────
+    // Holds the share-link token for each shelter so they can edit their own
+    // profile/dogs without an account. NEVER readable from the client; the
+    // /api/shelter-update endpoint validates it via the Admin SDK. Admins
+    // create/rotate tokens from the back office.
+    match /shelter_secrets/{shelterId} {
+      allow read, write: if isAdmin();
     }
 
     // ────────── FOUNDATION INTEREST SUBMISSIONS ──────────

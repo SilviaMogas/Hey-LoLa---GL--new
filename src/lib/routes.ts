@@ -41,6 +41,7 @@ export const paths = {
   community: '/community',
   communityGroup: '/community/:groupId',
   petProfile: '/pet/:petId',
+  shelterPortal: '/shelter/:shelterId',
   venue: '/venue/:slug',
   verifyVenue: '/verify/:placeId/:token',
   claimListing: '/claim-listing/:token',
@@ -71,6 +72,7 @@ export const buildPath = {
   brandBookCharacter: (name: string) => `/brand-book/${encodeURIComponent(name.toLowerCase())}`,
   communityGroup: (groupId: string) => `/community/${encodeURIComponent(groupId)}`,
   petProfile: (petId: string) => `/pet/${encodeURIComponent(petId)}`,
+  shelterPortal: (shelterId: string, token: string) => `/shelter/${encodeURIComponent(shelterId)}?t=${encodeURIComponent(token)}`,
 };
 
 /** Pages we actively want indexed by search engines. Used to generate

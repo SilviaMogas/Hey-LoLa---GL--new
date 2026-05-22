@@ -276,6 +276,14 @@ service cloud.firestore {
       allow write:  if isAdmin();
     }
 
+    // ────────── FOUNDATION SHELTERS (public directory) ──────────
+    // Partner shelters and their adoptable dogs (real Hey Lola profiles),
+    // managed by admins. Public read so the /foundation page shows them live.
+    match /shelters/{shelterId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
     // ────────── FOUNDATION INTEREST SUBMISSIONS ──────────
     // Visitors express interest in a rescue dog. Public create with a
     // strict payload contract; only admin can read or update afterwards.

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Loader2, MapPin, PawPrint, X } from 'lucide-react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { SHELTERS, FOUNDATION_LOCATION, dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
+import { FOUNDATION_LOCATION, dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
+
+const DOG_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
 
 interface Selected { shelter: Shelter; dog: ShelterDog }
 
@@ -14,10 +16,33 @@ interface Selected { shelter: Shelter; dog: ShelterDog }
  * manually to the shelter.
  */
 export const FoundationShelters: React.FC = () => {
+  const [shelters, setShelters] = useState<Shelter[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+
+  // Live from Firestore — no hardcoded shelters/dogs in the app.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDocs(collection(db, 'shelters'));
+        if (cancelled) return;
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<Shelter, 'id'>) }))
+          .map((s) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] }))
+          .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+        setShelters(list);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.READ, 'shelters');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const open = (shelter: Shelter, dog: ShelterDog) => {
     setSelected({ shelter, dog });
@@ -72,8 +97,13 @@ export const FoundationShelters: React.FC = () => {
         </p>
       </header>
 
+      {loading ? (
+        <div className="py-12 text-center"><PawPrint size={24} className="mx-auto text-stone-300 animate-pulse" /></div>
+      ) : shelters.length === 0 ? (
+        <p className="text-sm text-stone-400 italic">Shelters coming soon.</p>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {SHELTERS.map((shelter) => (
+        {shelters.map((shelter) => (
           <article key={shelter.id} className="rounded-[1.5rem] border border-stone-100 bg-white p-5 sm:p-6 space-y-4">
             <header className="border-b border-stone-100 pb-3 space-y-2">
               <div className="flex items-start justify-between gap-3">
@@ -102,7 +132,7 @@ export const FoundationShelters: React.FC = () => {
               {shelter.dogs.map((dog) => (
                 <li key={dog.id} className="flex items-center gap-3 rounded-2xl bg-stone-50/60 border border-stone-100 p-3">
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-100 shrink-0">
-                    <img src={dog.photo} alt={dog.name} loading="lazy" className="w-full h-full object-cover" />
+                    <img src={dog.photo || DOG_FALLBACK} alt={dog.name} loading="lazy" className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -125,6 +155,7 @@ export const FoundationShelters: React.FC = () => {
           </article>
         ))}
       </div>
+      )}
 
       {/* Adoption interest form modal */}
       <AnimatePresence>
@@ -164,7 +195,7 @@ export const FoundationShelters: React.FC = () => {
                 <>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-stone-100 shrink-0">
-                      <img src={selected.dog.photo} alt={selected.dog.name} className="w-full h-full object-cover" />
+                      <img src={selected.dog.photo || DOG_FALLBACK} alt={selected.dog.name} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Adopt</p>

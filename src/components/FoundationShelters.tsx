@@ -4,6 +4,7 @@ import { Heart, Loader2, MapPin, PawPrint, X } from 'lucide-react';
 import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { FOUNDATION_LOCATION, dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
+import { DEFAULT_SHELTERS } from '../data/sheltersSeed';
 
 const DOG_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
 
@@ -34,9 +35,11 @@ export const FoundationShelters: React.FC = () => {
           .map((d) => ({ id: d.id, ...(d.data() as Omit<Shelter, 'id'>) }))
           .map((s) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] }))
           .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-        setShelters(list);
+        // Firestore wins; fall back to the default set so the page is never empty.
+        setShelters(list.length > 0 ? list : DEFAULT_SHELTERS);
       } catch (err) {
         handleFirestoreError(err, OperationType.READ, 'shelters');
+        if (!cancelled) setShelters(DEFAULT_SHELTERS);
       } finally {
         if (!cancelled) setLoading(false);
       }

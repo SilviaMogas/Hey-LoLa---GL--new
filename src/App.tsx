@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './lib/useAuth';
 import { isAdminEmail } from './lib/admin';
@@ -30,46 +30,69 @@ import { ComingSoon, hasAccess } from './components/ComingSoon';
 
 import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 
+/**
+ * Wraps React.lazy so a failed dynamic import does not crash into the error
+ * boundary. This happens when a new deploy changes the asset hashes while a
+ * visitor still has the previous index.html cached: the old chunk path 404s
+ * ("Failed to fetch dynamically imported module"). We reload once to pull the
+ * fresh asset map; a sessionStorage flag prevents reload loops.
+ */
+function lazyWithReload<T extends ComponentType<Record<string, unknown>>>(
+  factory: () => Promise<{ default: T }>,
+): LazyExoticComponent<T> {
+  return lazy(() =>
+    factory().catch((err: unknown) => {
+      const KEY = 'heylola_chunk_reloaded';
+      if (typeof window !== 'undefined' && !sessionStorage.getItem(KEY)) {
+        sessionStorage.setItem(KEY, '1');
+        window.location.reload();
+        return new Promise<{ default: T }>(() => {}); // never resolves; the page is reloading
+      }
+      throw err;
+    }),
+  );
+}
+
 // Code-split heavy / less-critical views — they only ship when needed
-const Auth = lazy(() => import('./components/Auth').then(m => ({ default: m.Auth })));
-const Explore = lazy(() => import('./components/Explore').then(m => ({ default: m.Explore })));
-const Community = lazy(() => import('./components/Community').then(m => ({ default: m.Community })));
-const CommunityGroup = lazy(() => import('./components/CommunityGroup').then(m => ({ default: m.CommunityGroup })));
-const PetProfile = lazy(() => import('./components/PetProfile').then(m => ({ default: m.PetProfile })));
-const ShelterPortal = lazy(() => import('./components/ShelterPortal').then(m => ({ default: m.ShelterPortal })));
-const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
-const Passport = lazy(() => import('./components/Passport').then(m => ({ default: m.Passport })));
-const Onboarding = lazy(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
-const Admin = lazy(() => import('./components/Admin').then(m => ({ default: m.Admin })));
-const Blog = lazy(() => import('./components/Blog').then(m => ({ default: m.Blog })));
-const VerifyEmail = lazy(() => import('./components/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
-const VerifyVenue = lazy(() => import('./components/VerifyVenue').then(m => ({ default: m.VerifyVenue })));
-const ClaimListing = lazy(() => import('./components/ClaimListing').then(m => ({ default: m.ClaimListing })));
-const EmergencyModal = lazy(() => import('./components/EmergencyModal').then(m => ({ default: m.EmergencyModal })));
-const About = lazy(() => import('./components/About').then(m => ({ default: m.About })));
-const DmChat = lazy(() => import('./components/DmChat').then(m => ({ default: m.DmChat })));
-const VenuePage = lazy(() => import('./components/VenuePage').then(m => ({ default: m.VenuePage })));
-const ClaimByPartner = lazy(() => import('./components/ClaimByPartner').then(m => ({ default: m.ClaimByPartner })));
-const SavedPlaces = lazy(() => import('./components/SavedPlaces').then(m => ({ default: m.SavedPlaces })));
-const ClubWelcome = lazy(() => import('./components/ClubWelcome').then(m => ({ default: m.ClubWelcome })));
-const Faq = lazy(() => import('./components/Faq').then(m => ({ default: m.Faq })));
-const Privacy = lazy(() => import('./components/Privacy').then(m => ({ default: m.Privacy })));
-const Terms = lazy(() => import('./components/Terms').then(m => ({ default: m.Terms })));
-const FounderDeals = lazy(() => import('./components/FounderDeals').then(m => ({ default: m.FounderDeals })));
-const WhatsOn = lazy(() => import('./components/WhatsOn').then(m => ({ default: m.WhatsOn })));
-const Club = lazy(() => import('./components/Club').then(m => ({ default: m.Club })));
-const Creators = lazy(() => import('./components/Creators').then(m => ({ default: m.Creators })));
-const Partners = lazy(() => import('./components/Partners').then(m => ({ default: m.Partners })));
-const Start = lazy(() => import('./components/Start').then(m => ({ default: m.Start })));
-const BrandBook = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBook })));
-const BrandBookCharacter = lazy(() => import('./components/BrandBook').then(m => ({ default: m.BrandBookCharacter })));
-const Media = lazy(() => import('./components/Media').then(m => ({ default: m.Media })));
-const PartnerOnboarding = lazy(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
-const Concierges = lazy(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
-const Perks = lazy(() => import('./components/Perks').then(m => ({ default: m.Perks })));
-const Foundation = lazy(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
-const FoundationDogs = lazy(() => import('./components/FoundationDogs').then(m => ({ default: m.FoundationDogs })));
-const FoundationDogPassport = lazy(() => import('./components/FoundationDogPassport').then(m => ({ default: m.FoundationDogPassport })));
+const Auth = lazyWithReload(() => import('./components/Auth').then(m => ({ default: m.Auth })));
+const Explore = lazyWithReload(() => import('./components/Explore').then(m => ({ default: m.Explore })));
+const Community = lazyWithReload(() => import('./components/Community').then(m => ({ default: m.Community })));
+const CommunityGroup = lazyWithReload(() => import('./components/CommunityGroup').then(m => ({ default: m.CommunityGroup })));
+const PetProfile = lazyWithReload(() => import('./components/PetProfile').then(m => ({ default: m.PetProfile })));
+const ShelterPortal = lazyWithReload(() => import('./components/ShelterPortal').then(m => ({ default: m.ShelterPortal })));
+const Dashboard = lazyWithReload(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Passport = lazyWithReload(() => import('./components/Passport').then(m => ({ default: m.Passport })));
+const Onboarding = lazyWithReload(() => import('./components/Onboarding').then(m => ({ default: m.Onboarding })));
+const Admin = lazyWithReload(() => import('./components/Admin').then(m => ({ default: m.Admin })));
+const Blog = lazyWithReload(() => import('./components/Blog').then(m => ({ default: m.Blog })));
+const VerifyEmail = lazyWithReload(() => import('./components/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
+const VerifyVenue = lazyWithReload(() => import('./components/VerifyVenue').then(m => ({ default: m.VerifyVenue })));
+const ClaimListing = lazyWithReload(() => import('./components/ClaimListing').then(m => ({ default: m.ClaimListing })));
+const EmergencyModal = lazyWithReload(() => import('./components/EmergencyModal').then(m => ({ default: m.EmergencyModal })));
+const About = lazyWithReload(() => import('./components/About').then(m => ({ default: m.About })));
+const DmChat = lazyWithReload(() => import('./components/DmChat').then(m => ({ default: m.DmChat })));
+const VenuePage = lazyWithReload(() => import('./components/VenuePage').then(m => ({ default: m.VenuePage })));
+const ClaimByPartner = lazyWithReload(() => import('./components/ClaimByPartner').then(m => ({ default: m.ClaimByPartner })));
+const SavedPlaces = lazyWithReload(() => import('./components/SavedPlaces').then(m => ({ default: m.SavedPlaces })));
+const ClubWelcome = lazyWithReload(() => import('./components/ClubWelcome').then(m => ({ default: m.ClubWelcome })));
+const Faq = lazyWithReload(() => import('./components/Faq').then(m => ({ default: m.Faq })));
+const Privacy = lazyWithReload(() => import('./components/Privacy').then(m => ({ default: m.Privacy })));
+const Terms = lazyWithReload(() => import('./components/Terms').then(m => ({ default: m.Terms })));
+const FounderDeals = lazyWithReload(() => import('./components/FounderDeals').then(m => ({ default: m.FounderDeals })));
+const WhatsOn = lazyWithReload(() => import('./components/WhatsOn').then(m => ({ default: m.WhatsOn })));
+const Club = lazyWithReload(() => import('./components/Club').then(m => ({ default: m.Club })));
+const Creators = lazyWithReload(() => import('./components/Creators').then(m => ({ default: m.Creators })));
+const Partners = lazyWithReload(() => import('./components/Partners').then(m => ({ default: m.Partners })));
+const Start = lazyWithReload(() => import('./components/Start').then(m => ({ default: m.Start })));
+const BrandBook = lazyWithReload(() => import('./components/BrandBook').then(m => ({ default: m.BrandBook })));
+const BrandBookCharacter = lazyWithReload(() => import('./components/BrandBook').then(m => ({ default: m.BrandBookCharacter })));
+const Media = lazyWithReload(() => import('./components/Media').then(m => ({ default: m.Media })));
+const PartnerOnboarding = lazyWithReload(() => import('./components/PartnerOnboarding').then(m => ({ default: m.PartnerOnboarding })));
+const Concierges = lazyWithReload(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
+const Perks = lazyWithReload(() => import('./components/Perks').then(m => ({ default: m.Perks })));
+const Foundation = lazyWithReload(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
+const FoundationDogs = lazyWithReload(() => import('./components/FoundationDogs').then(m => ({ default: m.FoundationDogs })));
+const FoundationDogPassport = lazyWithReload(() => import('./components/FoundationDogPassport').then(m => ({ default: m.FoundationDogPassport })));
 
 const ViewFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -79,6 +102,12 @@ const ViewFallback = () => (
 
 export default function App() {
   const [unlocked, setUnlocked] = useState<boolean>(() => hasAccess());
+
+  useEffect(() => {
+    // The app shell loaded fine, so any prior chunk-reload attempt is resolved.
+    // Clearing the flag lets a future deploy trigger one fresh reload again.
+    try { sessionStorage.removeItem('heylola_chunk_reloaded'); } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     // Allow bypass via ?access=HelloMiami in the URL so we can share a direct link.

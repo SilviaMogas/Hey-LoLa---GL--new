@@ -74,7 +74,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   return (
     <svg
-      viewBox="0 -5 148 43"
+      viewBox="0 -5 126 43"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
@@ -83,23 +83,29 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       style={{ overflow: 'visible' }}
     >
       <title>{title}</title>
+      {/* The wordmark text width is pinned with textLength so the trailing
+          square dot lands in the same place regardless of which font the
+          browser falls back to (SVG <text> doesn't reliably pick up the
+          web font on iOS Safari — the old typographic '.' rendered as a
+          tofu box there). */}
       <text
         x="0"
         y="30"
+        textLength="120"
+        lengthAdjust="spacingAndGlyphs"
         fontFamily="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
         fontSize="34"
         fontWeight="900"
         fontStyle="italic"
         letterSpacing="-0.04em"
-        textLength="120"
-        lengthAdjust="spacing"
+        fill={colors.word}
       >
-        <tspan fill={colors.word}>HeyLola</tspan>
+        HeyLola
       </text>
-      {/* Brand full-stop: a SQUARE, not a round period — matches the
-          .brand-dot square used after every heading. Small clearance after
-          the italic word, sitting on the baseline. */}
-      <rect x="124" y="21" width="9" height="9" fill={colors.dot} />
+      {/* Brand dot — a real square, not a font glyph, sitting tight to
+          the italic 'a' on the baseline. Matches the site-wide
+          .brand-dot. */}
+      <rect x="112" y="20.5" width="9.5" height="9.5" fill={colors.dot} />
     </svg>
   );
 };

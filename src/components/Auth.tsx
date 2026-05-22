@@ -301,7 +301,11 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         // Both this link and the branded one set the same `emailVerified`
         // flag the app gates on, so they're fully interchangeable.
         try {
-          await sendEmailVerification(user);
+          // await sendEmailVerification(user);
+          await sendEmailVerification(user, {
+            url: `${window.location.origin}/onboarding`,
+            handleCodeInApp: false,
+          });
         } catch (e) {
           console.error('sendEmailVerification failed', e);
         }

@@ -224,7 +224,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.name}
                       onChange={update('name')}
                       placeholder="Your name"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                   <div className="space-y-2">
@@ -235,7 +235,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.email}
                       onChange={update('email')}
                       placeholder="hello@yoursite.com"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                 </div>
@@ -247,7 +247,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.city}
                     onChange={update('city')}
                     placeholder="Barcelona, Miami, NYC…"
-                    className="luxury-input h-12 w-full text-sm"
+                    className="luxury-input h-10 w-full text-sm"
                   />
                 </div>
               </div>
@@ -263,7 +263,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.instagram}
                       onChange={update('instagram')}
                       placeholder="@yourhandle"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                   <div className="space-y-2">
@@ -273,7 +273,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.tiktok}
                       onChange={update('tiktok')}
                       placeholder="@yourhandle"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                 </div>
@@ -284,7 +284,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.website}
                     onChange={update('website')}
                     placeholder="https://yourblog.com"
-                    className="luxury-input h-12 w-full text-sm"
+                    className="luxury-input h-10 w-full text-sm"
                   />
                 </div>
                 <div className="space-y-2">
@@ -293,7 +293,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     required
                     value={form.audience}
                     onChange={update('audience')}
-                    className="luxury-input h-12 w-full text-sm"
+                    className="luxury-input h-10 w-full text-sm"
                   >
                     <option value="">Select range…</option>
                     <option value="under_1k">Under 1,000</option>
@@ -316,7 +316,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.dogName}
                       onChange={update('dogName')}
                       placeholder="Lola, Max, Luna…"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                   <div className="space-y-2">
@@ -326,7 +326,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.dogBreed}
                       onChange={update('dogBreed')}
                       placeholder="Golden Retriever, Mixed…"
-                      className="luxury-input h-12 w-full text-sm"
+                      className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.contentType}
                     onChange={update('contentType')}
                     placeholder="City guides, pet lifestyle, travel, vet tips…"
-                    className="luxury-input h-12 w-full text-sm"
+                    className="luxury-input h-10 w-full text-sm"
                   />
                 </div>
                 <div className="space-y-2">
@@ -354,7 +354,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.best_post_url}
                     onChange={update('best_post_url')}
                     placeholder="https://…"
-                    className="luxury-input h-12 w-full text-sm"
+                    className="luxury-input h-10 w-full text-sm"
                   />
                 </div>
                 <div className="space-y-2">

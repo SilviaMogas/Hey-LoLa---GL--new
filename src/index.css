@@ -124,7 +124,7 @@
   }
   
   .luxury-input {
-    @apply bg-white border border-stone-line rounded-2xl px-4 sm:px-5 md:px-6 py-3 md:py-3.5 focus:outline-none focus:border-brand-orange/40 focus:ring-4 focus:ring-brand-orange/10 transition-all text-sm placeholder:text-stone-300 w-full;
+    @apply bg-white border border-stone-line rounded-xl px-4 sm:px-5 py-2.5 focus:outline-none focus:border-brand-orange/40 focus:ring-4 focus:ring-brand-orange/10 transition-all text-sm placeholder:text-stone-300 w-full;
   }
 
   /* Apple-style minimal input — used in Auth and onboarding flows */

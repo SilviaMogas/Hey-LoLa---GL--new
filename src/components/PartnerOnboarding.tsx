@@ -506,7 +506,7 @@ function Field({ label, optional, children }: { label: string; optional?: boolea
   );
 }
 
-const inputClass = 'luxury-input h-12 w-full text-sm';
+const inputClass = 'luxury-input h-10 w-full text-sm';
 
 function TypeStep({ form, update }: { form: FormState; update: <K extends keyof FormState>(k: K, v: FormState[K]) => void }) {
   return (

@@ -9,6 +9,7 @@ import {
   signInWithRedirect,
   getRedirectResult,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, writeBatch, addDoc, collection } from 'firebase/firestore';
 import { ArrowRight, ArrowLeft, Loader2, AtSign, Check, X, AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -294,17 +295,22 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         batch.set(doc(db, 'usernames', usernameKey), { uid: user.uid });
         await batch.commit();
         await updateProfile(user, { displayName });
-        // Always deliver the branded Hey Lola welcome via Resend (embeds
-        // the Firebase verification link generated server-side via Admin
-        // SDK). NO fallback to Firebase's default sendEmailVerification —
-        // that email lands in spam and defeats the point of a branded
-        // experience. If Resend can't deliver, the user can re-trigger via
-        // the "Resend link" button on /verify-email; the underlying
-        // delivery failure should be diagnosed in Vercel function logs and
-        // env-var configuration, not papered over with the ugly default.
-        // Pass the form data so the endpoint can send via Resend even if
-        // Firebase Admin SDK is misconfigured server-side (the client has
-        // the canonical email/name from the form input itself).
+        // GUARANTEED verification email: Firebase's built-in sender always
+        // works with zero server config, so the user can ALWAYS verify even
+        // if the branded Resend pipeline / Admin SDK env is misconfigured.
+        // Both this link and the branded one set the same `emailVerified`
+        // flag the app gates on, so they're fully interchangeable.
+        try {
+          await sendEmailVerification(user);
+        } catch (e) {
+          console.error('sendEmailVerification failed', e);
+        }
+        // Best-effort branded Hey Lola welcome via Resend (embeds a Firebase
+        // verification link generated server-side via Admin SDK). When the
+        // server env is configured this gives the polished experience; if it
+        // fails, the Firebase email above already covers verification.
+        // Pass the form data so the endpoint can send even if the Admin SDK
+        // is misconfigured (the client has the canonical email/name).
         void fetch('/api/notify-signup', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -442,13 +448,6 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
               </motion.div>
             ) : (
               <>
-                {error && (
-                  <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm flex items-start gap-3">
-                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
                 {/* User type tabs (signup only) */}
                 {mode === 'signup' && (
                   <div className="flex gap-1 bg-stone-50 p-1 rounded-full border border-stone-100">
@@ -659,6 +658,13 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                       I agree to the <a href="#terms" className="text-charcoal underline decoration-stone-300 underline-offset-2">Terms</a> and <a href="#privacy" className="text-charcoal underline decoration-stone-300 underline-offset-2">Privacy Policy</a>.
                     </span>
                   </label>
+                )}
+
+                {error && (
+                  <div className="bg-red-50 border border-red-100 text-red-600 p-3.5 rounded-xl text-sm flex items-start gap-3" role="alert" aria-live="assertive">
+                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
                 )}
 
                 <button

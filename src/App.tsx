@@ -15,6 +15,7 @@ import { DraftRoute } from './components/DraftRoute';
 import { UpgradeModal } from './components/UpgradeModal';
 import { PetData } from './types';
 import { db, auth } from './lib/firebase';
+import { sendEmailVerification } from 'firebase/auth';
 import { collection, query, where, setDoc, doc, onSnapshot } from 'firebase/firestore';
 import { Home } from './components/Home';
 import { Navbar } from './components/Navbar';
@@ -538,10 +539,14 @@ function AppContent() {
             <Route path={paths.verifyEmail} element={
               <ProtectedRoute>
                 <FadeIn><VerifyEmail email={user?.email || ''} onResend={async () => {
-                  // Re-trigger the branded Hey Lola welcome via Resend
-                  // (same endpoint used at signup). Pass profile data so
-                  // the endpoint can send even if Firebase Admin is broken.
                   if (!auth.currentUser) return;
+                  // GUARANTEED: re-send Firebase's native verification email
+                  // (works with no server config). Sets the same emailVerified
+                  // flag the app gates on.
+                  try { await sendEmailVerification(auth.currentUser); } catch (e) { console.error('resend verification failed', e); }
+                  // Best-effort branded Hey Lola welcome via Resend (same
+                  // endpoint as signup). Pass profile data so it can send even
+                  // if Firebase Admin is broken.
                   await fetch('/api/notify-signup', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },

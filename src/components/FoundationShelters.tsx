@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Heart, Loader2, MapPin, PawPrint, X } from 'lucide-react';
 import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
@@ -29,11 +30,27 @@ export const FoundationShelters: React.FC = () => {
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCity, setActiveCity] = useState('new-york');
-  const [openShelterId, setOpenShelterId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [openShelterId, setOpenShelterId] = useState<string | null>(() => searchParams.get('shelter'));
   const [selected, setSelected] = useState<Selected | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+
+  /** Each shelter gets its own shareable URL: /foundation?shelter=<id>. */
+  const openShelterById = (id: string) => {
+    setOpenShelterId(id);
+    const next = new URLSearchParams(searchParams);
+    next.set('shelter', id);
+    setSearchParams(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const closeShelter = () => {
+    setOpenShelterId(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete('shelter');
+    setSearchParams(next);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -113,7 +130,7 @@ export const FoundationShelters: React.FC = () => {
                 <button
                   type="button"
                   disabled={!c.active}
-                  onClick={() => { if (c.active) { setActiveCity(c.id); setOpenShelterId(null); } }}
+                  onClick={() => { if (c.active) { setActiveCity(c.id); closeShelter(); } }}
                   className={`whitespace-nowrap rounded-full px-5 h-10 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
                     isActive
                       ? 'bg-charcoal text-white border-charcoal'
@@ -139,7 +156,7 @@ export const FoundationShelters: React.FC = () => {
         <div className="space-y-5">
           <button
             type="button"
-            onClick={() => setOpenShelterId(null)}
+            onClick={closeShelter}
             className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 hover:text-charcoal transition-colors"
           >
             <ArrowLeft size={11} /> All shelters
@@ -186,11 +203,16 @@ export const FoundationShelters: React.FC = () => {
             <button
               key={shelter.id}
               type="button"
-              onClick={() => setOpenShelterId(shelter.id)}
+              onClick={() => openShelterById(shelter.id)}
               className="text-left rounded-[1.5rem] border border-stone-100 bg-white p-5 sm:p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col gap-3"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-xl bg-[#F7F9F5] border border-stone-100 flex items-center justify-center overflow-hidden shrink-0">
+                  {shelter.logo
+                    ? <img src={shelter.logo} alt={shelter.name} loading="lazy" className="w-full h-full object-contain" />
+                    : <span className="text-lg font-serif italic text-[#6E8C5D]">{shelter.name[0]}</span>}
+                </div>
+                <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-serif italic leading-tight">{shelter.name}</h3>
                   <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 mt-1 inline-flex items-center gap-1"><MapPin size={9} /> {shelter.city}</p>
                 </div>

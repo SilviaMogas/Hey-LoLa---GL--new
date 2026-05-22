@@ -23,6 +23,9 @@ export interface Shelter {
   blurb: string;
   website: string;
   dogs: ShelterDog[];
+  /** Optional shelter logo/avatar URL shown in the card box. Falls back to a
+   *  branded monogram when absent. */
+  logo?: string;
   /** Sort order on the page. */
   order?: number;
 }

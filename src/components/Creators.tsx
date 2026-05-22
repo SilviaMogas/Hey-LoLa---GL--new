@@ -86,7 +86,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
       {/* Hero — same visual language as Explore: white background, big
           black-italic display heading, lower-case orange period accent. */}
       <section className="relative pt-12 pb-10 px-5 sm:px-6">
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 text-stone-400 hover:text-charcoal transition-colors text-[10px] font-black uppercase tracking-[0.3em]"

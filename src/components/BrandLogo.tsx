@@ -74,7 +74,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   return (
     <svg
-      viewBox="0 -5 148 43"
+      viewBox="0 -5 132 43"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
@@ -91,15 +91,16 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         fontWeight="900"
         fontStyle="italic"
         letterSpacing="-0.04em"
-        textLength="120"
-        lengthAdjust="spacing"
+        textLength="118"
+        lengthAdjust="spacingAndGlyphs"
       >
         <tspan fill={colors.word}>HeyLola</tspan>
       </text>
       {/* Brand full-stop: a SQUARE, not a round period — matches the
-          .brand-dot square used after every heading. Small clearance after
-          the italic word, sitting on the baseline. */}
-      <rect x="124" y="21" width="9" height="9" fill={colors.dot} />
+          .brand-dot square used after every heading. Hugs the end of the
+          word like a period (textLength fixes the word width at 118 so this
+          stays snug regardless of the rendering font). */}
+      <rect x="119" y="21" width="9" height="9" fill={colors.dot} />
     </svg>
   );
 };

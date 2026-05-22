@@ -38,7 +38,8 @@ import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
  * ("Failed to fetch dynamically imported module"). We reload once to pull the
  * fresh asset map; a sessionStorage flag prevents reload loops.
  */
-function lazyWithReload<T extends ComponentType<Record<string, unknown>>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function lazyWithReload<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
 ): LazyExoticComponent<T> {
   return lazy(() =>

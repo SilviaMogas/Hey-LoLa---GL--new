@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import type { MembershipPlan } from './MembershipCard';
 import { MembershipPlansSection } from './MembershipPlansSection';
+import { FoundersCircleWaitlist } from './FoundersCircleWaitlist';
 import { SEO, serviceSchema } from '../lib/seo';
 
 const CLUB_BREADCRUMBS = [
@@ -66,7 +67,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
     <div className="bg-white page-shell">
       <SEO
         title="Hey Lola Club — Boutique Membership for Dog Parents"
-        description="The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Free to start; Local, Plus and Black tiers coming soon."
+        description="The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools. Free to start; premium memberships open city by city as our partner network grows."
         url="/club"
         breadcrumbs={CLUB_BREADCRUMBS}
         jsonLd={serviceSchema}
@@ -112,7 +113,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
           onClose={() => setShowFoundingModal(false)}
         />
         <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
-          Founding members keep their early access price
+          Founding members keep their early access rate for life
         </p>
         {cancelledBanner && (
           <p className="text-center text-sm text-stone-500 italic mt-4">
@@ -124,6 +125,9 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         )}
       </div>
 
+      {/* Founders' Circle — email-only waitlist (numbers hidden pre-reveal) */}
+      <FoundersCircleWaitlist />
+
       {/* FAQ teaser */}
       <section className="py-10 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-stone-100">
         <div className="max-w-3xl mx-auto space-y-6">
@@ -133,7 +137,7 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
           </div>
           {[
             { q: 'What is Hey Lola?', a: 'Hey Lola is a boutique lifestyle concierge for dog parents. It helps you organise your dog\'s essentials, discover trusted dog-friendly places, and access curated local perks.' },
-            { q: 'When will paid memberships launch?', a: 'Local, Plus and Black are coming soon. We activate them only after our partner network in each city is verified. Join the waitlist to be the first to know.' },
+            { q: 'When will paid memberships launch?', a: 'Right now everything is free. Paid memberships open city by city, only after our partner network in each city is verified. Join the Founders’ Circle to be the first to know.' },
             { q: 'Which cities are available?', a: 'Launching first in Miami. New York City and Barcelona coming next.' },
             { q: 'Can I use Hey Lola for free?', a: 'Yes. The Free plan is active today and gives you pet records, the curated city guide, saved places and the boutique concierge community — no card required.' },
           ].map(({ q, a }, i) => (

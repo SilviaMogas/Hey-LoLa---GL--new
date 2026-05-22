@@ -3,6 +3,14 @@ import { motion } from 'motion/react';
 import { MembershipCard, type MembershipPlan } from './MembershipCard';
 import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
 
+/**
+ * Paid tiers (Local / Plus / Black) are pre-reveal and activate city by city
+ * once the partner network is verified. Until then everything is Free, so we
+ * only surface the live (non-comingSoon) plans publicly. Flip the `comingSoon`
+ * flags in data/membershipPlans.ts to bring the paid tiers back.
+ */
+const VISIBLE_PLANS = MEMBERSHIP_PLANS.filter((p) => !p.comingSoon);
+
 interface MembershipPlansSectionProps {
   onSelect: (plan: MembershipPlan) => void;
   description?: string;
@@ -13,7 +21,7 @@ interface MembershipPlansSectionProps {
 
 export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
   onSelect,
-  description = "Start free and upgrade when you're ready. Founding members keep their early access price — forever.",
+  description = "Everything is free right now. Paid memberships open city by city as our partner network grows — founding members will keep their early-access rate for life.",
   busyPlanId,
   currentPlanId,
   sectionRef,
@@ -28,13 +36,13 @@ export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
       >
         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
         <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-          Boutique <span className="text-stone-300">membership tiers</span><span className="brand-dot" aria-hidden="true" />
+          Free to <span className="text-stone-300">start</span><span className="brand-dot" aria-hidden="true" />
         </h2>
         <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">{description}</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {MEMBERSHIP_PLANS.map((plan, i) => (
+      <div className={`grid gap-4 ${VISIBLE_PLANS.length === 1 ? 'max-w-md mx-auto grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4'}`}>
+        {VISIBLE_PLANS.map((plan, i) => (
           <motion.div
             key={plan.id}
             initial={{ opacity: 0, y: 20 }}

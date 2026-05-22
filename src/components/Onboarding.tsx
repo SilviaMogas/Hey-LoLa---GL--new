@@ -1110,7 +1110,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-white items-center justify-center text-2xl shrink-0 shadow-sm">✨</div>
               <div className="flex-1 min-w-0 space-y-1">
                 <p className="text-sm font-black text-charcoal leading-tight">Unlock more: perks, travel & community</p>
-                <p className="text-[11px] text-stone-500 italic leading-snug">Hey Lola Club gets you verified perks, member events and pet-friendly priority — from $6.99/mo.</p>
+                <p className="text-[11px] text-stone-500 italic leading-snug">Hey Lola Club gets you verified perks, member events and pet-friendly priority. Free while we open your city.</p>
               </div>
               <button
                 type="button"

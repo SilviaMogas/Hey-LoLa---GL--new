@@ -6,6 +6,7 @@ import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import { MembershipPlansSection } from './MembershipPlansSection';
+import { FoundersCircleWaitlist } from './FoundersCircleWaitlist';
 import { CONCIERGES, type ConciergeId } from '../data/concierges';
 import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO, organizationSchema, websiteSchema, serviceSchema } from '../lib/seo';
@@ -369,10 +370,13 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           isOpen={showFoundingModal}
           onClose={() => setShowFoundingModal(false)}
         />
-        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6 pb-8">
-          Founding members will keep their early access price.
+        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
+          Founding members will keep their early access rate for life.
         </p>
       </div>
+
+      {/* ── Founders' Circle waitlist (email only — numbers hidden pre-reveal) ── */}
+      <FoundersCircleWaitlist />
 
       {/* ── Built with local dog voices — Creator Banner ── */}
       <section className="py-8 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-b border-stone-100">

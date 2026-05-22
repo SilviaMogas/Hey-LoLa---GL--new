@@ -65,9 +65,10 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       'Exclusive Black member perks',
       'Founding member badge',
     ],
-    cta: 'Join Founding Circle',
+    cta: 'Join the waitlist',
     highlight: false,
     badge: 'Black',
-    showPrice: true,
+    comingSoon: true,
+    showPrice: false,
   },
 ];

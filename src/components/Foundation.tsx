@@ -13,6 +13,7 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import { SEO } from '../lib/seo';
+import { FoundationShelters } from './FoundationShelters';
 
 interface FoundationProps {
   onBack: () => void;
@@ -55,7 +56,7 @@ const PILLARS = [
 
 const IMPACT_NUMBERS = [
   { value: '4', label: 'Pillars', sub: 'Rescue · Welfare · Community · Education' },
-  { value: '3', label: 'Launch cities', sub: 'Miami · NYC · Barcelona' },
+  { value: 'NYC', label: 'Where we are now', sub: 'Americas · New York' },
   { value: '100%', label: 'Transparent', sub: 'Every initiative reported publicly' },
 ];
 
@@ -166,6 +167,11 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
           </div>
         </div>
       </section>
+
+      {/* Rescue partners — 5 shelters + adoptable dogs + adopt form */}
+      <div className="bg-stone-50 border-y border-stone-100">
+        <FoundationShelters />
+      </div>
 
       {/* Pillars */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 bg-stone-50 border-y border-stone-100" aria-labelledby="pillars-heading">

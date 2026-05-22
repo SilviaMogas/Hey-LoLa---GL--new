@@ -63,23 +63,27 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy })
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-[300px] z-[60]"
+          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-[320px] z-[60]"
           role="dialog"
           aria-label={t.cookies.ariaLabel}
         >
-          <div className="bg-white/95 backdrop-blur-md border border-stone-200/80 rounded-xl shadow-md px-4 py-3 flex flex-col gap-2.5">
-            <p className="text-[11.5px] leading-relaxed text-stone-500">
+          <div className="bg-white/95 backdrop-blur-md border border-stone-200/70 rounded-2xl shadow-[0_10px_40px_-8px_rgba(17,17,17,0.18)] px-5 pt-4 pb-3.5 flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-brand-orange rounded-[2px]" aria-hidden="true" />
+              <span className="text-[9.5px] font-black uppercase tracking-[0.32em] text-stone-400">Hey Lola</span>
+            </div>
+            <p className="text-[12px] leading-relaxed text-stone-500 font-light">
               {t.cookies.message}{' '}
               {onNavigatePrivacy && (
                 <button
                   onClick={onNavigatePrivacy}
-                  className="underline text-charcoal/70 hover:text-brand-orange transition-colors"
+                  className="underline underline-offset-2 text-charcoal/70 hover:text-brand-orange transition-colors"
                 >
                   {t.cookies.learnMore}
                 </button>
               )}
             </p>
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end pt-0.5">
               <ChoiceButton onClick={() => choose('denied')} variant="ghost" label={t.cookies.reject} />
               <ChoiceButton onClick={() => choose('granted')} variant="solid" label={t.cookies.accept} />
             </div>

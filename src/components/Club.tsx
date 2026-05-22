@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FoundingMemberModal } from './FoundingMemberModal';
 import type { MembershipPlan } from './MembershipCard';
-import { MembershipPlansSection } from './MembershipPlansSection';
-import { FoundersCircleWaitlist } from './FoundersCircleWaitlist';
+import { MembershipDuo } from './MembershipDuo';
 import { SEO, serviceSchema } from '../lib/seo';
 
 const CLUB_BREADCRUMBS = [
@@ -101,20 +100,9 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
         </div>
       </section>
 
-      <MembershipPlansSection
-        sectionRef={pricingRef}
-        onSelect={handleCardClick}
-        busyPlanId={busyPlan}
-        currentPlanId={currentPlan}
-      />
-      <div className="px-5 sm:px-6 max-w-7xl mx-auto pb-8">
-        <FoundingMemberModal
-          isOpen={showFoundingModal}
-          onClose={() => setShowFoundingModal(false)}
-        />
-        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
-          Founding members keep their early access rate for life
-        </p>
+      {/* Free on one side, the Founders' Circle waitlist on the other */}
+      <MembershipDuo onStartFree={onSignUp} />
+      <div className="px-5 sm:px-6 max-w-4xl mx-auto pb-2">
         {cancelledBanner && (
           <p className="text-center text-sm text-stone-500 italic mt-4">
             No worries — your checkout was cancelled. You have not been charged.
@@ -124,9 +112,6 @@ export const Club: React.FC<ClubProps> = ({ onBack, onSignUp, isLoggedIn = false
           <p className="text-center text-xs text-red-500 mt-4">{error}</p>
         )}
       </div>
-
-      {/* Founders' Circle — email-only waitlist (numbers hidden pre-reveal) */}
-      <FoundersCircleWaitlist />
 
       {/* FAQ teaser */}
       <section className="py-10 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-stone-100">

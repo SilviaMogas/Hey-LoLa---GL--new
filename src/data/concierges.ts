@@ -55,27 +55,6 @@ const concierge = (
   breed, signature, color, badgeColor, accent, imageUrl, headUrl, revealed,
 });
 
-/**
- * Coming-soon teaser. For concierges who haven't been publicly revealed
- * yet: keeps the data shape consistent while signalling to the UI to
- * render a locked "Coming soon" placeholder. The portrait, personality
- * and bio are intentionally empty — they belong to the real reveal.
- */
-const comingSoon = (id: ConciergeId, name: string): ConciergeProfile =>
-  concierge(
-    id,
-    name,
-    'Coming soon',
-    "We'll reveal them soon.",
-    '', '', '', '', '', '',
-    'bg-stone-100',
-    'bg-stone-200 text-stone-500',
-    '#A8A29E',
-    '',
-    undefined,
-    false,
-  );
-
 export const CONCIERGES: ConciergeProfile[] = [
   concierge(
     'lola',
@@ -94,9 +73,8 @@ export const CONCIERGES: ConciergeProfile[] = [
     '/HeyLola.Lola.1.png',
     '/Lola head.png',
   ),
-  comingSoon('bruno', 'Bruno'),
-  comingSoon('milo', 'Milo'),
-  comingSoon('taco', 'Taco'),
+  // Only Lola is live. The other concierges have been removed for now —
+  // re-add them here (or via the comingSoon teaser pattern) when revealed.
 ];
 
 /** Quick lookup helper. */

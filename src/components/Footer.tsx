@@ -41,6 +41,7 @@ export const Footer: React.FC = () => {
       links: [
         { label: 'Explore Gems', path: paths.explore },
         { label: 'Community', path: paths.community },
+        { label: 'The Journal', path: paths.blog },
         { label: "What's On", path: paths.whatsOn },
         { label: 'FAQ', path: paths.faq },
       ],

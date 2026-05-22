@@ -4,9 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star, Heart, Bone } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
-import { FoundingMemberModal } from './FoundingMemberModal';
-import { MembershipPlansSection } from './MembershipPlansSection';
-import { FoundersCircleWaitlist } from './FoundersCircleWaitlist';
+import { MembershipDuo } from './MembershipDuo';
 import { CONCIERGES, type ConciergeId } from '../data/concierges';
 import { ConciergeAvatar } from './ConciergeAvatar';
 import { SEO, organizationSchema, websiteSchema, serviceSchema } from '../lib/seo';
@@ -353,30 +351,8 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         </div>
       </section>
 
-      {/* ── Membership Plans ── */}
-      <MembershipPlansSection
-        onSelect={(plan) => {
-          if (plan.id === 'black') {
-            setShowFoundingModal(true);
-          } else if (plan.id === 'free') {
-            onSignUp();
-          } else {
-            onClub ? onClub() : onSignUp();
-          }
-        }}
-      />
-      <div className="px-5 sm:px-6 max-w-7xl mx-auto">
-        <FoundingMemberModal
-          isOpen={showFoundingModal}
-          onClose={() => setShowFoundingModal(false)}
-        />
-        <p className="text-center text-[11px] text-stone-400 font-bold uppercase tracking-widest mt-6">
-          Founding members will keep their early access rate for life.
-        </p>
-      </div>
-
-      {/* ── Founders' Circle waitlist (email only — numbers hidden pre-reveal) ── */}
-      <FoundersCircleWaitlist />
+      {/* ── Membership: Free on one side, Founders' Circle on the other ── */}
+      <MembershipDuo onStartFree={onSignUp} />
 
       {/* ── Built with local dog voices — Creator Banner ── */}
       <section className="py-8 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-b border-stone-100">
@@ -448,63 +424,31 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         </div>
       </section>
 
-      {/* Meet the Concierges Section */}
-      <section id="concierges" className="py-16 sm:py-24 px-5 sm:px-6 bg-stone-50/50 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-16 relative z-10">
-          <div className="text-center space-y-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The Concierges</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif italic tracking-tight leading-none">Meet the <span className="text-stone-300">Concierges</span><span className="brand-dot" aria-hidden="true" /></h2>
-            <p className="text-lg text-stone-500 font-light italic max-w-xl mx-auto leading-relaxed">
-              Your boutique guides to the dog-friendly world. Tap any concierge to open their brand book and the full pose pack.
+      {/* Meet Lola — compact concierge intro */}
+      <section id="concierges" className="py-10 sm:py-12 px-5 sm:px-6 bg-stone-50/50 border-y border-stone-100">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left">
+          <img
+            src="/HeyLola.Lola.1.png"
+            alt="Lola, your Hey Lola concierge"
+            loading="lazy"
+            className="w-24 h-24 sm:w-28 sm:h-28 object-contain shrink-0"
+          />
+          <div className="space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Your concierge</span>
+            <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none">
+              Meet Lola<span className="brand-dot" aria-hidden="true" />
+            </h2>
+            <p className="text-sm sm:text-base text-stone-500 font-light italic leading-snug max-w-md">
+              Your boutique guide to the dog-friendly world. Lola knows the cafés that save you the corner table and the hotels that keep a dog bed in the closet.
             </p>
+            <button
+              type="button"
+              onClick={onConcierge ? () => onConcierge('lola') : undefined}
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-charcoal hover:text-brand-orange transition-colors pt-1"
+            >
+              Meet Lola <ArrowRight size={12} />
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {CONCIERGES.map((c) => {
-              if (!c.revealed) {
-                return (
-                  <article
-                    key={c.id}
-                    className="relative flex flex-col h-full rounded-[2rem] sm:rounded-[2.5rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
-                    aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
-                  >
-                    <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
-                      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[12rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
-                      <span className="relative text-9xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
-                      <span className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-[0.3em] bg-white/85 backdrop-blur text-stone-500 rounded-full px-3 py-1.5 border border-stone-100">
-                        Coming soon
-                      </span>
-                    </div>
-                    <div className="p-8 space-y-3 text-center flex-1 flex flex-col justify-center">
-                      <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight text-stone-500 leading-none">{c.name[0]}…</h3>
-                      <p className="text-[12px] font-light text-stone-400 italic">A new face joining the pack soon.</p>
-                    </div>
-                  </article>
-                );
-              }
-              return (
-                <DogConciergeCard
-                  key={c.id}
-                  name={c.name}
-                  role={c.role}
-                  personality={c.personality}
-                  style={c.style}
-                  vibe={c.vibe}
-                  color={c.color}
-                  badgeColor={c.badgeColor}
-                  onClick={onConcierge ? () => onConcierge(c.id) : undefined}
-                />
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* Decorative background paws */}
-        <div className="absolute top-20 -left-10 opacity-[0.03] rotate-12 pointer-events-none">
-          <PawPrint size={200} />
-        </div>
-        <div className="absolute bottom-10 -right-10 opacity-[0.03] -rotate-12 pointer-events-none">
-          <PawPrint size={160} />
         </div>
       </section>
 

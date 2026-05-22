@@ -61,7 +61,7 @@ export const Concierges: React.FC<ConciergesProps> = ({ onBack, onOpenCharacter 
 
       {/* Editorial poster grid */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 max-w-sm mx-auto gap-5">
           {CONCIERGES.map((c, i) => {
             const tone = TONES[i % TONES.length];
             if (!c.revealed) {

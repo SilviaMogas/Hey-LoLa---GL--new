@@ -180,7 +180,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
 
       {/* Application form */}
       <section id="apply" className="py-8 sm:py-10 px-5 sm:px-6 bg-stone-50 border-t border-stone-100">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -211,7 +211,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
               </div>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white rounded-[1.5rem] border border-stone-100 p-8 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-[1.5rem] border border-stone-100 p-6">
               {/* Personal info */}
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">About you</h3>

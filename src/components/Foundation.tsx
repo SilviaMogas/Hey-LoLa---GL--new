@@ -139,6 +139,11 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
         </div>
       </section>
 
+      {/* Rescue partners — 5 shelters + adoptable dogs + adopt form */}
+      <div className="bg-stone-50 border-y border-stone-100">
+        <FoundationShelters />
+      </div>
+
       {/* Mission */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto" aria-labelledby="mission-heading">
         <header className="mb-8 space-y-2">
@@ -167,11 +172,6 @@ export const Foundation: React.FC<FoundationProps> = ({ onBack, onPartners, onJo
           </div>
         </div>
       </section>
-
-      {/* Rescue partners — 5 shelters + adoptable dogs + adopt form */}
-      <div className="bg-stone-50 border-y border-stone-100">
-        <FoundationShelters />
-      </div>
 
       {/* Pillars */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 bg-stone-50 border-y border-stone-100" aria-labelledby="pillars-heading">

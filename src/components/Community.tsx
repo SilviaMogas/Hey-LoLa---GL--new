@@ -729,7 +729,7 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
             ? <>Join with membership <ArrowRight size={11} /></>
             : joined
               ? <>Open room <ArrowRight size={11} /></>
-              : <>Join hub <ArrowRight size={11} /></>}
+              : <>Join the hub <ArrowRight size={11} /></>}
       </button>
     </motion.article>
   );

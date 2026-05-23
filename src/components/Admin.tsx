@@ -12,6 +12,7 @@ import { AdminShelters } from './AdminShelters';
 import { AdminEmailTemplates } from './AdminEmailTemplates';
 import { AdminFeatureFlags } from './AdminFeatureFlags';
 import { AdminCRM } from './AdminCRM';
+import { AdminBroadcast } from './AdminBroadcast';
 
 const PLACE_CATEGORIES: PlaceCategory[] = [
   'Parks / green areas',
@@ -39,7 +40,7 @@ const PLACE_STATUSES: PlaceStatus[] = [
 const RESERVATION_PROVIDERS: ReservationProvider[] = ['None', 'OpenTable', 'Direct', 'Other'];
 const BOOKING_STATUSES: BookingStatus[] = ['Not available', 'Pending', 'Active'];
 
-type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'shelters' | 'features' | 'crm' | 'emails';
+type AdminTab = 'places' | 'claims' | 'applications' | 'blog' | 'posts' | 'users' | 'creators' | 'onboarding' | 'outreach' | 'foundation' | 'shelters' | 'features' | 'crm' | 'emails' | 'broadcast';
 
 interface AdminProps {
   onBack?: () => void;
@@ -434,6 +435,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                 ['users', stats.totalUsers > 0 ? `Users (${stats.totalUsers})` : 'Users'],
                 ['creators', 'Creators'],
                 ['emails', 'Emails'],
+                ['broadcast', 'Broadcast'],
                 ['features', 'Features'],
               ] as [AdminTab, string][]).map(([tabId, label]) => (
                 <button
@@ -611,6 +613,8 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         <AdminCRM />
       ) : activeTab === 'emails' ? (
         <AdminEmailTemplates />
+      ) : activeTab === 'broadcast' ? (
+        <AdminBroadcast />
       ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          {loading ? (

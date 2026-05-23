@@ -3,7 +3,7 @@ import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Eye, Sparkles, CheckCircle2 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/useAuth';
-import { ALL_FEATURE_KEYS, FEATURES, type FeatureKey, type FeatureStatus } from '../lib/featureFlags';
+import { ALL_FEATURE_KEYS, FEATURES, type FeatureFlag, type FeatureKey, type FeatureStatus } from '../lib/featureFlags';
 
 const STATUS_OPTIONS: FeatureStatus[] = ['draft', 'beta', 'live'];
 
@@ -30,7 +30,7 @@ interface FlagRowProps {
  * ships alongside this component.
  */
 const FlagRow: React.FC<FlagRowProps> = ({ flagKey }) => {
-  const baseline = FEATURES[flagKey];
+  const baseline: FeatureFlag = FEATURES[flagKey];
   const [override, setOverride] = useState<FeatureStatus | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [saving, setSaving] = useState<FeatureStatus | null>(null);

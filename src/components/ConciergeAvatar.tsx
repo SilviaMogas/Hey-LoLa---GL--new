@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CONCIERGES, type ConciergeId } from '../data/concierges';
 
-interface ConciergeAvatarProps {
+export interface ConciergeAvatarProps {
   id: ConciergeId;
   /** Optional explicit asset path. Defaults to pose 01 (the hero pose). */
   src?: string;
@@ -11,6 +11,7 @@ interface ConciergeAvatarProps {
   alt?: string;
   className?: string;
   rounded?: 'full' | 'xl' | 'none';
+  loading?: 'lazy' | 'eager';
 }
 
 /**
@@ -26,6 +27,7 @@ export const ConciergeAvatar: React.FC<ConciergeAvatarProps> = ({
   alt,
   className = '',
   rounded = 'full',
+  loading = 'lazy',
 }) => {
   const profile = CONCIERGES.find((c) => c.id === id);
   const [failed, setFailed] = useState(false);
@@ -61,7 +63,7 @@ export const ConciergeAvatar: React.FC<ConciergeAvatarProps> = ({
       src={resolvedSrc}
       alt={alt ?? profile.name}
       onError={() => setFailed(true)}
-      loading="lazy"
+      loading={loading}
       className={`${radius} ${className} object-cover`}
     />
   );

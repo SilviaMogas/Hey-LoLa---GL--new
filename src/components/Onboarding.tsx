@@ -113,7 +113,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
   const handleSubmit = async (isPetLover = false) => {
     setLoading(true);
     try {
-      const finalPetType = petData.type === 'Other' ? (otherPetType || 'Other') : petData.type;
+      const finalPetType = (petData.type === 'Other' ? (otherPetType || 'Other') : petData.type) as PetData['type'];
       
       if (!isPetLover) {
         // Save Pet

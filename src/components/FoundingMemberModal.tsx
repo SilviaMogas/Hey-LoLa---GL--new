@@ -39,7 +39,7 @@ export const FoundingMemberModal: React.FC<FoundingMemberModalProps> = ({ isOpen
               
               <div className="relative z-10 space-y-4">
                 <div className="flex justify-center">
-                  <BrandLogo variant="white" scale={0.8} />
+                  <BrandLogo variant="white" size="lg" />
                 </div>
                 <div className="inline-flex items-center gap-2 bg-brand-orange/20 text-brand-orange px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em]">
                   <Sparkles size={12} /> Founding Member

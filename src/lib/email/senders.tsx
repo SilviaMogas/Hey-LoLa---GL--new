@@ -25,6 +25,7 @@ import BusinessLeadConfirmation from '../../../emails/business-lead-confirmation
 import BusinessLeadAdmin from '../../../emails/business-lead-admin.js';
 import SignupConfirmation from '../../../emails/signup-confirmation.js';
 import SignupAdmin from '../../../emails/signup-admin.js';
+import SubscriberBroadcast from '../../../emails/subscriber-broadcast.js';
 
 // `@react-email/render` returns either `string` or `Promise<string>` depending
 // on the version. Wrap to always await — keeps callers consistent.
@@ -448,4 +449,47 @@ export async function sendSignupEmails(opts: SignupEmailOpts) {
     sendOne(ADMIN_INBOX, subjectAlert, alert.html, alert.text),
   ]);
   return { confirmation: confirmationResult, alert: alertResult };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// SUBSCRIBER BROADCAST
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface SubscriberBroadcastEmailOpts {
+  subject: string;
+  body: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+}
+
+export interface BroadcastRecipient {
+  email: string;
+  firstName?: string;
+}
+
+export async function sendSubscriberBroadcast(
+  opts: SubscriberBroadcastEmailOpts,
+  recipients: BroadcastRecipient[],
+): Promise<{ total: number; delivered: number; failed: number; results: Array<{ email: string; result: SendResult }> }> {
+  const results: Array<{ email: string; result: SendResult }> = [];
+  let delivered = 0;
+  let failed = 0;
+
+  for (const recipient of recipients) {
+    const { html, text } = await renderBoth(
+      <SubscriberBroadcast
+        firstName={recipient.firstName}
+        subject={opts.subject}
+        body={opts.body}
+        ctaLabel={opts.ctaLabel}
+        ctaUrl={opts.ctaUrl}
+      />,
+    );
+    const result = await sendOne(recipient.email, opts.subject, html, text);
+    results.push({ email: recipient.email, result });
+    if (result.delivered) delivered++;
+    else failed++;
+  }
+
+  return { total: recipients.length, delivered, failed, results };
 }

@@ -81,6 +81,7 @@ export interface PetData {
   emergencyContacts?: EmergencyContact[];
   /** Health timeline events shown on the passport. */
   healthTimeline?: HealthEvent[];
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -173,6 +174,8 @@ export interface UserProfile {
   } | any;
   emailVerified?: boolean;
   status?: string;
+  /** Free-text "what's on this week" status shown on the dashboard. */
+  whatsOn?: string;
   statusUpdatedAt?: string;
   /** ISO timestamps of handle changes — used to enforce max 2 changes / 30 days. */
   usernameChangedAt?: string[];

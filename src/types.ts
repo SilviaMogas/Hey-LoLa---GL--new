@@ -165,13 +165,13 @@ export interface UserProfile {
   membership?: MembershipSubscription;
   onboarded?: boolean;
   onboardingStep?: number;
-  onboardingStatus?: {
+  onboardingStatus?: 'pending' | {
     hasSelectedPetType: boolean;
     selectedPetType?: string;
     hasPet: boolean;
     petLoverNoPet: boolean;
     updatedAt: string;
-  } | any;
+  };
   emailVerified?: boolean;
   status?: string;
   /** Free-text "what's on this week" status shown on the dashboard. */
@@ -187,6 +187,10 @@ export interface UserProfile {
   communityOptIn?: boolean;
   /** Free-text interests / hobbies shown on the member card. */
   interests?: string[];
+  /** Intents chosen during onboarding (e.g. 'community', 'travel'). */
+  appIntents?: string[];
+  /** Relationship status chosen during onboarding. */
+  relationshipStatus?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -20,7 +20,7 @@ import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { paths, buildPath } from '../lib/routes';
 import type { PetData } from '../types';
 
@@ -113,7 +113,6 @@ const LEADERBOARD: LeaderboardEntry[] = [];
 export const Community: React.FC<CommunityProps> = (_props) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [, setLivePosts] = useState<FeedPost[]>([]);
   const [latestMembers, setLatestMembers] = useState<PetData[]>([]);
 
   // Latest public pets — newest joiners surface as a horizontal
@@ -148,21 +147,7 @@ export const Community: React.FC<CommunityProps> = (_props) => {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Subscribe to the 50 most recent community posts. Falls back to the
-  // seed feed silently when no real posts exist yet (so the page is
-  // never empty at launch).
-  useEffect(() => {
-    const q = query(
-      collection(db, 'posts'),
-      orderBy('createdAt', 'desc'),
-      limit(50),
-    );
-    const unsub = onSnapshot(q,
-      (snap) => setLivePosts(mapPostSnapshot(snap)),
-      (err) => handleFirestoreError(err, OperationType.READ, 'posts'),
-    );
-    return () => unsub();
-  }, []);
+
 
   return (
     <div className="bg-white text-charcoal font-boutique min-h-screen">

@@ -31,13 +31,13 @@ const COMMON_VACCINES = [
   'Other',
 ];
 
-import { PetData, Activity } from '../types';
+import { PetData, Activity, UserProfile } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
 
 interface OnboardingProps {
   userId: string;
   userName?: string;
-  profile: any;
+  profile: UserProfile | null;
   onComplete: () => void;
   onBack?: () => void;
 }
@@ -65,7 +65,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
   const [otherPetType, setOtherPetType] = useState('');
 
   const handlePetTypeSelection = (type: string) => {
-    setPetData({ ...petData, type: type as any });
+    setPetData({ ...petData, type: type as PetData['type'] });
     if (type !== 'Other') setOtherPetType('');
     setStep(1);
   };
@@ -75,8 +75,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
     homeCity: profile?.homeCity || '',
     localHub: profile?.localHub || '',
     dreamDestination: profile?.dreamDestination || '',
-    appIntents: (profile?.appIntents as string[]) || [] as string[],
-    relationshipStatus: (profile?.relationshipStatus as string) || '',
+    appIntents: profile?.appIntents || [],
+    relationshipStatus: profile?.relationshipStatus || '',
     handle: profile?.username || '',
   });
   const APP_INTENTS = [
@@ -225,7 +225,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
   };
 
   const handlePetLoverOnboarding = () => {
-    setPetData({ ...petData, type: 'pet_lover' as any });
+    setPetData({ ...petData, type: 'pet_lover' });
     setStep(6); // Go to final profile questions
   };
 

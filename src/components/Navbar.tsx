@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, UserCircle, Globe, Menu, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { auth } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
+import { signOut, type User } from 'firebase/auth';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { getTier } from '../lib/membership';
@@ -12,7 +12,7 @@ import type { MemberPlan } from '../types';
 
 interface NavbarProps {
   setShowEmergency: (show: boolean) => void;
-  user: any;
+  user: User | null;
   profile?: { photoURL?: string; displayName?: string; firstName?: string; memberPlan?: MemberPlan } | null;
   isAdmin?: boolean;
   onShowProfile?: () => void;

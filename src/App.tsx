@@ -13,7 +13,7 @@ import { paths, buildPath } from './lib/routes';
 import { ProtectedRoute, AdminRoute, GuestOnlyRoute } from './lib/guards';
 import { DraftRoute } from './components/DraftRoute';
 import { UpgradeModal } from './components/UpgradeModal';
-import { PetData } from './types';
+import { PetData, UserProfile } from './types';
 import { db, auth } from './lib/firebase';
 import { sendEmailVerification } from 'firebase/auth';
 import { collection, query, where, setDoc, doc, onSnapshot } from 'firebase/firestore';
@@ -733,7 +733,7 @@ function FadeIn({ children, className }: { children: React.ReactNode; className?
   );
 }
 
-function WelcomeHeader({ profile, email }: { profile?: any | null, email?: string | null }) {
+function WelcomeHeader({ profile, email }: { profile?: Pick<UserProfile, 'firstName' | 'displayName'> | null, email?: string | null }) {
   const firstName = profile?.firstName || profile?.displayName?.split(' ')[0] || email?.split('@')[0] || 'there';
   return (
     <div className="mb-4 sm:mb-6 animate-fade-in">

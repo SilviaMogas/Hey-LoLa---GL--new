@@ -43,7 +43,7 @@ export async function sendOne(
   const resend = new Resend(apiKey);
 
   try {
-    const r = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
@@ -56,12 +56,12 @@ export async function sendOne(
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
       },
     });
-    if ((r as any)?.error) {
-      const e = (r as any).error;
-      return { delivered: false, skippedReason: `Provider error: ${e.message || e.name || 'unknown'}` };
+    if (error) {
+      return { delivered: false, skippedReason: `Provider error: ${error.message || error.name || 'unknown'}` };
     }
-    return { delivered: true, providerMessageId: (r as any)?.data?.id };
-  } catch (err: any) {
-    return { delivered: false, skippedReason: `Provider error: ${err?.message || 'unknown'}` };
+    return { delivered: true, providerMessageId: data?.id };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'unknown';
+    return { delivered: false, skippedReason: `Provider error: ${message}` };
   }
 }

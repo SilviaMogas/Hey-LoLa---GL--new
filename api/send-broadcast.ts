@@ -85,9 +85,11 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Build recipient list from Firestore.
+  // Build recipient list from Firestore. Abort if any segment fails —
+  // it's safer to not send than to silently send to an incomplete list.
   const recipients: BroadcastRecipient[] = [];
   const seen = new Set<string>();
+  const fetchErrors: string[] = [];
 
   if (audience === 'all' || audience === 'users') {
     try {
@@ -100,8 +102,10 @@ export default async function handler(req: any, res: any) {
           recipients.push({ email, firstName: data.firstName || undefined });
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'unknown';
       console.error('[send-broadcast] users fetch failed', err);
+      fetchErrors.push(`Failed to fetch users collection: ${msg}`);
     }
   }
 
@@ -116,9 +120,20 @@ export default async function handler(req: any, res: any) {
           recipients.push({ email, firstName: data.firstName || undefined });
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'unknown';
       console.error('[send-broadcast] waitlist fetch failed', err);
+      fetchErrors.push(`Failed to fetch waitlist collection: ${msg}`);
     }
+  }
+
+  if (fetchErrors.length > 0) {
+    res.status(502).json({
+      success: false,
+      error: 'Aborted: could not fetch all audience segments.',
+      fetchErrors,
+    });
+    return;
   }
 
   if (recipients.length === 0) {

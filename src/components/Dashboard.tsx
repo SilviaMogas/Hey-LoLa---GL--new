@@ -450,7 +450,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       </AnimatePresence>
 
       {/* Pet Lover No Pet CTA */}
-      {typeof profile?.onboardingStatus === 'object' && profile.onboardingStatus.petLoverNoPet && pets.length === 0 && (
+      {typeof profile?.onboardingStatus === 'object' && profile.onboardingStatus !== null && profile.onboardingStatus.petLoverNoPet && pets.length === 0 && (
          <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

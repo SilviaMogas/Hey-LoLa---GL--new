@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { PawPrint, MapPin, MessageSquare, ArrowRight, X, Send, Loader2, Star, Heart, Bone } from 'lucide-react';
+import { motion } from 'motion/react';
+import { PawPrint, MapPin, MessageSquare, ArrowRight, Send, Star, Heart, Bone } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { MembershipDuo } from './MembershipDuo';
@@ -25,40 +25,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
   const { t } = useTranslation();
   const navigate = useNavigate();
   const goToCreatorApply = () => navigate('/creators#apply');
-  const [showApplyModal, setShowApplyModal] = useState(false);
-  const [applyForm, setApplyForm] = useState({ name: '', email: '', handle: '', topics: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showFoundingModal, setShowFoundingModal] = useState(false);
   const [comingSoonHint, setComingSoonHint] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!showApplyModal) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowApplyModal(false);
-    };
-    document.addEventListener('keydown', onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [showApplyModal]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setTimeout(() => { 
-        setShowApplyModal(false); 
-        setIsSubmitted(false); 
-        setApplyForm({ name: '', email: '', handle: '', topics: '' });
-      }, 2000);
-    }, 1500);
-  };
 
   return (
     <div className="bg-white min-h-screen text-charcoal font-boutique selection:bg-stone-200 overflow-x-hidden">
@@ -475,118 +442,6 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         </div>
       </section>
 
-      <AnimatePresence>
-        {showApplyModal && (
-          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6 overflow-y-auto">
-            <button
-              type="button"
-              aria-label="Cerrar"
-              onClick={() => setShowApplyModal(false)}
-              className="absolute inset-0 bg-charcoal/40 backdrop-blur-xl cursor-default focus-visible:outline-none"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-white w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] md:rounded-2xl p-6 sm:p-6 md:p-8 lg:p-8 relative shadow-2xl border border-stone-100 overflow-hidden my-4 sm:my-8 z-10"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="hub-insight-title"
-            >
-              <div className="absolute top-0 right-0 p-6 md:p-6 opacity-5 pointer-events-none">
-                <BrandLogo size="3xl" />
-              </div>
-
-              <button
-                onClick={() => setShowApplyModal(false)}
-                aria-label="Cerrar"
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 text-stone-400 hover:text-charcoal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40 rounded-full w-9 h-9 flex items-center justify-center bg-white/60 hover:bg-white z-10"
-              >
-                <X size={18} />
-              </button>
-
-              {isSubmitted ? (
-                <div className="text-center space-y-6 sm:space-y-8 py-8 sm:py-8">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-charcoal text-white rounded-full flex items-center justify-center mx-auto shadow-xl">
-                    <PawPrint size={32} />
-                  </div>
-                  <div className="space-y-3">
-                    <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic text-charcoal leading-none">Insight Received<span className="brand-dot" aria-hidden="true" /></h2>
-                    <p className="text-base sm:text-lg text-stone-400 font-light italic tracking-tight">{t.blog.insightDesc}</p>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 md:space-y-8 relative z-10 font-boutique">
-                  <div className="space-y-3 sm:space-y-4 pr-10">
-                    <span className="text-stone-400 text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em]">Apply to contribute</span>
-                    <h2 id="hub-insight-title" className="text-3xl sm:text-3xl md:text-4xl tracking-tight leading-[0.95] font-serif italic text-charcoal/90">
-                      Hub <span className="text-stone-400">Insight</span>.
-                    </h2>
-                    <p className="text-sm sm:text-base md:text-lg font-light text-stone-400 italic leading-snug">{t.blog.formSubtitle}</p>
-                  </div>
-
-                  <div className="space-y-5 sm:space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-400 ml-1">{t.blog.nameLabel}</label>
-                        <input
-                          required
-                          type="text"
-                          value={applyForm.name}
-                          onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })}
-                          placeholder={t.blog.namePlaceholder}
-                          className="luxury-input h-12 w-full text-sm font-medium"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-400 ml-1">{t.blog.emailLabel}</label>
-                        <input
-                          required
-                          type="email"
-                          value={applyForm.email}
-                          onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })}
-                          placeholder={t.blog.emailPlaceholder}
-                          className="luxury-input h-12 w-full text-sm font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-400 ml-1">{t.blog.handleLabel}</label>
-                      <input
-                        required
-                        type="text"
-                        value={applyForm.handle}
-                        onChange={(e) => setApplyForm({ ...applyForm, handle: e.target.value })}
-                        placeholder={t.blog.handlePlaceholder}
-                        className="luxury-input h-12 w-full text-sm font-medium"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-400 ml-1">{t.blog.topicsLabel}</label>
-                      <textarea
-                        required
-                        value={applyForm.topics}
-                        onChange={(e) => setApplyForm({ ...applyForm, topics: e.target.value })}
-                        placeholder={t.blog.topicsPlaceholder}
-                        className="luxury-input p-4 h-28 sm:h-32 resize-none w-full text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    disabled={isSubmitting}
-                    type="submit"
-                    className="luxury-button-primary w-full h-12 sm:h-14 text-xs flex items-center justify-center gap-3 disabled:opacity-40 shadow-xl transition-all duration-500"
-                  >
-                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <>{t.blog.submit} <ArrowRight size={16} /></>}
-                  </button>
-                </form>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

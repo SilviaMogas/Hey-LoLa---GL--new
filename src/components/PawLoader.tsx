@@ -15,10 +15,16 @@ const CENTER_COMPANIONS = [
   { x:  0.95, y:  0.85, rotate:  24 },
 ];
 
-// Spread points across the full viewport so the paws never overlap
-// the central mark. Each point sits in its own quadrant zone with at
-// least 15% margin between siblings.
-const SCATTERED_COMPANIONS = [
+interface ScatteredCompanion {
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  rotate: number;
+  delay: number;
+}
+
+const SCATTERED_COMPANIONS: ScatteredCompanion[] = [
   { top: '8%',  left: '8%',   rotate: -18, delay: 0 },
   { top: '14%', right: '12%', rotate: 22,  delay: 0.4 },
   { top: '32%', left: '4%',   rotate: -40, delay: 0.2 },
@@ -62,8 +68,8 @@ export const PawLoader: React.FC<PawLoaderProps> = ({ size = 44, className, vari
               position: 'absolute',
               top: c.top,
               left: c.left,
-              right: (c as any).right,
-              bottom: (c as any).bottom,
+              right: c.right,
+              bottom: c.bottom,
               opacity: 0.15,
             }}
             animate={{

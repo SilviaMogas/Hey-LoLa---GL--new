@@ -10,6 +10,7 @@ import {
   getRedirectResult,
   sendPasswordResetEmail,
   sendEmailVerification,
+  type User,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, writeBatch, addDoc, collection } from 'firebase/firestore';
 import { ArrowRight, ArrowLeft, Loader2, AtSign, Check, X, AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -90,7 +91,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
   // Shared post-Google-auth provisioning: create the user doc for brand-new
   // users, then hand control back to the app. Used by both the popup (desktop)
   // and redirect (mobile) flows.
-  const provisionGoogleUser = async (user: any) => {
+  const provisionGoogleUser = async (user: User) => {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
       const baseUsername = user.displayName?.toLowerCase().replace(/\s+/g, '') || 'traveler';

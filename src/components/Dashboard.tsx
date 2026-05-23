@@ -4,6 +4,7 @@ import { auth, db } from '../lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, limit } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { Heart, MapPin, Calendar, Compass, ShieldCheck, ChevronRight, User as UserIcon, Plus, MessageSquare, Loader2, ArrowRight, Plane, Home as HomeIcon, Pencil, Check, Camera, Sparkles, Coffee, Trees, Waves, Stethoscope, Bed, PartyPopper } from 'lucide-react';
+import type { User } from 'firebase/auth';
 import { UserProfile, PetData, Place } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
 import { cn, compressDataUrl } from '../lib/utils';
@@ -19,7 +20,7 @@ import { buildPath } from '../lib/routes';
 import { HUB_CITIES, hubLabel } from '../lib/hubs';
 
 interface DashboardProps {
-  user: any;
+  user: User;
   profile: UserProfile | null;
   pets: PetData[];
   onAddPet: () => void;

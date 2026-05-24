@@ -1,4 +1,5 @@
 import { getAdminClient } from './_supabase.js';
+import { isAdminEmail } from '../src/lib/admin.js';
 
 /**
  * POST /api/manage-foundation
@@ -43,6 +44,10 @@ export default async function handler(req: any, res: any) {
   const { data: { user }, error: authErr } = await db.auth.getUser(idToken);
   if (authErr || !user) {
     res.status(401).json({ success: false, error: 'Invalid auth token.' });
+    return;
+  }
+  if (!isAdminEmail(user.email)) {
+    res.status(403).json({ success: false, error: 'Admin only.' });
     return;
   }
 
@@ -96,12 +101,12 @@ export default async function handler(req: any, res: any) {
       }
       const d = body.data || {};
       const update: Record<string, any> = { updated_at: new Date().toISOString() };
-      if (d.name !== undefined) update.name = d.name.trim();
-      if (d.breed !== undefined) update.breed = d.breed.trim();
-      if (d.age !== undefined) update.age = d.age.trim();
+      if (d.name !== undefined) update.name = typeof d.name === 'string' ? d.name.trim() : d.name;
+      if (d.breed !== undefined) update.breed = typeof d.breed === 'string' ? d.breed.trim() : d.breed;
+      if (d.age !== undefined) update.age = typeof d.age === 'string' ? d.age.trim() : d.age;
       if (d.sex !== undefined) update.sex = d.sex;
       if (d.photo !== undefined) update.photo = d.photo;
-      if (d.bio !== undefined) update.bio = d.bio.trim();
+      if (d.bio !== undefined) update.bio = typeof d.bio === 'string' ? d.bio.trim() : d.bio;
       if (d.shelter_id !== undefined) update.shelter_id = d.shelter_id;
       if (d.status !== undefined) update.status = d.status;
       if (d.passport !== undefined) update.passport = d.passport;

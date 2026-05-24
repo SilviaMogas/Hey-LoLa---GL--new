@@ -1,5 +1,5 @@
-import { getAdminClient } from './_supabase.js';
-import { appUrl } from './_supabase.js';
+import { getAdminClient, appUrl } from './_supabase.js';
+import { isAdminEmail } from '../src/lib/admin.js';
 
 /**
  * POST /api/manage-shelters
@@ -43,6 +43,10 @@ export default async function handler(req: any, res: any) {
     res.status(401).json({ success: false, error: 'Invalid auth token.' });
     return;
   }
+  if (!isAdminEmail(user.email)) {
+    res.status(403).json({ success: false, error: 'Admin only.' });
+    return;
+  }
 
   try {
     // ── LIST: get all shelters ──
@@ -79,7 +83,7 @@ export default async function handler(req: any, res: any) {
     // ── CREATE: add a new shelter ──
     if (action === 'create') {
       const d = body.data || {};
-      const id = (d.id || `shelter-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`).trim();
+      const id = (d.id || crypto.randomUUID()).trim();
       if (!d.name?.trim()) {
         res.status(400).json({ success: false, error: 'Shelter name is required.' });
         return;
@@ -110,11 +114,11 @@ export default async function handler(req: any, res: any) {
       }
       const d = body.data || {};
       const update: Record<string, any> = { updated_at: new Date().toISOString() };
-      if (d.name !== undefined) update.name = d.name.trim();
-      if (d.city !== undefined) update.city = d.city.trim();
+      if (d.name !== undefined) update.name = typeof d.name === 'string' ? d.name.trim() : d.name;
+      if (d.city !== undefined) update.city = typeof d.city === 'string' ? d.city.trim() : d.city;
       if (d.region !== undefined) update.region = d.region;
-      if (d.blurb !== undefined) update.blurb = d.blurb.trim();
-      if (d.website !== undefined) update.website = d.website.trim();
+      if (d.blurb !== undefined) update.blurb = typeof d.blurb === 'string' ? d.blurb.trim() : d.blurb;
+      if (d.website !== undefined) update.website = typeof d.website === 'string' ? d.website.trim() : d.website;
       if (d.logo !== undefined) update.logo = d.logo;
       if (d.order !== undefined) update.order = Number(d.order);
       if (Array.isArray(d.dogs)) update.dogs = d.dogs;

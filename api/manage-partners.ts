@@ -1,4 +1,5 @@
 import { getAdminClient } from './_supabase.js';
+import { isAdminEmail } from '../src/lib/admin.js';
 
 /**
  * POST /api/manage-partners
@@ -42,6 +43,10 @@ export default async function handler(req: any, res: any) {
   const { data: { user }, error: authErr } = await db.auth.getUser(idToken);
   if (authErr || !user) {
     res.status(401).json({ success: false, error: 'Invalid auth token.' });
+    return;
+  }
+  if (!isAdminEmail(user.email)) {
+    res.status(403).json({ success: false, error: 'Admin only.' });
     return;
   }
 

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Heart, Loader2, MapPin, PawPrint, X } from 'lucide-react';
-import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
 import { DEFAULT_SHELTERS } from '../data/sheltersSeed';
 import { buildPath, paths } from '../lib/routes';
@@ -63,15 +63,12 @@ export const FoundationShelters: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDocs(collection(db, 'shelters'));
+        const { data } = await supabase.from('shelters').select('*').order('order', { ascending: true });
         if (cancelled) return;
-        const list = snap.docs
-          .map((d) => ({ id: d.id, ...(d.data() as Omit<Shelter, 'id'>) }))
-          .map((s) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] }))
-          .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+        const list = (data || []).map((s: any) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] })) as Shelter[];
         setShelters(list.length > 0 ? list : DEFAULT_SHELTERS);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'shelters');
+        handleSupabaseError(err, OperationType.READ, 'shelters');
         if (!cancelled) setShelters(DEFAULT_SHELTERS);
       } finally {
         if (!cancelled) setLoading(false);
@@ -94,20 +91,20 @@ export const FoundationShelters: React.FC = () => {
     if (!form.name.trim() || form.email.trim().length < 5) return;
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'foundation_interests'), {
+      await supabase.from('foundation_interests').insert({
         source: 'rescue_passport',
         status: 'new',
-        dogId: selected.dog.id,
-        dogSlug: dogSlug(selected.dog.name),
-        dogName: selected.dog.name,
-        partnerId: selected.shelter.id,
-        shelterName: selected.shelter.name,
+        dog_id: selected.dog.id,
+        dog_slug: dogSlug(selected.dog.name),
+        dog_name: selected.dog.name,
+        partner_id: selected.shelter.id,
+        shelter_name: selected.shelter.name,
         contact: { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), message: form.message.trim() },
-        createdAt: serverTimestamp(),
+        created_at: new Date().toISOString(),
       });
       setSent(true);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'foundation_interests');
+      handleSupabaseError(err, OperationType.WRITE, 'foundation_interests');
     } finally {
       setSubmitting(false);
     }

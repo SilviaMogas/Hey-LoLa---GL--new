@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { auth } from '../lib/firebase';
-import { sendEmailVerification } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 import { AlertCircle, X, RefreshCw } from 'lucide-react';
 import { useTranslation } from '../lib/LanguageContext';
 
@@ -17,13 +16,13 @@ export function VerifyEmailBanner({ email }: VerifyEmailBannerProps) {
   if (dismissed) return null;
 
   const handleResend = async () => {
-    if (!auth.currentUser || resending) return;
+    if (!email || resending) return;
     setResending(true);
     try {
-      await sendEmailVerification(auth.currentUser);
+      await supabase.auth.resend({ type: 'signup', email });
       setResent(true);
     } catch {
-      // silent — Firebase rate-limits to ~1/min
+      // silent — Supabase rate-limits resends
     } finally {
       setResending(false);
     }

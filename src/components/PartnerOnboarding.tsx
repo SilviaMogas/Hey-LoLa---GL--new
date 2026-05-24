@@ -15,8 +15,7 @@ import {
   Globe,
   Layers,
 } from 'lucide-react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { SEO } from '../lib/seo';
 
 interface PartnerOnboardingProps {
@@ -284,26 +283,23 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
     setSubmitting(true);
     setError(null);
     try {
-      const docRef = await addDoc(collection(db, 'partner_applications'), {
-        partnerType: form.partnerType,
-        businessName: form.businessName,
+      const { data: row } = await supabase.from('partner_applications').insert({
+        partner_type: form.partnerType,
+        business_name: form.businessName,
         categories: form.categories,
-        // Local
         city: needsCity ? (form.city === 'other' ? form.cityOther : form.city) : null,
         address: needsCity ? form.address : null,
-        // Online
-        storeUrl: needsOnline ? form.storeUrl : null,
-        shipsTo: needsOnline ? form.shipsTo : null,
-        // Common
+        store_url: needsOnline ? form.storeUrl : null,
+        ships_to: needsOnline ? form.shipsTo : null,
         website: form.website,
         instagram: form.instagram,
-        contactName: form.contactName,
-        contactRole: form.contactRole,
+        contact_name: form.contactName,
+        contact_role: form.contactRole,
         email: form.email,
         phone: form.phone,
-        dogFriendlyFeatures: form.features,
+        dog_friendly_features: form.features,
         notes: form.notes,
-        offersPerk: form.offersPerk,
+        offers_perk: form.offersPerk,
         perk: form.offersPerk
           ? {
               types: form.perkTypes,
@@ -314,15 +310,15 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           : null,
         source: 'self_onboarding',
         status: 'pending',
-        createdAt: serverTimestamp(),
-      });
-      // Fire-and-forget notification (confirmation to applicant + admin alert).
-      // The endpoint re-reads the doc via the Admin SDK so it cannot be spoofed.
-      void fetch('/api/notify-partner-application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
+      if (row) {
+        void fetch('/api/notify-partner-application', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ applicationId: row.id }),
+        }).catch(() => { /* email is best-effort */ });
+      }
       setSubmitted(true);
       onComplete?.();
     } catch (err) {

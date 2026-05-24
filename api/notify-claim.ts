@@ -1,4 +1,4 @@
-import { getAdminDb, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendVenueClaimEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-claim
@@ -24,21 +24,21 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-claim: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('claim_requests').doc(claimId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('claim_requests').select('*').eq('id', claimId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Claim not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
   // Reject stale claim ids so a leaked one can't be replayed forever.
   const createdMs = Date.parse(String(data.createdAt || '')) || 0;

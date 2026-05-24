@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { auth, db, googleProvider, handleFirestoreError, OperationType } from '../lib/firebase';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-  type User,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, writeBatch, addDoc, collection } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { ArrowRight, ArrowLeft, Loader2, AtSign, Check, X, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { track } from '../lib/analytics';
@@ -75,13 +64,9 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
     const checkUsername = async () => {
       setUsernameStatus('checking');
       try {
-        const usernameRef = doc(db, 'usernames', username.toLowerCase());
-        const docSnap = await getDoc(usernameRef);
-        setUsernameStatus(docSnap.exists() ? 'taken' : 'available');
+        const { data } = await supabase.from('usernames').select('username').eq('username', username.toLowerCase()).maybeSingle();
+        setUsernameStatus(data ? 'taken' : 'available');
       } catch (err) {
-        // Don't optimistically mark as available on error — the final
-        // pre-check in handleSubmit will catch it. Stay in 'checking' so
-        // submit is gated.
         console.warn('Username availability check failed', err);
         setUsernameStatus('checking');
       }
@@ -90,108 +75,18 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
     return () => clearTimeout(t);
   }, [username, mode]);
 
-  // Shared post-Google-auth provisioning: create the user doc for brand-new
-  // users, then hand control back to the app. Used by both the popup (desktop)
-  // and redirect (mobile) flows.
-  const provisionGoogleUser = async (user: User) => {
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists()) {
-      const baseUsername = user.displayName?.toLowerCase().replace(/\s+/g, '') || 'traveler';
-      const finalUsername = `${baseUsername}${Math.floor(Math.random() * 1000)}`;
-      const nameParts = user.displayName?.split(' ') || [];
-      const batch = writeBatch(db);
-      const now = new Date().toISOString();
-      batch.set(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        firstName: nameParts[0] || '',
-        lastName: nameParts.slice(1).join(' ') || '',
-        displayName: user.displayName || user.email?.split('@')[0] || 'Traveler',
-        username: finalUsername,
-        userType: 'Dog Owner',
-        onboardingStep: 0,
-        onboarded: false,
-        onboardingStatus: 'pending',
-        createdAt: now,
-        updatedAt: now,
-      });
-      batch.set(doc(db, 'usernames', finalUsername), { uid: user.uid });
-      await batch.commit();
-      // Branded welcome + admin alert. Only the new-user branch fires this
-      // (returning Google users skip it). Pass form-derived data so the
-      // endpoint can send via Resend even if Firebase Admin SDK is broken.
-      void fetch('/api/notify-signup', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.uid,
-          email: user.email,
-          firstName: nameParts[0] || '',
-          lastName: nameParts.slice(1).join(' ') || undefined,
-          username: finalUsername,
-          userType: 'Dog Owner',
-          signupMethod: 'google',
-        }),
-      }).catch(() => { /* email is best-effort */ });
-      track('signup_completed', { method: 'google' });
-      onSuccess(true);
-    } else {
-      track('login_completed', { method: 'google' });
-      onSuccess(false);
-    }
-  };
-
-  // On mobile, signInWithPopup is unreliable (popups get blocked → blank
-  // screen), so we use signInWithRedirect and finish the flow here when the
-  // user returns to the app.
-  useEffect(() => {
-    let active = true;
-    getRedirectResult(auth)
-      .then((res) => { if (active && res?.user) return provisionGoogleUser(res.user); })
-      .catch((err) => {
-        if (active && err?.code && err.code !== 'auth/popup-closed-by-user') {
-          console.warn('Google redirect sign-in failed', err);
-        }
-      });
-    return () => { active = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const isMobileDevice = () =>
-    typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
-
-    // Mobile: redirect (popup is unreliable and shows a blank screen).
-    if (isMobileDevice()) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return; // page navigates away; provisioning happens on return
-      } catch (err: any) {
-        setError(err?.message || t.auth.googleFailed);
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Desktop: popup, with a redirect fallback if the popup can't open.
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      await provisionGoogleUser(result.user);
-    } catch (err: any) {
-      const code = err?.code || '';
-      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-environment' || code === 'auth/cancelled-popup-request') {
-        try { await signInWithRedirect(auth, googleProvider); return; } catch { /* fall through to message */ }
-      }
-      let message = err.message || t.auth.googleFailed;
-      if (code === 'auth/operation-not-allowed') {
-        message = t.auth.googleNotEnabled;
-      } else if (code === 'auth/popup-closed-by-user') {
-        message = '';
-      }
-      if (message) setError(message);
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/signup` },
+      });
+      if (oauthError) throw oauthError;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t.auth.googleFailed;
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -209,19 +104,19 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
             setError(t.auth.errorFillAll);
             return;
           }
-          const docRef = await addDoc(collection(db, 'business_leads'), {
-            businessName,
-            contactRole,
+          const { data: leadRow } = await supabase.from('business_leads').insert({
+            business_name: businessName,
+            contact_role: contactRole,
             location: businessLocation,
             reason: businessReason,
             email,
             status: 'new',
-            createdAt: new Date().toISOString(),
-          });
+            created_at: new Date().toISOString(),
+          }).select('id').single();
           void fetch('/api/notify-business-lead', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ leadId: docRef.id }),
+            body: JSON.stringify({ leadId: leadRow?.id }),
           }).catch(() => { /* email is best-effort */ });
           track('business_inquiry_sent');
           setInquirySent(true);
@@ -262,9 +157,8 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         // user — catches the race window between the debounced check and
         // submit, plus failures of the live check (e.g. flaky network).
         try {
-          const usernameRef = doc(db, 'usernames', usernameKey);
-          const existing = await getDoc(usernameRef);
-          if (existing.exists()) {
+          const { data: existing } = await supabase.from('usernames').select('username').eq('username', usernameKey).maybeSingle();
+          if (existing) {
             setUsernameStatus('taken');
             setError(t.auth.errorUsernameJustTaken);
             return;
@@ -275,50 +169,41 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
           return;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const { user } = userCredential;
         const displayName = `${firstName} ${lastName}`;
-        const batch = writeBatch(db);
-        const now = new Date().toISOString();
-        batch.set(doc(db, 'users', user.uid), {
-          uid: user.uid,
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
-          firstName,
-          lastName,
-          displayName,
-          username: usernameKey,
-          userType,
-          onboardingStep: 0,
-          onboarded: false,
-          onboardingStatus: 'pending',
-          ...(referralCode.trim() ? { referredBy: referralCode.trim().toUpperCase() } : {}),
-          createdAt: now,
-          updatedAt: now,
+          password,
+          options: {
+            data: { display_name: displayName, avatar_url: '' },
+          },
         });
-        batch.set(doc(db, 'usernames', usernameKey), { uid: user.uid });
-        await batch.commit();
-        await updateProfile(user, { displayName });
-        // GUARANTEED verification email: Firebase's built-in sender always
-        // works with zero server config, so the user can ALWAYS verify even
-        // if the branded Resend pipeline / Admin SDK env is misconfigured.
-        // Both this link and the branded one set the same `emailVerified`
-        // flag the app gates on, so they're fully interchangeable.
-        try {
-          await sendEmailVerification(user);
-        } catch (e) {
-          console.error('sendEmailVerification failed', e);
-        }
-        // Best-effort branded Hey Lola welcome via Resend (embeds a Firebase
-        // verification link generated server-side via Admin SDK). When the
-        // server env is configured this gives the polished experience; if it
-        // fails, the Firebase email above already covers verification.
-        // Pass the form data so the endpoint can send even if the Admin SDK
-        // is misconfigured (the client has the canonical email/name).
+        if (signUpError) throw signUpError;
+        const user = signUpData.user;
+        if (!user) throw new Error('Signup failed');
+
+        const now = new Date().toISOString();
+        await supabase.from('users').insert({
+          id: user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          display_name: displayName,
+          username: usernameKey,
+          user_type: userType,
+          onboarding_step: 0,
+          onboarded: false,
+          onboarding_status: 'pending',
+          ...(referralCode.trim() ? { referred_by: referralCode.trim().toUpperCase() } : {}),
+          created_at: now,
+          updated_at: now,
+        });
+        await supabase.from('usernames').insert({ username: usernameKey, uid: user.id });
+
         void fetch('/api/notify-signup', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            userId: user.uid,
+            userId: user.id,
             email,
             firstName,
             lastName,
@@ -331,27 +216,19 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         track('signup_completed', { method: 'email', userType });
         onSuccess(true);
       } else if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginError) throw loginError;
         track('login_completed', { method: 'email' });
         onSuccess(false);
       } else if (mode === 'reset') {
-        await sendPasswordResetEmail(auth, email);
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+        if (resetError) throw resetError;
         setResetSent(true);
       }
-    } catch (err: any) {
-      const code = err?.code as string | undefined;
-      const messages: Record<string, string> = {
-        'auth/email-already-in-use': t.auth.errorEmailInUse,
-        'auth/invalid-email': t.auth.errorInvalidEmail,
-        'auth/weak-password': t.auth.errorWeakPassword,
-        'auth/user-not-found': t.auth.errorUserNotFound,
-        'auth/wrong-password': t.auth.errorWrongPassword,
-        'auth/invalid-credential': t.auth.errorInvalidCredential,
-        'auth/too-many-requests': t.auth.errorTooManyRequests,
-        'auth/network-request-failed': t.auth.errorNetworkFailed,
-      };
-      setError((code && messages[code]) || err.message || t.auth.errorGeneric);
-      if (code) handleFirestoreError(err, OperationType.WRITE, 'auth');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t.auth.errorGeneric;
+      setError(message);
+      handleSupabaseError(err, OperationType.WRITE, 'auth');
     } finally {
       setLoading(false);
     }

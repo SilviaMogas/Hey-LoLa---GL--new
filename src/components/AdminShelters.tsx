@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
-import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
 import { DEFAULT_SHELTERS } from '../data/sheltersSeed';
 
@@ -25,26 +25,23 @@ export const AdminShelters: React.FC = () => {
     if (!s.id) { alert('Save the shelter first, then generate its edit link.'); return; }
     const token = (crypto.randomUUID?.() || `${Date.now()}${Math.random()}`).replace(/-/g, '');
     try {
-      await setDoc(doc(db, 'shelter_secrets', s.id), { token, updatedAt: serverTimestamp() }, { merge: true });
+      await supabase.from('shelter_secrets').upsert({ id: s.id, token, updated_at: new Date().toISOString() });
       const url = `${window.location.origin}/shelter/${s.id}?t=${token}`;
       setLinks((p) => ({ ...p, [s.id]: url }));
       try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'shelter_secrets');
+      handleSupabaseError(err, OperationType.WRITE, 'shelter_secrets');
     }
   };
 
   const load = async () => {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, 'shelters'));
-      const list = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Shelter, 'id'>) }))
-        .map((s) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] }))
-        .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-      setShelters(list);
+      const { data } = await supabase.from('shelters').select('*').order('order', { ascending: true });
+      const list = (data || []).map((s: any) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] }));
+      setShelters(list as Shelter[]);
     } catch (err) {
-      handleFirestoreError(err, OperationType.READ, 'shelters');
+      handleSupabaseError(err, OperationType.READ, 'shelters');
     } finally {
       setLoading(false);
     }
@@ -62,7 +59,8 @@ export const AdminShelters: React.FC = () => {
     if (!s.name.trim()) { alert('Shelter needs a name.'); return; }
     setSavingId(id);
     try {
-      await setDoc(doc(db, 'shelters', id), {
+      await supabase.from('shelters').upsert({
+        id,
         name: s.name.trim(),
         city: s.city.trim(),
         region: s.region || 'Americas',
@@ -78,11 +76,11 @@ export const AdminShelters: React.FC = () => {
             ...(d.photo?.trim() ? { photo: d.photo.trim() } : {}),
             bio: d.bio.trim(),
           })),
-        updatedAt: serverTimestamp(),
-      }, { merge: false });
-      if (!s.id) patch(i, { id }); // adopt the generated id locally
+        updated_at: new Date().toISOString(),
+      });
+      if (!s.id) patch(i, { id });
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'shelters');
+      handleSupabaseError(err, OperationType.WRITE, 'shelters');
     } finally {
       setSavingId(null);
     }
@@ -92,10 +90,10 @@ export const AdminShelters: React.FC = () => {
     const s = shelters[i];
     if (!confirm(`Delete shelter "${s.name || 'Untitled'}"?`)) return;
     try {
-      if (s.id) await deleteDoc(doc(db, 'shelters', s.id));
+      if (s.id) await supabase.from('shelters').delete().eq('id', s.id);
       setShelters((prev) => prev.filter((_, idx) => idx !== i));
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, 'shelters');
+      handleSupabaseError(err, OperationType.DELETE, 'shelters');
     }
   };
 
@@ -107,11 +105,11 @@ export const AdminShelters: React.FC = () => {
     setSeeding(true);
     try {
       for (const s of DEFAULT_SHELTERS) {
-        await setDoc(doc(db, 'shelters', s.id), { ...s, updatedAt: serverTimestamp() }, { merge: true });
+        await supabase.from('shelters').upsert({ ...s, updated_at: new Date().toISOString() });
       }
       await load();
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'shelters');
+      handleSupabaseError(err, OperationType.WRITE, 'shelters');
     } finally {
       setSeeding(false);
     }

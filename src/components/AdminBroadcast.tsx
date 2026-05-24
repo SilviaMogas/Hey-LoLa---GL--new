@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { Loader2, Send, Mail, TestTube2 } from 'lucide-react';
 
 type Audience = 'all' | 'users' | 'waitlist';
@@ -44,7 +44,8 @@ export const AdminBroadcast: React.FC = () => {
     setResult(null);
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       if (!token) throw new Error('Not authenticated.');
 
       const payload: Record<string, string> = { subject: subject.trim(), body: body.trim(), audience };

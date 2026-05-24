@@ -1,12 +1,7 @@
-import { db, auth } from './firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { supabase } from './supabase';
 import { Place, ReservationClick } from '../types';
 import { track } from './analytics';
 
-/**
- * Append `?ref=heylola` (or merge with existing query) so OpenTable receives
- * an attribution signal for every outbound click.
- */
 export const buildOpenTableUrl = (rawUrl: string, place: Place): string => {
   try {
     const url = new URL(rawUrl);
@@ -21,11 +16,12 @@ export const buildOpenTableUrl = (rawUrl: string, place: Place): string => {
 };
 
 export async function logReservationClick(place: Place): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
   const event: ReservationClick = {
     venueId: place.id,
     venueName: place.name,
     city: place.city,
-    userId: auth.currentUser?.uid,
+    userId: user?.id,
     timestamp: new Date().toISOString(),
     source: 'heylola',
     action: 'opentable_reservation_click',
@@ -34,13 +30,12 @@ export async function logReservationClick(place: Place): Promise<void> {
     campaignId: place.reservationCampaignId,
     referralCode: place.reservationReferralCode,
   };
-  // Strip undefined fields — Firestore stores them as `null` otherwise.
   const payload: Record<string, unknown> = {};
   Object.entries(event).forEach(([k, v]) => {
     if (v !== undefined) payload[k] = v;
   });
   try {
-    await addDoc(collection(db, 'reservation_clicks'), payload);
+    await supabase.from('reservation_clicks').insert(payload);
   } catch (err) {
     console.error('Failed to log reservation click', err);
   }

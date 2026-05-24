@@ -1,4 +1,4 @@
-import { getAdminDb, getAdminAuth, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendGroupJoinEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-group-join
@@ -10,25 +10,27 @@ import { sendGroupJoinEmails } from '../src/lib/email/index.js';
 
 const RECENT_WINDOW_MS = 10 * 60 * 1000;
 
-async function resolveRecipient(db: ReturnType<typeof getAdminDb>, auth: ReturnType<typeof getAdminAuth>, userId: string): Promise<{ email: string; name: string }> {
+async function resolveRecipient(db: ReturnType<typeof getAdminClient>, userId: string): Promise<{ email: string; name: string }> {
   let email = '';
   let name = 'there';
   try {
-    const userRecord = await auth.getUser(userId);
-    email = userRecord.email || '';
-    name = userRecord.displayName || name;
+    const { data: { user } } = await db.auth.admin.getUserById(userId);
+    if (user) {
+      email = user.email || '';
+      name = user.user_metadata?.display_name || user.user_metadata?.full_name || name;
+    }
   } catch (err) {
     console.warn('notify-group-join: getUser failed', err);
   }
   if (email) return { email, name };
   try {
-    const snap = await db.collection('users').doc(userId).get();
-    if (snap.exists) {
-      const p = snap.data() || {};
-      email = String(p.email || p.contactEmail || '');
-      const composed = [p.firstName, p.lastName].filter(Boolean).join(' ').trim();
+    const { data: row } = await db.from('users').select('*').eq('id', userId).maybeSingle();
+    if (row) {
+      const p = row as Record<string, any>;
+      email = String(p.email || p.contact_email || '');
+      const composed = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
       if (composed) name = composed;
-      else if (p.displayName) name = String(p.displayName);
+      else if (p.display_name) name = String(p.display_name);
     }
   } catch (err) {
     console.warn('notify-group-join: profile lookup failed', err);
@@ -48,40 +50,38 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
-  let auth: ReturnType<typeof getAdminAuth>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
-    auth = getAdminAuth();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-group-join: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('group_memberships').doc(membershipId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('group_memberships').select('*').eq('id', membershipId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Membership not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
   // Reject stale requests so a leaked membershipId can't be replayed indefinitely.
-  const joinedAtMs = data.joinedAt?._seconds ? data.joinedAt._seconds * 1000 : 0;
+  const joinedAtMs = Date.parse(String(data.joined_at || '')) || 0;
   if (joinedAtMs && Date.now() - joinedAtMs > RECENT_WINDOW_MS) {
     res.status(409).json({ success: false, error: 'Membership is not recent.' });
     return;
   }
 
-  const userId = String(data.userId || '');
-  const groupId = String(data.groupId || '');
-  const groupName = String(data.groupName || 'the pack');
+  const userId = String(data.user_id || '');
+  const groupId = String(data.group_id || '');
+  const groupName = String(data.group_name || 'the pack');
   if (!userId || !groupId) {
     res.status(422).json({ success: false, error: 'Membership is missing userId / groupId.' });
     return;
   }
 
-  const { email, name } = await resolveRecipient(db, auth, userId);
+  const { email, name } = await resolveRecipient(db, userId);
   if (!email || !email.includes('@')) {
     res.status(422).json({ success: false, error: 'User has no usable email.' });
     return;

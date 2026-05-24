@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { collection, doc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import {
   OnboardingSubmission,
   OnboardingSubmissionStatus,
@@ -34,14 +34,14 @@ export const OnboardingAdminPanel: React.FC = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [subSnap, claimSnap] = await Promise.all([
-        getDocs(query(collection(db, 'onboarding_submissions'), orderBy('createdAt', 'desc'))),
-        getDocs(query(collection(db, 'venue_claims'), orderBy('createdAt', 'desc'))),
+      const [subRes, claimRes] = await Promise.all([
+        supabase.from('onboarding_submissions').select('*').order('created_at', { ascending: false }),
+        supabase.from('venue_claims').select('*').order('created_at', { ascending: false }),
       ]);
-      setSubmissions(subSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })));
-      setClaims(claimSnap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })));
+      setSubmissions((subRes.data || []) as any[]);
+      setClaims((claimRes.data || []) as any[]);
     } catch (err) {
-      handleFirestoreError(err, OperationType.GET, 'onboarding');
+      handleSupabaseError(err, OperationType.GET, 'onboarding');
     } finally {
       setLoading(false);
     }
@@ -54,19 +54,19 @@ export const OnboardingAdminPanel: React.FC = () => {
 
   const updateSubmissionStatus = async (id: string, status: OnboardingSubmissionStatus) => {
     try {
-      await updateDoc(doc(db, 'onboarding_submissions', id), { status });
+      await supabase.from('onboarding_submissions').update({ status }).eq('id', id);
       setSubmissions((prev) => prev.map((s) => s.id === id ? { ...s, status } : s));
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `onboarding_submissions/${id}`);
+      handleSupabaseError(err, OperationType.WRITE, `onboarding_submissions/${id}`);
     }
   };
 
   const updateClaim = async (id: string, patch: Partial<VenueClaim>) => {
     try {
-      await updateDoc(doc(db, 'venue_claims', id), patch);
+      await supabase.from('venue_claims').update(patch).eq('id', id);
       setClaims((prev) => prev.map((c) => c.id === id ? { ...c, ...patch } : c));
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `venue_claims/${id}`);
+      handleSupabaseError(err, OperationType.WRITE, `venue_claims/${id}`);
     }
   };
 

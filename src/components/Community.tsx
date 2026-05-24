@@ -19,8 +19,8 @@ import { COMMUNITY_GROUPS, CATEGORY_META, CONTINENT_ORDER, CONTINENT_META, type 
 import { SEO } from '../lib/seo';
 import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { paths, buildPath } from '../lib/routes';
 import type { PetData } from '../types';
 
@@ -129,19 +129,16 @@ export const Community: React.FC<CommunityProps> = (_props) => {
         // and let the carousel surface them. Firestore's `list` rule on
         // /pets requires isSignedIn() so visitors won't see this; the
         // client-side filter drops hidden pets and the viewer's own.
-        const snap = await getDocs(query(
-          collection(db, 'pets'),
-          limit(50),
-        ));
+        const { data: rows } = await supabase.from('pets').select('*').limit(50);
         if (cancelled) return;
-        const pets = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as PetData))
-          .filter((p) => !p.isHidden && p.userId !== user.uid && (p.name || '').trim().length > 0)
+        const pets = (rows || [])
+          .map((r) => ({ id: r.id, userId: r.user_id, name: r.name, type: r.type, breed: r.breed, sex: r.sex, photoURL: r.photo_url, city: r.city, isPublic: r.is_public, isHidden: r.is_hidden, createdAt: r.created_at } as PetData))
+          .filter((p) => !p.isHidden && p.userId !== user.id && (p.name || '').trim().length > 0)
           .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
           .slice(0, 12);
         setLatestMembers(pets);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'pets');
+        handleSupabaseError(err, OperationType.READ, 'pets');
       }
     })();
     return () => { cancelled = true; };
@@ -363,7 +360,7 @@ interface Reply {
 }
 
 export interface FeedAuthor {
-  user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
+  user: { id: string; user_metadata?: Record<string, unknown> } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
 }
 
@@ -383,25 +380,25 @@ export function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAutho
     if (!loaded && isRealPost) {
       setLoaded(true);
       try {
-        const snap = await getDocs(query(
-          collection(db, 'posts', post.id, 'replies'),
-          orderBy('createdAt', 'asc'),
-          limit(50),
-        ));
-        const list = snap.docs.map((d): Reply => {
-          const data = d.data() as Record<string, unknown>;
-          const created = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+        const { data: replyRows } = await supabase
+          .from('post_replies')
+          .select('*')
+          .eq('parent_post_id', post.id)
+          .order('created_at', { ascending: true })
+          .limit(50);
+        const list = (replyRows || []).map((r): Reply => {
+          const created = r.created_at ? new Date(r.created_at).getTime() : undefined;
           return {
-            id: d.id,
-            author: String(data.author ?? 'Member'),
-            avatar: String(data.avatar ?? ''),
-            body: String(data.body ?? ''),
+            id: r.id,
+            author: String(r.author ?? 'Member'),
+            avatar: String(r.avatar ?? ''),
+            body: String(r.body ?? ''),
             timeAgo: created ? formatTimeAgo(created) : 'just now',
           };
         });
         setReplies(list);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'posts/replies');
+        handleSupabaseError(err, OperationType.READ, 'post_replies');
       }
     }
   };
@@ -413,21 +410,21 @@ export function FeedItem({ post, user, profile }: { post: FeedPost } & FeedAutho
     setSending(true);
     const displayName = profile?.displayName
       ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
-      ?? user.displayName
+      ?? (user.user_metadata?.display_name as string)
       ?? 'Member';
     try {
-      const docRef = await addDoc(collection(db, 'posts', post.id, 'replies'), {
-        userId: user.uid,
-        parentPostId: post.id,
+      const { data: replyRow } = await supabase.from('post_replies').insert({
+        user_id: user.id,
+        parent_post_id: post.id,
         author: displayName,
-        avatar: profile?.photoURL ?? user.photoURL ?? '',
+        avatar: profile?.photoURL ?? (user.user_metadata?.photo_url as string) ?? '',
         body,
-        createdAt: serverTimestamp(),
-      });
-      setReplies((prev) => [...prev, { id: docRef.id, author: displayName, avatar: profile?.photoURL ?? user.photoURL ?? '', body, timeAgo: 'now' }]);
+        created_at: new Date().toISOString(),
+      }).select('id').single();
+      setReplies((prev) => [...prev, { id: replyRow?.id ?? '', author: displayName, avatar: profile?.photoURL ?? (user.user_metadata?.photo_url as string) ?? '', body, timeAgo: 'now' }]);
       setDraft('');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'posts/replies');
+      handleSupabaseError(err, OperationType.WRITE, 'post_replies');
     } finally {
       setSending(false);
     }
@@ -610,13 +607,13 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDocs(query(
-          collection(db, 'group_memberships'),
-          where('userId', '==', user.uid),
-          where('groupId', '==', group.id),
-          limit(1),
-        ));
-        if (!cancelled) setJoined(!snap.empty);
+        const { data: memberRows } = await supabase
+          .from('group_memberships')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('group_id', group.id)
+          .limit(1);
+        if (!cancelled) setJoined((memberRows || []).length > 0);
       } catch (err) {
         // Best-effort — fall back to 'Join group' label on rule errors.
         void err;
@@ -640,30 +637,29 @@ function GroupCard({ group, delay }: { group: CommunityGroup; delay: number }) {
     // private /users docs (which the rules block for non-owners).
     const memberName = profile?.displayName
       ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
-      ?? user.displayName
+      ?? (user.user_metadata?.display_name as string)
       ?? 'Member';
     try {
-      const ref = await addDoc(collection(db, 'group_memberships'), {
-        userId: user.uid,
-        groupId: group.id,
-        groupName: group.name,
-        userName: memberName,
-        userPhoto: profile?.photoURL ?? user.photoURL ?? '',
-        userCity: profile?.homeCity ?? '',
-        joinedAt: serverTimestamp(),
-      });
+      const { data: memberRow } = await supabase.from('group_memberships').insert({
+        user_id: user.id,
+        group_id: group.id,
+        group_name: group.name,
+        user_name: memberName,
+        user_photo: profile?.photoURL ?? (user.user_metadata?.photo_url as string) ?? '',
+        user_city: profile?.homeCity ?? '',
+        joined_at: new Date().toISOString(),
+      }).select('id').single();
       setJoined(true);
-      // Fire-and-forget welcome email. The server endpoint re-reads the
-      // membership doc via Admin SDK (source of truth) so the client
-      // can't forge a recipient by passing arbitrary fields.
-      void fetch('/api/notify-group-join', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ membershipId: ref.id }),
-      }).catch(() => { /* email is best-effort, never block join */ });
+      if (memberRow) {
+        void fetch('/api/notify-group-join', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ membershipId: memberRow.id }),
+        }).catch(() => { /* email is best-effort, never block join */ });
+      }
       openRoom();
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
+      handleSupabaseError(err, OperationType.WRITE, 'group_memberships');
     } finally {
       setBusy(false);
     }
@@ -733,7 +729,8 @@ export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Re
   return snap.docs
     .map((d): FeedPost => {
       const data = d.data();
-      const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.();
+      const createdAt = (data.createdAt as { toMillis?: () => number } | null)?.toMillis?.()
+        ?? (typeof data.created_at === 'string' ? new Date(data.created_at).getTime() : undefined);
       return {
         id: d.id,
         author: String(data.author ?? 'Member'),
@@ -746,6 +743,29 @@ export function mapPostSnapshot(snap: { docs: Array<{ id: string; data: () => Re
         topic: data.topic as string | undefined,
         likes: Number(data.likes ?? 0),
         replies: Number(data.replies ?? 0),
+        timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
+      };
+    })
+    .filter((p) => p.body.trim().length > 0);
+}
+
+/** Map an array of Supabase post rows into FeedPost[]. */
+export function mapPostRows(rows: Record<string, unknown>[]): FeedPost[] {
+  return rows
+    .map((r): FeedPost => {
+      const createdAt = typeof r.created_at === 'string' ? new Date(r.created_at).getTime() : undefined;
+      return {
+        id: String(r.id ?? ''),
+        author: String(r.author ?? 'Member'),
+        handle: String(r.handle ?? ''),
+        avatar: String(r.avatar ?? '/HeyLola.Lola.1.png'),
+        badge: r.badge as string | undefined,
+        city: r.city as string | undefined,
+        body: String(r.body ?? ''),
+        spot: r.spot as string | undefined,
+        topic: r.topic as string | undefined,
+        likes: Number(r.likes ?? 0),
+        replies: Number(r.replies ?? 0),
         timeAgo: createdAt ? formatTimeAgo(createdAt) : 'just now',
       };
     })
@@ -777,7 +797,7 @@ export function formatTimeAgo(ms: number): string {
 }
 
 export interface PostComposerProps {
-  user: { uid: string; displayName?: string | null; photoURL?: string | null } | null | undefined;
+  user: { id: string; user_metadata?: Record<string, unknown> } | null | undefined;
   profile: { firstName?: string; lastName?: string; homeCity?: string; photoURL?: string; displayName?: string } | null | undefined;
   /** Extra fields stamped on every post created from this composer.
    *  Used by the group rooms (/community/:groupId) to scope posts. */
@@ -814,7 +834,7 @@ export function PostComposer({ user, profile, extraFields, placeholder }: PostCo
 
   const displayName = profile?.displayName
     ?? [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
-    ?? user.displayName
+    ?? (user.user_metadata?.display_name as string)
     ?? 'Member';
 
   const submit = async () => {
@@ -822,21 +842,21 @@ export function PostComposer({ user, profile, extraFields, placeholder }: PostCo
     if (!body || sending) return;
     setSending(true);
     try {
-      await addDoc(collection(db, 'posts'), {
-        userId: user.uid,
+      await supabase.from('posts').insert({
+        user_id: user.id,
         author: displayName,
         handle: '',
-        avatar: profile?.photoURL ?? user.photoURL ?? '',
+        avatar: profile?.photoURL ?? (user.user_metadata?.photo_url as string) ?? '',
         body,
         city: profile?.homeCity ?? '',
         likes: 0,
         replies: 0,
-        createdAt: serverTimestamp(),
+        created_at: new Date().toISOString(),
         ...(extraFields ?? {}),
       });
       setDraft('');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'posts');
+      handleSupabaseError(err, OperationType.WRITE, 'posts');
     } finally {
       setSending(false);
     }

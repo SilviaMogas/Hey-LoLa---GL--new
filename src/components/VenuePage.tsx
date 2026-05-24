@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { collection, getDocs, query, where, limit } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { ArrowLeft, MapPin, Phone, Globe, Instagram, Loader2, CalendarCheck, ShieldCheck } from 'lucide-react';
 import { Place } from '../types';
 import { curatedPlaces } from '../data/curatedPlaces';
@@ -27,10 +26,10 @@ export const VenuePage: React.FC<VenuePageProps> = ({ slug, onClaim, onBackToApp
     const fromSeed = curatedPlaces.find(p => placeMatches(p, slug));
     (async () => {
       try {
-        const snap = await getDocs(query(collection(db, 'places'), limit(500)));
+        const { data: rows } = await supabase.from('places').select('*').limit(500);
         if (!active) return;
-        const fromDb = snap.docs
-          .map(d => ({ id: d.id, ...(d.data() as Omit<Place, 'id'>) }))
+        const fromDb = (rows || [])
+          .map(d => ({ ...d } as Place))
           .find(p => placeMatches(p, slug) && !p.isHidden);
         const found = fromDb ?? (fromSeed ? ({ ...fromSeed, id: `seed-${slug}` } as Place) : null);
         setPlace(found);

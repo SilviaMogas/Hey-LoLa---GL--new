@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Check, Loader2, Sparkles } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { useTranslation } from '../lib/LanguageContext';
 
 /**
@@ -33,20 +33,20 @@ export const FoundersCircleWaitlist: React.FC<{ inline?: boolean }> = ({ inline 
     }
     setLoading(true);
     try {
-      const ref = await addDoc(collection(db, 'waitlist'), {
+      const { data: row } = await supabase.from('waitlist').insert({
         type: 'founders',
         email: email.trim().toLowerCase(),
         source: 'founders_circle',
-        createdAt: serverTimestamp(),
-      });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
       void fetch('/api/notify-waitlist', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ entryId: ref.id }),
+        body: JSON.stringify({ entryId: row?.id }),
       }).catch(() => { /* email is best-effort */ });
       setSubmitted(true);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'waitlist');
+      handleSupabaseError(err, OperationType.WRITE, 'waitlist');
       setError(t.membership.foundersError);
     } finally {
       setLoading(false);

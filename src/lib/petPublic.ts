@@ -1,21 +1,10 @@
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from './firebase';
+import { supabase } from './supabase';
+import { handleSupabaseError, OperationType } from './dbHelpers';
 import type { Activity, PetData, UserProfile } from '../types';
 
-/**
- * A pet's PUBLIC profile card. This is a deliberately narrow subset of
- * PetData — it never carries confidential fields (microchip, passport,
- * vaccinations, weight, health timeline, emergency contacts, birth date,
- * residence/country). It lives in its own collection `pet_public/{petId}`
- * so the public profile page can read it without ever touching the private
- * /pets document (and so search engines / anonymous visitors only ever see
- * safe data). Owner-identifying fields are denormalised here too so the
- * "furry parent" ficha renders without reading the private /users doc.
- */
 export interface PetPublicCard {
   petId: string;
   ownerId: string;
-  // Pet — safe fields only.
   name: string;
   type: PetData['type'];
   sex?: 'Male' | 'Female';
@@ -24,10 +13,8 @@ export interface PetPublicCard {
   city?: string;
   activities?: Activity[];
   hobbies?: string;
-  // Visibility gates (mirrored so rules + UI can filter).
   isPublic: boolean;
   isHidden: boolean;
-  // Furry parent — safe, public-facing fields only.
   ownerName?: string;
   ownerHandle?: string;
   ownerPhoto?: string;
@@ -36,7 +23,6 @@ export interface PetPublicCard {
   updatedAt?: unknown;
 }
 
-/** Build the safe public card from a pet + its owner's profile. */
 export function buildPetPublicCard(
   petId: string,
   pet: Partial<PetData> & { userId?: string },
@@ -50,10 +36,9 @@ export function buildPetPublicCard(
     ownerId: pet.userId ?? '',
     name: (pet.name ?? '').trim(),
     type: (pet.type ?? 'Dog') as PetData['type'],
-    isPublic: pet.isPublic !== false, // default to visible unless explicitly false
+    isPublic: pet.isPublic !== false,
     isHidden: pet.isHidden === true,
   };
-  // Only attach optional fields when present — Firestore rejects `undefined`.
   if (pet.sex) card.sex = pet.sex;
   if (pet.breed) card.breed = pet.breed;
   if (pet.photoURL) card.photoURL = pet.photoURL;
@@ -69,11 +54,6 @@ export function buildPetPublicCard(
   return card;
 }
 
-/**
- * Best-effort write of a pet's public card. NEVER throws — a failed mirror
- * must not block the underlying pet save. Call after creating or updating
- * a pet, and to backfill existing pets on dashboard load.
- */
 export async function syncPetPublicCard(
   petId: string,
   pet: Partial<PetData> & { userId?: string },
@@ -82,8 +62,27 @@ export async function syncPetPublicCard(
   if (!petId || !pet.userId) return;
   try {
     const card = buildPetPublicCard(petId, pet, profile);
-    await setDoc(doc(db, 'pet_public', petId), { ...card, updatedAt: serverTimestamp() }, { merge: true });
+    await supabase.from('pet_public').upsert({
+      pet_id: card.petId,
+      owner_id: card.ownerId,
+      name: card.name,
+      type: card.type,
+      sex: card.sex || null,
+      breed: card.breed || null,
+      photo_url: card.photoURL || null,
+      city: card.city || null,
+      activities: card.activities || null,
+      hobbies: card.hobbies || null,
+      is_public: card.isPublic,
+      is_hidden: card.isHidden,
+      owner_name: card.ownerName || null,
+      owner_handle: card.ownerHandle || null,
+      owner_photo: card.ownerPhoto || null,
+      owner_city: card.ownerCity || null,
+      owner_bio: card.ownerBio || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'pet_id' });
   } catch (err) {
-    handleFirestoreError(err, OperationType.WRITE, 'pet_public');
+    handleSupabaseError(err, OperationType.WRITE, 'pet_public');
   }
 }

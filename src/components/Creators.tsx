@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, Loader2, PawPrint } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useTranslation } from '../lib/LanguageContext';
 
 interface CreatorsProps {
@@ -63,10 +62,21 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
     setError('');
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'creator_applications'), {
-        ...form,
+      await supabase.from('creator_applications').insert({
+        name: form.name,
+        email: form.email,
+        city: form.city,
+        instagram: form.instagram,
+        tiktok: form.tiktok,
+        website: form.website,
+        audience: form.audience,
+        dog_name: form.dogName,
+        dog_breed: form.dogBreed,
+        content_type: form.contentType,
+        best_post_url: form.best_post_url,
+        motivation: form.motivation,
         status: 'pending',
-        createdAt: serverTimestamp(),
+        created_at: new Date().toISOString(),
       });
       setIsSubmitted(true);
     } catch {

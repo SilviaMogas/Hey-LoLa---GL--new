@@ -1,4 +1,4 @@
-import { getAdminDb, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendOnboardingCompleteEmail } from '../src/lib/email/index.js';
 
 // POST /api/notify-onboarding-complete
@@ -35,14 +35,14 @@ export default async function handler(req: any, res: any) {
   let profileFirstName = firstName || '';
   let petName = body.petName;
   try {
-    const db = getAdminDb();
+    const db = getAdminClient();
     if (!profileFirstName) {
-      const snap = await db.collection('users').doc(userId).get();
-      if (snap.exists) profileFirstName = snap.data()?.firstName || '';
+      const { data: userRow } = await db.from('users').select('first_name').eq('id', userId).maybeSingle();
+      if (userRow) profileFirstName = (userRow as any).first_name || '';
     }
     if (!petName) {
-      const petsSnap = await db.collection('pets').where('userId', '==', userId).limit(1).get();
-      if (!petsSnap.empty) petName = petsSnap.docs[0].data()?.name;
+      const { data: petRows } = await db.from('pets').select('name').eq('user_id', userId).limit(1);
+      if (petRows && petRows.length > 0) petName = (petRows[0] as any).name;
     }
   } catch (err) {
     console.warn('[notify-onboarding-complete] admin lookup failed (continuing with body data):', err);

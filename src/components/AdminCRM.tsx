@@ -1,14 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  addDoc,
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-} from 'firebase/firestore';
+
 import {
   ArrowRight,
   Building2,
@@ -23,7 +14,7 @@ import {
   Tag,
   X,
 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/useAuth';
 import {
   CRM_CATEGORY_LABEL,
@@ -84,15 +75,15 @@ export const AdminCRM: React.FC = () => {
   const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, 'crm_leads'), orderBy('updatedAt', 'desc'));
-    return onSnapshot(q, (snap) => {
-      setLeads(
-        snap.docs.map((d) => {
-          const data = d.data() as Omit<CrmLead, 'id'>;
-          return { id: d.id, ...data };
-        }),
-      );
-    });
+    supabase.from('crm_leads').select('*').order('updated_at', { ascending: false })
+      .then(({ data }) => { if (data) setLeads(data as CrmLead[]); });
+    const channel = supabase.channel('crm-leads').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'crm_leads',
+    }, () => {
+      supabase.from('crm_leads').select('*').order('updated_at', { ascending: false })
+        .then(({ data }) => { if (data) setLeads(data as CrmLead[]); });
+    }).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const cities = useMemo(() => {
@@ -132,12 +123,12 @@ export const AdminCRM: React.FC = () => {
   }, [filtered]);
 
   const moveStage = async (lead: CrmLead, nextStage: CrmStage) => {
-    await updateDoc(doc(db, 'crm_leads', lead.id), {
+    await supabase.from('crm_leads').update({
       stage: nextStage,
-      lastTouchAt: Date.now(),
-      lastTouchBy: user?.email || 'admin',
-      updatedAt: serverTimestamp(),
-    });
+      last_touch_at: Date.now(),
+      last_touch_by: user?.email || 'admin',
+      updated_at: new Date().toISOString(),
+    }).eq('id', lead.id);
     if (activeLead?.id === lead.id) {
       setActiveLead({ ...lead, stage: nextStage });
     }
@@ -148,12 +139,12 @@ export const AdminCRM: React.FC = () => {
     if (!trimmed) return;
     const note = { at: Date.now(), by: user?.email || 'admin', text: trimmed };
     const nextNotes = [...(lead.notes || []), note];
-    await updateDoc(doc(db, 'crm_leads', lead.id), {
+    await supabase.from('crm_leads').update({
       notes: nextNotes,
-      lastTouchAt: note.at,
-      lastTouchBy: note.by,
-      updatedAt: serverTimestamp(),
-    });
+      last_touch_at: note.at,
+      last_touch_by: note.by,
+      updated_at: new Date().toISOString(),
+    }).eq('id', lead.id);
     if (activeLead?.id === lead.id) {
       setActiveLead({ ...lead, notes: nextNotes, lastTouchAt: note.at, lastTouchBy: note.by });
     }
@@ -181,10 +172,10 @@ export const AdminCRM: React.FC = () => {
         .filter(Boolean),
       notes: [],
       createdAt: now,
-      updatedAt: serverTimestamp(),
-      createdBy: user?.email || 'admin',
+      updated_at: new Date().toISOString(),
+      created_by: user?.email || 'admin',
     };
-    await addDoc(collection(db, 'crm_leads'), payload);
+    await supabase.from('crm_leads').insert(payload);
   };
 
   return (

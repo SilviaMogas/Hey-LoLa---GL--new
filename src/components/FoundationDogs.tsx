@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, MapPin, ShieldCheck } from 'lucide-react';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
 import { SEO } from '../lib/seo';
 
@@ -27,18 +26,18 @@ export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPa
   // Subscribe to the live Firestore collection. If it has any verified
   // public dogs we use them; otherwise we fall back to the seed sample.
   useEffect(() => {
-    const q = query(collection(db, 'foundationDogs'), where('status', '==', 'available'));
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        const dogs = snap.docs
-          .map((d) => ({ id: d.id, ...(d.data() as Omit<FoundationDog, 'id'>) }))
-          .filter((d) => d.passport?.visibility === 'public');
+    const fetchDogs = async () => {
+      try {
+        const { data } = await supabase.from('foundation_dogs').select('*').eq('status', 'available');
+        const dogs = (data || []).filter((d: any) => d.passport?.visibility === 'public') as FoundationDog[];
         setLive(dogs);
-      },
-      () => setLive([]),
-    );
-    return () => unsubscribe();
+      } catch { setLive([]); }
+    };
+    fetchDogs();
+    const channel = supabase.channel('foundation-dogs-live').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'foundation_dogs',
+    }, () => fetchDogs()).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const visible: FoundationDog[] = live && live.length > 0 ? live : SEED_VISIBLE;

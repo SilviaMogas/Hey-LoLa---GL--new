@@ -1,27 +1,11 @@
-import { getAdminDb, getAdminAuth } from './_admin.js';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getAdminClient } from './_supabase.js';
 
 // POST /api/shelter-update
 //
-// One endpoint, three actions (all server-side via Admin SDK, so no Firestore
-// rule changes are needed — the client never writes shelters directly):
-//
-//   action 'update' (default):
-//     Body: { shelterId, data, token? , idToken? }
-//     Edits a shelter's own profile + dogs. Authorised by EITHER a valid
-//     shareable token (shelter_secrets) OR a logged-in owner (idToken whose
-//     uid is linked to this shelter in shelter_owners).
-//
-//   action 'claim':
-//     Body: { shelterId, token, idToken }
-//     Links a freshly-signed-up account (idToken) to a shelter, gated by the
-//     shelter's invite token. Writes shelter_owners/{uid} = { shelterId }.
-//
-//   action 'mine':
-//     Body: { idToken }
-//     Returns the shelter the logged-in user owns (for the shelter dashboard).
-//
-// order/region stay admin-controlled and are never written here.
+// One endpoint, three actions:
+//   action 'update': Edit shelter profile + dogs
+//   action 'claim': Link a signed-up account to a shelter
+//   action 'mine': Return the shelter the logged-in user owns
 
 function sanitizeDog(d: any) {
   const out: Record<string, unknown> = {
@@ -36,9 +20,9 @@ function sanitizeDog(d: any) {
   return out;
 }
 
-async function tokenValid(db: any, shelterId: string, token: string): Promise<boolean> {
-  const secretSnap = await db.collection('shelter_secrets').doc(shelterId).get();
-  return secretSnap.exists && String(secretSnap.data()?.token || '') === String(token);
+async function tokenValid(db: ReturnType<typeof getAdminClient>, shelterId: string, token: string): Promise<boolean> {
+  const { data } = await db.from('shelter_secrets').select('token').eq('id', shelterId).maybeSingle();
+  return !!data && String((data as any).token || '') === String(token);
 }
 
 export default async function handler(req: any, res: any) {
@@ -52,10 +36,9 @@ export default async function handler(req: any, res: any) {
   };
   const action = String(body.action || 'update');
 
-  let db; let auth;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
-    auth = getAdminAuth();
+    db = getAdminClient();
   } catch (err) {
     console.error('shelter-update: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
@@ -74,17 +57,22 @@ export default async function handler(req: any, res: any) {
         res.status(403).json({ success: false, error: 'Invalid or expired invite link.' });
         return;
       }
-      const shelterSnap = await db.collection('shelters').doc(shelterId).get();
-      if (!shelterSnap.exists) {
+      const { data: shelter } = await db.from('shelters').select('id').eq('id', shelterId).maybeSingle();
+      if (!shelter) {
         res.status(404).json({ success: false, error: 'Shelter not found.' });
         return;
       }
-      const decoded = await auth.verifyIdToken(idToken);
-      await db.collection('shelter_owners').doc(decoded.uid).set({
-        shelterId,
-        email: decoded.email || null,
-        claimedAt: FieldValue.serverTimestamp(),
-      }, { merge: true });
+      const { data: { user }, error } = await db.auth.getUser(idToken);
+      if (error || !user) {
+        res.status(401).json({ success: false, error: 'Invalid auth token.' });
+        return;
+      }
+      await db.from('shelter_owners').upsert({
+        id: user.id,
+        shelter_id: shelterId,
+        email: user.email || null,
+        claimed_at: new Date().toISOString(),
+      });
       res.status(200).json({ success: true, shelterId });
       return;
     }
@@ -93,13 +81,14 @@ export default async function handler(req: any, res: any) {
     if (action === 'mine') {
       const { idToken } = body;
       if (!idToken) { res.status(400).json({ success: false, error: 'idToken is required.' }); return; }
-      const decoded = await auth.verifyIdToken(idToken);
-      const ownerSnap = await db.collection('shelter_owners').doc(decoded.uid).get();
-      if (!ownerSnap.exists) { res.status(200).json({ success: true, shelter: null }); return; }
-      const shelterId = String(ownerSnap.data()?.shelterId || '');
-      const shelterSnap = await db.collection('shelters').doc(shelterId).get();
-      if (!shelterSnap.exists) { res.status(200).json({ success: true, shelter: null }); return; }
-      res.status(200).json({ success: true, shelter: { id: shelterId, ...shelterSnap.data() } });
+      const { data: { user }, error } = await db.auth.getUser(idToken);
+      if (error || !user) { res.status(401).json({ success: false, error: 'Invalid auth token.' }); return; }
+      const { data: ownerRow } = await db.from('shelter_owners').select('shelter_id').eq('id', user.id).maybeSingle();
+      if (!ownerRow) { res.status(200).json({ success: true, shelter: null }); return; }
+      const shelterId = String((ownerRow as any).shelter_id || '');
+      const { data: shelterRow } = await db.from('shelters').select('*').eq('id', shelterId).maybeSingle();
+      if (!shelterRow) { res.status(200).json({ success: true, shelter: null }); return; }
+      res.status(200).json({ success: true, shelter: { id: shelterId, ...(shelterRow as Record<string, any>) } });
       return;
     }
 
@@ -110,38 +99,41 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    // Authorise: a valid share token, OR a logged-in owner of this shelter.
     let authorized = false;
     if (token && (await tokenValid(db, shelterId, token))) authorized = true;
     if (!authorized && idToken) {
-      const decoded = await auth.verifyIdToken(idToken);
-      const ownerSnap = await db.collection('shelter_owners').doc(decoded.uid).get();
-      if (ownerSnap.exists && String(ownerSnap.data()?.shelterId) === String(shelterId)) authorized = true;
+      const { data: { user }, error } = await db.auth.getUser(idToken);
+      if (!error && user) {
+        const { data: ownerRow } = await db.from('shelter_owners').select('shelter_id').eq('id', user.id).maybeSingle();
+        if (ownerRow && String((ownerRow as any).shelter_id) === String(shelterId)) authorized = true;
+      }
     }
     if (!authorized) {
       res.status(403).json({ success: false, error: 'Not authorised to edit this shelter.' });
       return;
     }
 
-    const shelterSnap = await db.collection('shelters').doc(shelterId).get();
-    if (!shelterSnap.exists) {
+    const { data: shelterRow } = await db.from('shelters').select('*').eq('id', shelterId).maybeSingle();
+    if (!shelterRow) {
       res.status(404).json({ success: false, error: 'Shelter not found.' });
       return;
     }
+    const existing = shelterRow as Record<string, any>;
 
     const dogs = Array.isArray(data.dogs)
       ? data.dogs.filter((d: any) => String(d?.name || '').trim()).map(sanitizeDog)
       : [];
 
-    await db.collection('shelters').doc(shelterId).set({
-      name: String(data.name || shelterSnap.data()?.name || '').trim(),
-      city: String(data.city || shelterSnap.data()?.city || '').trim(),
+    await db.from('shelters').upsert({
+      id: shelterId,
+      name: String(data.name || existing.name || '').trim(),
+      city: String(data.city || existing.city || '').trim(),
       blurb: String(data.blurb || '').trim(),
       website: String(data.website || '').trim(),
       ...(data.logo !== undefined ? { logo: String(data.logo || '').trim() } : {}),
       dogs,
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
+      updated_at: new Date().toISOString(),
+    });
 
     res.status(200).json({ success: true, dogs: dogs.length });
   } catch (err: any) {

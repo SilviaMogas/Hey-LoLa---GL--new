@@ -1,18 +1,9 @@
 // POST /api/enrich-venue
-// Authorization: Bearer <Firebase admin ID token>
+// Authorization: Bearer <Supabase access token>
 // Body: { placeId: string }
-//
-// Fetches the venue website + contact page, extracts publicly available
-// business info (emails, phone, Instagram), and saves the results to
-// /places/{placeId}. Returns enriched data plus a diff for fields that
-// differ from what the venue already has in Firestore.
-//
-// Only collects publicly available information. Respects redirects.
-// Does not bypass auth, paywalls, robots.txt blocks, or captchas.
 
-import { getAuth } from 'firebase-admin/auth';
 import { isAdminEmail } from '../src/lib/admin.js';
-import { getAdminApp, getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 
 const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
 const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
@@ -77,19 +68,19 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    getAdminApp();
-    db = getAdminDb();
+    db = getAdminClient();
   } catch {
-    res.status(500).json({ success: false, error: 'Firebase Admin not configured.' });
+    res.status(500).json({ success: false, error: 'Supabase not configured.' });
     return;
   }
 
   let callerEmail: string;
   try {
-    const decoded = await getAuth().verifyIdToken(token);
-    callerEmail = decoded.email || '';
+    const { data: { user }, error } = await db.auth.getUser(token);
+    if (error || !user) throw error || new Error('No user');
+    callerEmail = user.email || '';
     if (!isAdminEmail(callerEmail)) {
       res.status(403).json({ success: false, error: 'Admin access required.' });
       return;
@@ -105,13 +96,12 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const placeRef = db.collection('places').doc(placeId);
-  const placeSnap = await placeRef.get();
-  if (!placeSnap.exists) {
+  const { data: placeRow } = await db.from('places').select('*').eq('id', placeId).maybeSingle();
+  if (!placeRow) {
     res.status(404).json({ success: false, error: 'Place not found.' });
     return;
   }
-  const place = { id: placeSnap.id, ...placeSnap.data() } as Record<string, any>;
+  const place: Record<string, any> = { id: placeId, ...(placeRow as Record<string, any>) };
 
   if (!place.website) {
     res.status(400).json({ success: false, error: 'Place has no website URL.' });
@@ -120,10 +110,8 @@ export default async function handler(req: any, res: any) {
 
   const baseUrl = normalizeUrl(place.website).replace(/\/$/, '');
 
-  // Fetch homepage
   const homeHtml = await fetchPage(baseUrl);
 
-  // Discover and fetch contact page
   let contactPageUrl: string | undefined;
   let contactHtml: string | null = null;
 
@@ -174,21 +162,20 @@ export default async function handler(req: any, res: any) {
       : 'needs_manual_review';
 
   const enriched: Record<string, any> = {
-    enrichmentStatus,
-    enrichmentSource: 'website_scrape',
-    enrichmentLastCheckedAt: new Date().toISOString(),
-    outreachReady: !!primaryEmail,
+    enrichment_status: enrichmentStatus,
+    enrichment_source: 'website_scrape',
+    enrichment_last_checked_at: new Date().toISOString(),
+    outreach_ready: !!primaryEmail,
   };
-  if (primaryEmail) enriched.primaryEmail = primaryEmail;
-  if (secondaryEmails.length) enriched.secondaryEmails = secondaryEmails;
-  if (contactPageUrl) enriched.contactPageUrl = contactPageUrl;
+  if (primaryEmail) enriched.primary_email = primaryEmail;
+  if (secondaryEmails.length) enriched.secondary_emails = secondaryEmails;
+  if (contactPageUrl) enriched.contact_page_url = contactPageUrl;
   if (instagram) enriched.instagram = instagram;
   if (phone) enriched.phone = phone;
 
-  // Build diff for fields where existing data conflicts with enriched data
   const diff: Array<{ field: string; label: string; current: string; suggested: string }> = [];
-  if (primaryEmail && place.contactEmail && place.contactEmail !== primaryEmail) {
-    diff.push({ field: 'contactEmail', label: 'Contact Email', current: place.contactEmail, suggested: primaryEmail });
+  if (primaryEmail && place.contact_email && place.contact_email !== primaryEmail) {
+    diff.push({ field: 'contactEmail', label: 'Contact Email', current: place.contact_email, suggested: primaryEmail });
   }
   if (instagram && place.instagram && place.instagram !== instagram) {
     diff.push({ field: 'instagram', label: 'Instagram', current: place.instagram, suggested: instagram });
@@ -197,13 +184,12 @@ export default async function handler(req: any, res: any) {
     diff.push({ field: 'phone', label: 'Phone', current: place.phone, suggested: phone });
   }
 
-  // Auto-fill fields that were empty
-  const patch: Record<string, any> = { ...enriched, updatedAt: new Date().toISOString() };
-  if (primaryEmail && !place.contactEmail) patch.contactEmail = primaryEmail;
+  const patch: Record<string, any> = { ...enriched, updated_at: new Date().toISOString() };
+  if (primaryEmail && !place.contact_email) patch.contact_email = primaryEmail;
   if (instagram && !place.instagram) patch.instagram = instagram;
   if (phone && !place.phone) patch.phone = phone;
 
-  await placeRef.update(patch);
+  await db.from('places').update(patch).eq('id', placeId);
 
   res.status(200).json({ success: true, enriched, diff, status: enrichmentStatus });
 }

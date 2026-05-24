@@ -1,4 +1,4 @@
-import { getAdminDb, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendEmailVerifiedEmail } from '../src/lib/email/index.js';
 
 // POST /api/notify-email-verified
@@ -34,9 +34,9 @@ export default async function handler(req: any, res: any) {
   let firstName = body.firstName || '';
   try {
     if (!firstName) {
-      const db = getAdminDb();
-      const snap = await db.collection('users').doc(userId).get();
-      if (snap.exists) firstName = snap.data()?.firstName || '';
+      const db = getAdminClient();
+      const { data: userRow } = await db.from('users').select('first_name').eq('id', userId).maybeSingle();
+      if (userRow) firstName = (userRow as any).first_name || '';
     }
   } catch (err) {
     console.warn('[notify-email-verified] admin lookup failed (continuing with body data):', err);

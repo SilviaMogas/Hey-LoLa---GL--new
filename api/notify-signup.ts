@@ -1,4 +1,4 @@
-import { getAdminAuth, getAdminDb, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendSignupEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-signup
@@ -53,11 +53,9 @@ export default async function handler(req: any, res: any) {
   // wrong env vars, revoked key, etc.) we still attempt to send the Resend
   // welcome using the body data — because Firebase being broken cannot
   // block our transactional email.
-  let db: ReturnType<typeof getAdminDb> | null = null;
-  let auth: ReturnType<typeof getAdminAuth> | null = null;
+  let db: ReturnType<typeof getAdminClient> | null = null;
   try {
-    db = getAdminDb();
-    auth = getAdminAuth();
+    db = getAdminClient();
     console.log('[notify-signup] step=admin-init-ok');
   } catch (err: any) {
     console.warn('[notify-signup] admin-init failed (continuing with body data):', err?.message || err);
@@ -68,13 +66,15 @@ export default async function handler(req: any, res: any) {
   let canonicalEmailVerified = false;
   let providers: string[] = [];
   let canonicalDisplayName: string | undefined;
-  if (auth) {
+  if (db) {
     try {
-      const userRecord = await auth.getUser(userId);
-      canonicalEmail = userRecord.email || undefined;
-      canonicalEmailVerified = !!userRecord.emailVerified;
-      providers = (userRecord.providerData || []).map((p) => p.providerId);
-      canonicalDisplayName = userRecord.displayName || undefined;
+      const { data: { user } } = await db.auth.admin.getUserById(userId);
+      if (user) {
+        canonicalEmail = user.email || undefined;
+        canonicalEmailVerified = !!user.email_confirmed_at;
+        providers = (user.identities || []).map((i: any) => i.provider);
+        canonicalDisplayName = user.user_metadata?.display_name || user.user_metadata?.full_name || undefined;
+      }
       console.log('[notify-signup] step=user-loaded-from-auth', {
         email: canonicalEmail,
         emailVerified: canonicalEmailVerified,
@@ -96,11 +96,11 @@ export default async function handler(req: any, res: any) {
   let profile: any = {};
   if (db) {
     try {
-      const snap = await db.collection('users').doc(userId).get();
-      if (snap.exists) profile = snap.data() || {};
+      const { data: row } = await db.from('users').select('*').eq('id', userId).maybeSingle();
+      if (row) profile = row as Record<string, any>;
       console.log('[notify-signup] step=profile-loaded', {
-        firstName: profile.firstName,
-        createdAt: profile.createdAt,
+        firstName: profile.first_name,
+        createdAt: profile.created_at,
       });
     } catch (err) {
       console.warn('[notify-signup] profile lookup failed', err);
@@ -118,18 +118,8 @@ export default async function handler(req: any, res: any) {
   // email still goes out, just without the verify CTA.
   let verifyUrl: string | undefined;
   let verifyUrlError: string | undefined;
-  if (auth && signupMethod === 'email' && !canonicalEmailVerified) {
-    try {
-      verifyUrl = await auth.generateEmailVerificationLink(email, {
-        url: `${appUrl(req)}/dashboard`,
-        handleCodeInApp: false,
-      });
-      console.log('[notify-signup] step=verifyUrl-generated');
-    } catch (err: any) {
-      verifyUrlError = err?.message || err?.code || String(err);
-      console.error('[notify-signup] generateEmailVerificationLink failed (sending welcome without link):', verifyUrlError);
-    }
-  }
+  // Supabase handles email verification via its own flow; no server-side link generation needed.
+  // The verify URL is handled by the Supabase auth confirmation email.
 
   console.log('[notify-signup] step=calling-sendSignupEmails', {
     signupMethod,
@@ -140,11 +130,11 @@ export default async function handler(req: any, res: any) {
   let result;
   try {
     result = await sendSignupEmails({
-      firstName: String(profile.firstName || body.firstName || canonicalDisplayName?.split(' ')[0] || ''),
-      lastName: profile.lastName || body.lastName,
+      firstName: String(profile.first_name || body.firstName || canonicalDisplayName?.split(' ')[0] || ''),
+      lastName: profile.last_name || body.lastName,
       email,
       username: profile.username || body.username,
-      userType: profile.userType || body.userType,
+      userType: profile.user_type || body.userType,
       signupMethod,
       emailVerified: canonicalEmailVerified,
       referredBy: profile.referredBy || body.referredBy,

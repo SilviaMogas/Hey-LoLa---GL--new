@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Eye, Sparkles, CheckCircle2 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/useAuth';
 import { ALL_FEATURE_KEYS, FEATURES, type FeatureFlag, type FeatureKey, type FeatureStatus } from '../lib/featureFlags';
 
@@ -37,13 +36,31 @@ const FlagRow: React.FC<FlagRowProps> = ({ flagKey }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const ref = doc(db, 'feature_flags', baseline.key);
-    return onSnapshot(ref, (snap) => {
-      const data = snap.data();
-      const raw = data?.status;
-      setOverride(raw === 'draft' || raw === 'beta' || raw === 'live' ? raw : null);
-      setUpdatedAt(data?.updatedAt?.toMillis?.() ?? null);
-    });
+    supabase
+      .from('feature_flags')
+      .select('status, updated_at')
+      .eq('key', baseline.key)
+      .maybeSingle()
+      .then(({ data }) => {
+        const raw = data?.status;
+        setOverride(raw === 'draft' || raw === 'beta' || raw === 'live' ? raw : null);
+        setUpdatedAt(data?.updated_at ? new Date(data.updated_at).getTime() : null);
+      });
+
+    const channel = supabase
+      .channel(`admin-ff-${baseline.key}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'feature_flags',
+        filter: `key=eq.${baseline.key}`,
+      }, (payload) => {
+        const raw = (payload.new as Record<string, unknown>)?.status;
+        setOverride(raw === 'draft' || raw === 'beta' || raw === 'live' ? raw as FeatureStatus : null);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [baseline.key]);
 
   const effective: FeatureStatus = override ?? baseline.status;
@@ -52,15 +69,12 @@ const FlagRow: React.FC<FlagRowProps> = ({ flagKey }) => {
     if (saving) return;
     setSaving(next);
     try {
-      await setDoc(
-        doc(db, 'feature_flags', baseline.key),
-        {
-          status: next,
-          updatedAt: serverTimestamp(),
-          updatedBy: user?.email ?? 'admin',
-        },
-        { merge: true },
-      );
+      await supabase.from('feature_flags').upsert({
+        key: baseline.key,
+        status: next,
+        updated_at: new Date().toISOString(),
+        updated_by: user?.email ?? 'admin',
+      }, { onConflict: 'key' });
     } finally {
       setSaving(null);
     }

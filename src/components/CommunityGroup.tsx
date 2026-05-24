@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Lock, MapPin, Users } from 'lucide-react';
-import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { useAuth } from '../lib/useAuth';
 import { isAdminEmail } from '../lib/admin';
 import { COMMUNITY_GROUPS } from '../data/communityGroups';
@@ -14,7 +14,7 @@ import {
   FeedItem,
   PostComposer,
   EmptyFeedState,
-  mapPostSnapshot,
+  mapPostRows,
   type FeedPost,
   type PostComposerProps,
 } from './Community';
@@ -72,17 +72,15 @@ export const CommunityGroup: React.FC = () => {
   // Subscribe to posts scoped to this group.
   useEffect(() => {
     if (!groupId || locked) return;
-    const q = query(
-      collection(db, 'posts'),
-      where('groupId', '==', groupId),
-      orderBy('createdAt', 'desc'),
-      limit(100),
-    );
-    const unsub = onSnapshot(q,
-      (snap) => setLivePosts(mapPostSnapshot(snap)),
-      (err) => handleFirestoreError(err, OperationType.READ, 'posts'),
-    );
-    return () => unsub();
+    supabase.from('posts').select('*').eq('group_id', groupId).order('created_at', { ascending: false }).limit(100)
+      .then(({ data }) => { if (data) setLivePosts(mapPostRows(data)); });
+    const channel = supabase.channel(`group-posts-${groupId}`).on('postgres_changes', {
+      event: '*', schema: 'public', table: 'posts', filter: `group_id=eq.${groupId}`,
+    }, () => {
+      supabase.from('posts').select('*').eq('group_id', groupId).order('created_at', { ascending: false }).limit(100)
+        .then(({ data }) => { if (data) setLivePosts(mapPostRows(data)); });
+    }).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [groupId, locked]);
 
   // Load the group's human members (best-effort — falls back to empty on
@@ -92,25 +90,21 @@ export const CommunityGroup: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDocs(query(
-          collection(db, 'group_memberships'),
-          where('groupId', '==', groupId),
-          limit(200),
-        ));
+        const { data: memberRows } = await supabase
+          .from('group_memberships')
+          .select('*')
+          .eq('group_id', groupId)
+          .limit(200);
         if (cancelled) return;
         const seen = new Set<string>();
-        const list = snap.docs
-          .map((d): GroupMember => {
-            const data = d.data() as Record<string, unknown>;
-            return {
-              id: d.id,
-              userId: String(data.userId ?? ''),
-              name: String(data.userName ?? 'Member'),
-              photo: String(data.userPhoto ?? ''),
-              city: (data.userCity as string | undefined) || undefined,
-            };
-          })
-          // De-dupe by user in case of legacy double-joins.
+        const list = (memberRows || [])
+          .map((d): GroupMember => ({
+            id: d.id,
+            userId: String(d.user_id ?? ''),
+            name: String(d.user_name ?? 'Member'),
+            photo: String(d.user_photo ?? ''),
+            city: (d.user_city as string | undefined) || undefined,
+          }))
           .filter((m) => {
             if (!m.userId || seen.has(m.userId)) return false;
             seen.add(m.userId);
@@ -118,7 +112,7 @@ export const CommunityGroup: React.FC = () => {
           });
         setMembers(list);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'group_memberships');
+        handleSupabaseError(err, OperationType.READ, 'group_memberships');
       }
     })();
     return () => { cancelled = true; };
@@ -130,13 +124,13 @@ export const CommunityGroup: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDocs(query(
-          collection(db, 'group_memberships'),
-          where('userId', '==', user.uid),
-          where('groupId', '==', groupId),
-          limit(1),
-        ));
-        if (!cancelled) setJoined(!snap.empty);
+        const { data: myMember } = await supabase
+          .from('group_memberships')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('group_id', groupId)
+          .limit(1);
+        if (!cancelled) setJoined((myMember || []).length > 0);
       } catch { /* best effort */ }
     })();
     return () => { cancelled = true; };
@@ -149,25 +143,27 @@ export const CommunityGroup: React.FC = () => {
     setJoining(true);
     const memberName = profile?.displayName
       || [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
-      || user.displayName || 'Member';
+      || (user.user_metadata?.display_name as string) || 'Member';
     try {
-      const ref = await addDoc(collection(db, 'group_memberships'), {
-        userId: user.uid,
-        groupId: group.id,
-        groupName: group.name,
-        userName: memberName,
-        userPhoto: profile?.photoURL ?? user.photoURL ?? '',
-        userCity: profile?.localHub ?? profile?.homeCity ?? '',
-        joinedAt: serverTimestamp(),
-      });
+      const { data: memberRow } = await supabase.from('group_memberships').insert({
+        user_id: user.id,
+        group_id: group.id,
+        group_name: group.name,
+        user_name: memberName,
+        user_photo: profile?.photoURL ?? (user.user_metadata?.photo_url as string) ?? '',
+        user_city: profile?.localHub ?? profile?.homeCity ?? '',
+        joined_at: new Date().toISOString(),
+      }).select('id').single();
       setJoined(true);
-      void fetch('/api/notify-group-join', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ membershipId: ref.id }),
-      }).catch(() => { /* email best-effort */ });
+      if (memberRow) {
+        void fetch('/api/notify-group-join', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ membershipId: memberRow.id }),
+        }).catch(() => { /* email best-effort */ });
+      }
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'group_memberships');
+      handleSupabaseError(err, OperationType.WRITE, 'group_memberships');
     } finally {
       setJoining(false);
     }

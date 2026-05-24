@@ -1,4 +1,4 @@
-import { getAdminDb, appUrl } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 import { sendFoundationInterestEmails } from '../src/lib/email/index.js';
 
 // Public endpoint called by the client immediately after a foundation_interest
@@ -23,23 +23,23 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-foundation-interest: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('foundation_interests').doc(interestId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('foundation_interests').select('*').eq('id', interestId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Interest not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
-  const createdAtMs = data.createdAt?._seconds ? data.createdAt._seconds * 1000 : 0;
+  const createdAtMs = Date.parse(String(data.created_at || '')) || 0;
   if (createdAtMs && Date.now() - createdAtMs > RECENT_WINDOW_MS) {
     res.status(409).json({ success: false, error: 'Interest is not recent.' });
     return;
@@ -55,12 +55,12 @@ export default async function handler(req: any, res: any) {
   let dogName = 'a rescue dog';
   let partnerName: string | undefined;
   let dogSlug = String(data.dogSlug || '');
-  if (data.dogId) {
-    const dogSnap = await db.collection('foundationDogs').doc(String(data.dogId)).get();
-    if (dogSnap.exists) {
-      const dog = dogSnap.data() || {};
+  if (data.dog_id) {
+    const { data: dogRow } = await db.from('foundation_dogs').select('*').eq('id', String(data.dog_id)).maybeSingle();
+    if (dogRow) {
+      const dog = dogRow as Record<string, any>;
       dogName = String(dog.name || dogName);
-      partnerName = typeof dog.partnerName === 'string' ? dog.partnerName : undefined;
+      partnerName = typeof dog.partner_name === 'string' ? dog.partner_name : undefined;
       dogSlug = String(dog.passport?.slug || dogSlug);
     }
   }

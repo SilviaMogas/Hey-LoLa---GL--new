@@ -1,4 +1,4 @@
-import { getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 import { sendBusinessLeadEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-business-lead
@@ -23,21 +23,21 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-business-lead: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('business_leads').doc(leadId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('business_leads').select('*').eq('id', leadId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Lead not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
   // createdAt here is an ISO string (Auth.tsx writes `new Date().toISOString()`),
   // not a Firestore Timestamp.

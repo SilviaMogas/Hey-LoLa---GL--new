@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, Heart, PawPrint, Store, Sparkles, Loader2 } from 'lucide-react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { FormField, FormSelect } from './FormField';
 import { useTranslation } from '../lib/LanguageContext';
 
@@ -254,25 +253,27 @@ const PetParentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     }
     setBusy(true);
     try {
-      const docRef = await addDoc(collection(db, 'onboarding_submissions'), {
+      const { data: row } = await supabase.from('onboarding_submissions').insert({
         type: 'pet_parent',
         status: 'new',
         source: 'website_start_page',
-        createdAt: serverTimestamp(),
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
+        created_at: new Date().toISOString(),
+        first_name: data.firstName.trim(),
+        last_name: data.lastName.trim(),
         email: data.email.trim().toLowerCase(),
         city: data.city.trim(),
-        petName: data.petName.trim(),
-        petType: data.petType,
+        pet_name: data.petName.trim(),
+        pet_type: data.petType,
         instagram: data.instagram.trim() || null,
-        foundingClubInterest: data.foundingClubInterest,
-      });
-      void fetch('/api/notify-onboarding', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ submissionId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+        founding_club_interest: data.foundingClubInterest,
+      }).select('id').single();
+      if (row) {
+        void fetch('/api/notify-onboarding', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ submissionId: row.id }),
+        }).catch(() => { /* email is best-effort */ });
+      }
       onSuccess();
     } catch (err: any) {
       console.error(err);
@@ -342,23 +343,25 @@ const AnimalLoverForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     }
     setBusy(true);
     try {
-      const docRef = await addDoc(collection(db, 'onboarding_submissions'), {
+      const { data: row2 } = await supabase.from('onboarding_submissions').insert({
         type: 'animal_lover',
         status: 'new',
         source: 'website_start_page',
-        createdAt: serverTimestamp(),
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
+        created_at: new Date().toISOString(),
+        first_name: data.firstName.trim(),
+        last_name: data.lastName.trim(),
         email: data.email.trim().toLowerCase(),
         city: data.city.trim(),
         instagram: data.instagram.trim() || null,
         interests,
-      });
-      void fetch('/api/notify-onboarding', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ submissionId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+      }).select('id').single();
+      if (row2) {
+        void fetch('/api/notify-onboarding', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ submissionId: row2.id }),
+        }).catch(() => { /* email is best-effort */ });
+      }
       onSuccess();
     } catch (err: any) {
       console.error(err);
@@ -453,31 +456,33 @@ const VenueForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     }
     setBusy(true);
     try {
-      const docRef = await addDoc(collection(db, 'venue_claims'), {
-        businessName: data.businessName.trim(),
+      const { data: row3 } = await supabase.from('venue_claims').insert({
+        business_name: data.businessName.trim(),
         category: data.category,
         city: data.city.trim(),
         address: data.address.trim(),
         website: data.website.trim() || null,
         instagram: data.instagram.trim() || null,
-        contactPerson: data.contactPerson.trim(),
+        contact_person: data.contactPerson.trim(),
         role: data.role.trim() || null,
         email: data.email.trim().toLowerCase(),
         phone: data.phone.trim(),
-        petFriendlyStatus: data.petFriendlyStatus,
-        perkInterest: data.perkInterest,
+        pet_friendly_status: data.petFriendlyStatus,
+        perk_interest: data.perkInterest,
         notes: data.notes.trim() || null,
-        claimStatus: 'claim_submitted',
-        verificationStatus: 'pending_review',
-        perkStatus: 'not_confirmed',
+        claim_status: 'claim_submitted',
+        verification_status: 'pending_review',
+        perk_status: 'not_confirmed',
         source: 'website_start_page',
-        createdAt: serverTimestamp(),
-      });
-      void fetch('/api/notify-venue-claim', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ claimId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
+      if (row3) {
+        void fetch('/api/notify-venue-claim', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ claimId: row3.id }),
+        }).catch(() => { /* email is best-effort */ });
+      }
       onSuccess();
     } catch (err: any) {
       console.error(err);

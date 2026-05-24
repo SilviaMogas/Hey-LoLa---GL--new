@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 export type WaitlistType = 'member' | 'partner';
 
@@ -61,49 +60,49 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
 
     try {
       if (type === 'member') {
-        const waitlistRef = collection(db, 'waitlist');
-        const docRef = await addDoc(waitlistRef, {
+        const { data: row } = await supabase.from('waitlist').insert({
           type: 'member',
-          firstName,
-          lastName,
+          first_name: firstName,
+          last_name: lastName,
           email,
           city,
-          dogName,
-          dogType,
+          dog_name: dogName,
+          dog_type: dogType,
           plan,
           perks,
           consent,
-          createdAt: serverTimestamp(),
-        });
-        void fetch('/api/notify-waitlist', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ entryId: docRef.id }),
-        }).catch(() => { /* email is best-effort */ });
+          created_at: new Date().toISOString(),
+        }).select('id').single();
+        if (row) {
+          void fetch('/api/notify-waitlist', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ entryId: row.id }),
+          }).catch(() => { /* email is best-effort */ });
+        }
       } else {
-        const partnersRef = collection(db, 'partner_applications');
-        const docRef = await addDoc(partnersRef, {
-          businessName,
+        const { data: partnerRow } = await supabase.from('partner_applications').insert({
+          business_name: businessName,
           category,
           city,
           address,
           website,
           instagram,
-          contactName,
+          contact_name: contactName,
           email,
           policy,
-          suggestedPerk,
-          claimProfile,
+          suggested_perk: suggestedPerk,
+          claim_profile: claimProfile,
           source: 'self_onboarding',
           status: 'pending',
-          createdAt: serverTimestamp(),
-        });
+          created_at: new Date().toISOString(),
+        }).select('id').single();
         // Fire-and-forget: confirmation to applicant + admin alert. The
         // endpoint re-reads the doc via Admin SDK so it cannot be spoofed.
         void fetch('/api/notify-partner-application', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ applicationId: docRef.id }),
+          body: JSON.stringify({ applicationId: partnerRow?.id }),
         }).catch(() => { /* email is best-effort */ });
       }
       setSuccess(true);

@@ -498,14 +498,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
               {t.dashboard.greeting} <span className="text-stone-300">{firstName}<span className="text-charcoal">.</span></span>
            </h1>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug">{t.dashboard.nextHeading}</p>
-           <div className="pt-0.5"><StatusComposer userId={user?.uid} initialStatus={profile?.status} presets={STATUS_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key] }))} /></div>
+           <div className="pt-0.5"><StatusComposer userId={user?.uid} initialStatus={profile?.status} presets={STATUS_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key], key: p.key }))} /></div>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug pt-2">{t.dashboardExtra.whatsOnThisWeek}</p>
            <div className="pt-0.5">
              <StatusComposer
                userId={user?.uid}
                initialStatus={profile?.whatsOn}
                field="whatsOn"
-               presets={WHATS_ON_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key] }))}
+               presets={WHATS_ON_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key], key: p.key }))}
                placeholder={t.dashboardExtra.whatsOnPlaceholder}
              />
            </div>
@@ -1009,6 +1009,7 @@ const WHATS_ON_PRESET_ICONS = [
 interface StatusPreset {
   icon: React.ComponentType<{ size?: number }>;
   label: string;
+  key?: string;
 }
 
 interface StatusComposerProps {
@@ -1021,7 +1022,7 @@ interface StatusComposerProps {
   placeholder?: string;
 }
 
-function StatusComposer({ userId, initialStatus, field = 'status', presets, placeholder }: StatusComposerProps) {
+function StatusComposer({ userId, initialStatus, field = 'status', presets = [], placeholder }: StatusComposerProps) {
   const { t: tr } = useTranslation();
   const [status, setStatus] = useState(initialStatus || '');
   const [draft, setDraft] = useState(initialStatus || '');
@@ -1053,7 +1054,10 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets, plac
     }
   };
 
-  // Display mode: shows the saved status with an edit pencil
+  // Display mode: shows the saved status with an edit pencil.
+  // Stored value may be a language-neutral key (e.g. 'travelling') or free text.
+  const displayLabel = presets.find(p => p.key === status)?.label || status;
+
   if (!editing && status) {
     return (
       <button
@@ -1061,7 +1065,7 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets, plac
         className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-stone-50 border border-stone-100 hover:border-stone-200 transition-colors max-w-full"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-        <span className="text-sm font-medium text-charcoal truncate">{status}</span>
+        <span className="text-sm font-medium text-charcoal truncate">{displayLabel}</span>
         <Pencil size={12} className="text-stone-300 group-hover:text-charcoal transition-colors shrink-0" />
       </button>
     );
@@ -1071,11 +1075,11 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets, plac
     <div className="space-y-3 pt-1">
       {/* Preset chips */}
       <div className="flex flex-wrap gap-2">
-        {presets.map(({ icon: Icon, label }) => (
+        {presets.map(({ icon: Icon, label, key: presetKey }) => (
           <button
-            key={label}
+            key={presetKey || label}
             type="button"
-            onClick={() => save(label)}
+            onClick={() => save(presetKey || label)}
             disabled={saving}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-[11px] font-medium text-charcoal hover:bg-stone-50 hover:border-stone-300 transition-colors disabled:opacity-40"
           >

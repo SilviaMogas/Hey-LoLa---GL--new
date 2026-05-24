@@ -13,7 +13,9 @@ const Loading = () => (
 
 /** Requires a signed-in user. Unauthenticated visitors are bounced to
  *  /login with `?from=<original path>` so we can return them after
- *  successful auth. Unverified users are forced through /verify-email. */
+ *  successful auth. Email verification is checked softly via a banner
+ *  in the main layout — unverified users are NOT blocked here so they
+ *  can complete onboarding and explore the app immediately. */
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -23,10 +25,6 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   if (!user) {
     const from = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`${paths.login}?from=${from}`} replace />;
-  }
-
-  if (!user.emailVerified && location.pathname !== paths.verifyEmail) {
-    return <Navigate to={paths.verifyEmail} replace />;
   }
 
   return <>{children}</>;
@@ -54,16 +52,14 @@ export function AdminRoute({ children }: { children: ReactNode }) {
 
 /** Inverse of ProtectedRoute: signed-in users are pushed to the dashboard.
  *  Used on /login and /signup so we don't show the auth form to a user
- *  who is already authenticated. */
+ *  who is already authenticated. Unverified users are allowed through so
+ *  they can sign out and try a different account if needed. */
 export function GuestOnlyRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) return <Loading />;
   if (user && user.emailVerified) {
     return <Navigate to={paths.dashboard} replace />;
-  }
-  if (user && !user.emailVerified) {
-    return <Navigate to={paths.verifyEmail} replace />;
   }
   return <>{children}</>;
 }

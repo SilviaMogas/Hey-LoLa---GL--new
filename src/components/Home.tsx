@@ -100,9 +100,9 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         >
           <div className="h-20 sm:h-28 md:h-32 w-px bg-stone-300 mt-3 md:mt-4 shrink-0" />
           <div className="space-y-4 sm:space-y-6">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-stone-400">Curated City Guide</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] text-stone-400">{t.home.curatedCityGuide}</span>
             <h2 className="text-3xl md:text-4xl font-serif tracking-tight leading-[0.85] text-charcoal italic">
-              Trusted <br /><span className="text-stone-300">Cities<span className="brand-dot" aria-hidden="true" /></span>
+              {t.home.trustedLabel} <br /><span className="text-stone-300">{t.home.citiesLabel}<span className="brand-dot" aria-hidden="true" /></span>
             </h2>
             <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light leading-snug italic max-w-xl">
               {t.home.networkDesc}
@@ -112,19 +112,19 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-            <CityCard name="Miami" status="Live" image="https://images.unsplash.com/photo-1514214246283-d427a95c5d2f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('miami')} />
+            <CityCard name="Miami" status={t.home.cityStatusLive} isLive image="https://images.unsplash.com/photo-1514214246283-d427a95c5d2f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('miami')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-            <CityCard name="New York" status="Launching soon" image="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('nyc')} />
+            <CityCard name="New York" status={t.home.cityStatusLaunchingSoon} image="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('nyc')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-            <CityCard name="Barcelona" status="Launching soon" image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('barcelona')} />
+            <CityCard name="Barcelona" status={t.home.cityStatusLaunchingSoon} image="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('barcelona')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
-            <CityCard name="Toronto" status="Launching soon" image="https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('toronto')} />
+            <CityCard name="Toronto" status={t.home.cityStatusLaunchingSoon} image="https://images.unsplash.com/photo-1517090504586-fde19ea6066f?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('toronto')} />
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }}>
-            <CityCard name="Washington DC" status="Launching soon" image="https://images.unsplash.com/photo-1501466044931-62695aada8e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('dc')} />
+            <CityCard name="Washington DC" status={t.home.cityStatusLaunchingSoon} image="https://images.unsplash.com/photo-1501466044931-62695aada8e9?auto=format&fit=crop&w=800" onClick={() => onExploreCity?.('dc')} />
           </motion.div>
         </div>
 
@@ -151,7 +151,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               >
                   {comingSoonHint === city && (
                     <span className="absolute top-3 right-3 rounded-full bg-charcoal/90 text-white text-[9px] px-2.5 py-1 font-semibold tracking-[0.05em]">
-                      Coming soon
+                      {t.home.comingSoonBadge}
                     </span>
                   )}
                   <span className="text-base sm:text-lg md:text-xl font-serif italic tracking-tight text-charcoal/40 group-hover:text-charcoal transition-colors">
@@ -178,8 +178,8 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 md:gap-8"
           >
             <div className="space-y-5 sm:space-y-6 md:space-y-8 max-w-2xl border-l border-stone-200 pl-5 sm:pl-8 md:pl-10">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-stone-400">Editorial Hub</span>
-              <h2 className="text-3xl sm:text-3xl lg:text-3xl tracking-tight leading-[0.9] font-serif italic text-charcoal">Travel <span className="text-stone-300">Hub</span><span className="brand-dot" aria-hidden="true" /></h2>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-stone-400">{t.home.editorialHub}</span>
+              <h2 className="text-3xl sm:text-3xl lg:text-3xl tracking-tight leading-[0.9] font-serif italic text-charcoal">{t.home.travelLabel} <span className="text-stone-300">{t.home.hubLabel}</span><span className="brand-dot" aria-hidden="true" /></h2>
               <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light italic leading-snug">{t.blog.description}</p>
             </div>
             <button onClick={onBlog} className="luxury-button-secondary h-11 md:h-12 px-8 md:px-12 group self-start lg:self-auto">
@@ -189,9 +189,9 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
-              { location: "London", tag: "Editorial", title: "City stories are on the way", author: "Hey Lola", comingSoon: true },
-              { location: "Miami", tag: "Guides", title: "Local travel tips arriving soon", author: "Hey Lola", comingSoon: true },
-              { location: "NYC", tag: "Community", title: "Real member updates coming soon", author: "Hey Lola", comingSoon: true }
+              { location: "London", tag: t.home.activityEditorial, title: t.home.activityCityStories, author: "Hey Lola", comingSoon: true },
+              { location: "Miami", tag: t.home.activityGuides, title: t.home.activityTravelTips, author: "Hey Lola", comingSoon: true },
+              { location: "NYC", tag: t.home.activityCommunity, title: t.home.activityCommunityUpdates, author: "Hey Lola", comingSoon: true }
             ].map((activity, i) => (
               <motion.div
                 key={i}
@@ -265,32 +265,32 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               className="space-y-8"
             >
               <div className="space-y-4">
-                <span className="text-white/40 font-black uppercase tracking-[0.5em] text-[10px]">Membership</span>
+                <span className="text-white/40 font-black uppercase tracking-[0.5em] text-[10px]">{t.home.membershipLabel}</span>
                 <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85] text-white">
                   Hey Lola<br /><span className="text-white/30">Club</span><span className="brand-dot" aria-hidden="true" />
                 </h2>
               </div>
               <p className="text-2xl sm:text-3xl text-white/70 font-light italic leading-snug">
-                A boutique lifestyle concierge for life with your dog.
+                {t.home.clubSubtitle}
               </p>
               <p className="text-base sm:text-lg text-stone-400 font-light leading-relaxed max-w-lg">
-                Organise your dog's essentials, discover trusted dog-friendly places, and access curated local perks through a concierge-style experience designed for modern dog parents.
+                {t.home.clubDesc1}
               </p>
               <p className="text-sm text-stone-500 leading-relaxed max-w-lg">
-                The Hey Lola Club is a boutique membership for dog parents who want curated experiences, trusted partners and practical tools to organise their dog's life. We are starting city by city — Miami first, then New York City and Barcelona.
+                {t.home.clubDesc2}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <button
                   onClick={onSignUp}
                   className="luxury-button bg-white text-charcoal h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 hover:scale-[1.02] transition-all shadow-xl"
                 >
-                  Join Hey Lola
+                  {t.home.joinHeyLola}
                 </button>
                 <button
                   onClick={onExplore}
                   className="luxury-button border border-white/20 text-white/70 hover:text-white hover:border-white/40 h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-all"
                 >
-                  Explore the City
+                  {t.home.exploreCity}
                 </button>
               </div>
             </motion.div>
@@ -302,10 +302,10 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { icon: <MapPin size={18} />, label: 'Trusted places', desc: 'A curated city guide of dog-friendly restaurants, cafés, hotels and parks.' },
-                { icon: <Star size={18} />, label: 'Curated perks', desc: 'Simple member benefits from verified partners who welcome dog parents.' },
-                { icon: <PawPrint size={18} />, label: 'Pet records', desc: 'Vaccines, microchip, vet contacts and emergency notes — neatly organised.' },
-                { icon: <MessageSquare size={18} />, label: 'Concierge support', desc: 'Helpful guidance for everyday moments, trips and life with your dog.' },
+                { icon: <MapPin size={18} />, label: t.home.featureTrustedPlaces, desc: t.home.featureTrustedPlacesDesc },
+                { icon: <Star size={18} />, label: t.home.featureCuratedPerks, desc: t.home.featureCuratedPerksDesc },
+                { icon: <PawPrint size={18} />, label: t.home.featurePetRecords, desc: t.home.featurePetRecordsDesc },
+                { icon: <MessageSquare size={18} />, label: t.home.featureConciergeSupport, desc: t.home.featureConciergeSupportDesc },
               ].map(({ icon, label, desc }) => (
                 <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3 hover:bg-white/8 transition-colors">
                   <div className="text-white/50">{icon}</div>
@@ -331,15 +331,15 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             className="flex flex-col lg:flex-row items-center justify-between gap-8"
           >
             <div className="space-y-6 max-w-2xl border-l-2 border-stone-300 pl-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Creator Partners</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.home.creatorPartnersLabel}</span>
               <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight leading-none">
-                Built with local<br /><span className="text-stone-300">dog voices</span><span className="brand-dot" aria-hidden="true" />
+                {t.home.builtWithLocal}<br /><span className="text-stone-300">{t.home.dogVoices}</span><span className="brand-dot" aria-hidden="true" />
               </h2>
               <p className="text-xl text-stone-500 font-light italic leading-snug">
-                Our city guides are created with dog parents, bloggers and creators who know the best places before everyone else.
+                {t.home.creatorDesc1}
               </p>
               <p className="text-base text-stone-400 leading-relaxed">
-                Hey Lola features trusted recommendations from local creators, always with credit, links to their profiles and referral codes when available.
+                {t.home.creatorDesc2}
               </p>
             </div>
             <div className="shrink-0">
@@ -347,7 +347,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                 onClick={onCreators}
                 className="luxury-button-primary h-11 px-12 text-[11px] group shadow-xl"
               >
-                Become a Creator Partner <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                {t.home.becomeCreatorPartner} <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </motion.div>
@@ -357,35 +357,35 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
       {/* How Hey Lola works — three audiences */}
       <section id="how-it-works" aria-labelledby="how-heading" className="py-12 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto border-t border-stone-100">
         <header className="text-center space-y-3 mb-10 max-w-2xl mx-auto">
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">How it works</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.home.howItWorks}</span>
           <h2 id="how-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-[0.95]">
-            One trusted space, three audiences<span className="brand-dot" aria-hidden="true" />
+            {t.home.howItWorksTitle}<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-base text-stone-500 font-light italic leading-snug">
-            Hey Lola helps modern dog parents organise their pet's life, foundations welcome new homes, and verified partners build trust with the community.
+            {t.home.howItWorksDesc}
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4622D]">For pet parents</p>
-            <h3 className="text-xl font-serif italic leading-tight">Your pet's trusted life companion.</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4622D]">{t.home.forPetParents}</p>
+            <h3 className="text-xl font-serif italic leading-tight">{t.home.forPetParentsTitle}</h3>
             <p className="text-sm text-stone-500 font-light leading-relaxed">
-              Keep vaccines, microchip, vet contacts and emergency notes in one elegant pet passport. Discover trusted dog-friendly places and unlock curated local perks from verified partners.
+              {t.home.forPetParentsDesc}
             </p>
           </article>
           <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6E8C5D]">For foundations</p>
-            <h3 className="text-xl font-serif italic leading-tight">Every rescue dog gets a Hey Lola passport.</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6E8C5D]">{t.home.forFoundations}</p>
+            <h3 className="text-xl font-serif italic leading-tight">{t.home.forFoundationsTitle}</h3>
             <p className="text-sm text-stone-500 font-light leading-relaxed">
-              Foundation partners — like Animal Haven — get a public rescue-passport page per dog, with verified-by-Hey-Lola trust layer, QR code and a warm interest flow that hands off to the partner's official process.
+              {t.home.forFoundationsDesc}
             </p>
           </article>
           <article className="rounded-[1.5rem] border border-stone-100 bg-white p-6 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5D848C]">For partners</p>
-            <h3 className="text-xl font-serif italic leading-tight">Be discovered. Build trust.</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5D848C]">{t.home.forPartners}</p>
+            <h3 className="text-xl font-serif italic leading-tight">{t.home.forPartnersTitle}</h3>
             <p className="text-sm text-stone-500 font-light leading-relaxed">
-              Dog-friendly cafés, hotels, vets, groomers, online stores. Self-onboard, earn the Verified badge, offer member perks, get priority placement in the curated city guide.
+              {t.home.forPartnersDesc}
             </p>
           </article>
         </div>
@@ -401,19 +401,19 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             className="w-24 h-24 sm:w-28 sm:h-28 object-contain shrink-0"
           />
           <div className="space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Your concierge</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">{t.home.yourConcierge}</span>
             <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-none">
-              Meet Lola<span className="brand-dot" aria-hidden="true" />
+              {t.home.meetLola}<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-sm sm:text-base text-stone-500 font-light italic leading-snug max-w-md">
-              Your boutique guide to the dog-friendly world. Lola knows the cafés that save you the corner table and the hotels that keep a dog bed in the closet.
+              {t.home.meetLolaDesc}
             </p>
             <button
               type="button"
               onClick={onConcierge ? () => onConcierge('lola') : undefined}
               className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-charcoal hover:text-brand-orange transition-colors pt-1"
             >
-              Meet Lola <ArrowRight size={12} />
+              {t.home.meetLola} <ArrowRight size={12} />
             </button>
           </div>
         </div>
@@ -424,7 +424,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
         <div className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-2xl md:rounded-3xl lg:rounded-3xl bg-charcoal p-8 sm:p-6 md:p-8 lg:p-8 text-center space-y-8 relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.25)] md:shadow-[0_50px_100px_rgba(0,0,0,0.3)]">
           <div className="relative z-10 space-y-8 md:space-y-8">
             <div className="space-y-4 md:space-y-6">
-              <span className="text-white/40 font-black uppercase tracking-[0.35em] sm:tracking-[0.5em] text-[10px]">A boutique club for modern dog parents</span>
+              <span className="text-white/40 font-black uppercase tracking-[0.35em] sm:tracking-[0.5em] text-[10px]">{t.home.boutiqueClub}</span>
               <h2 className="text-3xl md:text-3xl lg:text-3xl text-white tracking-tight leading-[0.85] sm:leading-[0.8] font-serif italic max-w-3xl mx-auto">{t.home.readyForLiftoff}</h2>
             </div>
             <p className="text-stone-400 text-base sm:text-lg md:text-xl font-light max-w-lg mx-auto italic leading-snug px-5 sm:px-8">{t.home.joinThousands}</p>
@@ -521,8 +521,7 @@ function DogConciergeCard({ name, role, personality, style, vibe, color, badgeCo
   );
 }
 
-function CityCard({ name, status, image, onClick }: { name: string, status: string, image: string, onClick?: () => void }) {
-  const isLive = status === 'Live';
+function CityCard({ name, status, image, onClick, isLive }: { name: string, status: string, image: string, onClick?: () => void, isLive?: boolean }) {
   return (
     <button
       type="button"
@@ -569,7 +568,7 @@ function ActivityCard({ location, tag, title, author, image, comingSoon, onClick
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-2 text-charcoal text-[9px] font-black uppercase tracking-[0.2em] bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">{location}</span>
-            <span className="inline-flex text-stone-500 text-[9px] font-black uppercase tracking-[0.3em] bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">Coming soon</span>
+            <span className="inline-flex text-stone-500 text-[9px] font-black uppercase tracking-[0.3em] bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">{t.home.comingSoonBadge}</span>
           </div>
           <h4 className="text-2xl sm:text-3xl font-serif italic font-light tracking-tight leading-[1.15] text-charcoal">{title}</h4>
         </div>

@@ -6,11 +6,11 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     name: 'Free',
     price: 'Free',
     period: 'always',
-    tagline: 'Begin exploring and create your dog’s profile. No card required.',
+    tagline: "Begin exploring and create your dog's profile. No card required.",
     features: [
-      'Your dog’s profile and passport',
+      "Your dog's profile and passport",
       'Discover dog-friendly places',
-      'The members’ community',
+      "The members' community",
       'Curated city guides',
     ],
     cta: 'Get started',
@@ -72,3 +72,29 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     showPrice: false,
   },
 ];
+
+type MembershipTranslations = {
+  freeName: string;
+  freePrice: string;
+  freePeriod: string;
+  freeTagline: string;
+  freeFeature1: string;
+  freeFeature2: string;
+  freeFeature3: string;
+  freeFeature4: string;
+  freeCta: string;
+};
+
+export function getTranslatedFreePlan(m: MembershipTranslations): MembershipPlan {
+  return {
+    id: 'free',
+    name: m.freeName,
+    price: m.freePrice,
+    period: m.freePeriod,
+    tagline: m.freeTagline,
+    features: [m.freeFeature1, m.freeFeature2, m.freeFeature3, m.freeFeature4],
+    cta: m.freeCta,
+    highlight: false,
+    showPrice: true,
+  };
+}

@@ -340,7 +340,17 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       }
     } catch (err: any) {
       const code = err?.code as string | undefined;
-      setError(err.message || t.auth.googleFailed);
+      const messages: Record<string, string> = {
+        'auth/email-already-in-use': t.auth.errorEmailInUse,
+        'auth/invalid-email': t.auth.errorInvalidEmail,
+        'auth/weak-password': t.auth.errorWeakPassword,
+        'auth/user-not-found': t.auth.errorUserNotFound,
+        'auth/wrong-password': t.auth.errorWrongPassword,
+        'auth/invalid-credential': t.auth.errorInvalidCredential,
+        'auth/too-many-requests': t.auth.errorTooManyRequests,
+        'auth/network-request-failed': t.auth.errorNetworkFailed,
+      };
+      setError((code && messages[code]) || err.message || t.auth.errorGeneric);
       if (code) handleFirestoreError(err, OperationType.WRITE, 'auth');
     } finally {
       setLoading(false);

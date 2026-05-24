@@ -228,7 +228,7 @@ export const Footer: React.FC = () => {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 text-center sm:text-left">
           <BrandLogo size="2xl" className="opacity-30" />
           <p className="text-xl sm:text-2xl md:text-3xl font-serif italic tracking-tight text-stone-400/80">
-            Your dog's lifestyle concierge<span className="brand-dot brand-dot--soft" aria-hidden="true" />
+            {t.common.footerTagline}<span className="brand-dot brand-dot--soft" aria-hidden="true" />
           </p>
         </div>
       </div>

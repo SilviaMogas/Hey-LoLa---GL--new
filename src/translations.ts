@@ -22,6 +22,10 @@ export const EN = {
     copied: "Copied",
     change: "Change",
     remove: "Remove",
+    club: "Club",
+    creators: "Creators",
+    join: "Join",
+    footerTagline: "Your dog's lifestyle concierge",
   },
   home: {
     tagline: "",
@@ -694,6 +698,10 @@ export const ES = {
     copied: "Copiado",
     change: "Cambiar",
     remove: "Eliminar",
+    club: "Club",
+    creators: "Creadores",
+    join: "Únete",
+    footerTagline: "El concierge de estilo de vida para tu perro",
   },
   home: {
     tagline: "",

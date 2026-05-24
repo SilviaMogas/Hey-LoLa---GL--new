@@ -51,16 +51,16 @@ export default async function handler(req: any, res: any) {
   }
 
   const result = await sendVenueIntakeEmails({
-    businessName: String(data.businessName || 'your venue'),
+    businessName: String(data.business_name || data.businessName || 'your venue'),
     category: typeof data.category === 'string' ? data.category : undefined,
     city: String(data.city || ''),
     address: typeof data.address === 'string' ? data.address : undefined,
-    contactPerson: String(data.contactPerson || ''),
+    contactPerson: String(data.contact_person || data.contactPerson || ''),
     contactRole: typeof data.role === 'string' ? data.role : undefined,
     email: String(data.email),
     phone: typeof data.phone === 'string' ? data.phone : undefined,
-    petFriendlyStatus: typeof data.petFriendlyStatus === 'string' ? data.petFriendlyStatus : undefined,
-    perkInterest: typeof data.perkInterest === 'string' ? data.perkInterest : undefined,
+    petFriendlyStatus: typeof data.pet_friendly_status === 'string' ? data.pet_friendly_status : (typeof data.petFriendlyStatus === 'string' ? data.petFriendlyStatus : undefined),
+    perkInterest: typeof data.perk_interest === 'string' ? data.perk_interest : (typeof data.perkInterest === 'string' ? data.perkInterest : undefined),
     notes: typeof data.notes === 'string' ? data.notes : undefined,
     website: typeof data.website === 'string' ? data.website : undefined,
     instagram: typeof data.instagram === 'string' ? data.instagram : undefined,

@@ -54,10 +54,10 @@ export default async function handler(req: any, res: any) {
   }
 
   const result = await sendPartnerApplicationEmails({
-    businessName: String(data.businessName || 'New partner'),
-    contactName: String(data.contactName || data.email),
+    businessName: String(data.business_name || data.businessName || 'New partner'),
+    contactName: String(data.contact_name || data.contactName || data.email),
     contactEmail: String(data.email),
-    contactRole: typeof data.contactRole === 'string' ? data.contactRole : undefined,
+    contactRole: typeof data.contact_role === 'string' ? data.contact_role : (typeof data.contactRole === 'string' ? data.contactRole : undefined),
     city: typeof data.city === 'string' ? data.city : undefined,
     applicationId,
   });
@@ -74,13 +74,13 @@ export default async function handler(req: any, res: any) {
     })();
     const now = Date.now();
     await db.from('crm_leads').insert({
-      businessName: String(data.businessName || 'New partner'),
-      category: typeof data.category === 'string' ? data.category : 'other',
+      businessName: String(data.business_name || data.businessName || 'New partner'),
+      category: typeof data.category === 'string' ? data.category : (Array.isArray(data.categories) ? data.categories[0] : 'other'),
       tier,
       city: typeof data.city === 'string' ? data.city : '',
       contact: {
-        name: typeof data.contactName === 'string' ? data.contactName : '',
-        role: typeof data.contactRole === 'string' ? data.contactRole : '',
+        name: typeof data.contact_name === 'string' ? data.contact_name : (typeof data.contactName === 'string' ? data.contactName : ''),
+        role: typeof data.contact_role === 'string' ? data.contact_role : (typeof data.contactRole === 'string' ? data.contactRole : ''),
         email: String(data.email || ''),
         phone: typeof data.phone === 'string' ? data.phone : '',
         ig: '',

@@ -54,14 +54,14 @@ export default async function handler(req: any, res: any) {
 
   const result = await sendOnboardingSubmissionEmails({
     type: t,
-    firstName: String(data.firstName || ''),
-    lastName: typeof data.lastName === 'string' ? data.lastName : undefined,
+    firstName: String(data.first_name || data.firstName || ''),
+    lastName: typeof data.last_name === 'string' ? data.last_name : (typeof data.lastName === 'string' ? data.lastName : undefined),
     email: String(data.email),
     city: String(data.city || ''),
-    petName: typeof data.petName === 'string' ? data.petName : undefined,
-    petType: typeof data.petType === 'string' ? data.petType : undefined,
+    petName: typeof data.pet_name === 'string' ? data.pet_name : (typeof data.petName === 'string' ? data.petName : undefined),
+    petType: typeof data.pet_type === 'string' ? data.pet_type : (typeof data.petType === 'string' ? data.petType : undefined),
     instagram: typeof data.instagram === 'string' ? data.instagram : undefined,
-    foundingClubInterest: typeof data.foundingClubInterest === 'string' ? data.foundingClubInterest : undefined,
+    foundingClubInterest: typeof data.founding_club_interest === 'string' ? data.founding_club_interest : (typeof data.foundingClubInterest === 'string' ? data.foundingClubInterest : undefined),
     interests: Array.isArray(data.interests) ? data.interests : undefined,
     submissionId,
   });

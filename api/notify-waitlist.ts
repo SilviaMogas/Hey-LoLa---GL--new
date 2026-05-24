@@ -51,12 +51,12 @@ export default async function handler(req: any, res: any) {
   }
 
   const result = await sendWaitlistEmails({
-    firstName: String(data.firstName || ''),
-    lastName: typeof data.lastName === 'string' ? data.lastName : undefined,
+    firstName: String(data.first_name || data.firstName || ''),
+    lastName: typeof data.last_name === 'string' ? data.last_name : (typeof data.lastName === 'string' ? data.lastName : undefined),
     email: String(data.email),
     city: String(data.city || ''),
-    dogName: typeof data.dogName === 'string' ? data.dogName : undefined,
-    dogType: typeof data.dogType === 'string' ? data.dogType : undefined,
+    dogName: typeof data.dog_name === 'string' ? data.dog_name : (typeof data.dogName === 'string' ? data.dogName : undefined),
+    dogType: typeof data.dog_type === 'string' ? data.dog_type : (typeof data.dogType === 'string' ? data.dogType : undefined),
     plan: typeof data.plan === 'string' ? data.plan : undefined,
     perks: typeof data.perks === 'string' ? data.perks : undefined,
     entryId,

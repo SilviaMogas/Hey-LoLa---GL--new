@@ -26,6 +26,8 @@ import BusinessLeadAdmin from '../../../emails/business-lead-admin.js';
 import SignupConfirmation from '../../../emails/signup-confirmation.js';
 import SignupAdmin from '../../../emails/signup-admin.js';
 import SubscriberBroadcast from '../../../emails/subscriber-broadcast.js';
+import OnboardingComplete from '../../../emails/onboarding-complete.js';
+import EmailVerified from '../../../emails/email-verified.js';
 
 // `@react-email/render` returns either `string` or `Promise<string>` depending
 // on the version. Wrap to always await — keeps callers consistent.
@@ -466,6 +468,58 @@ export interface BroadcastRecipient {
   email: string;
   firstName?: string;
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// ONBOARDING COMPLETE (user finishes their pet passport)
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface OnboardingCompleteEmailOpts {
+  firstName: string;
+  email: string;
+  petName?: string;
+  dashboardUrl: string;
+  exploreUrl: string;
+  userId: string;
+}
+
+export async function sendOnboardingCompleteEmail(opts: OnboardingCompleteEmailOpts) {
+  const firstName = (opts.firstName || 'there').trim().split(/\s+/)[0];
+  const { html, text } = await renderBoth(
+    <OnboardingComplete
+      firstName={firstName}
+      petName={opts.petName}
+      dashboardUrl={opts.dashboardUrl}
+      exploreUrl={opts.exploreUrl}
+    />,
+  );
+  const subject = opts.petName
+    ? `${opts.petName}'s passport is ready`
+    : 'Your passport is ready';
+  return sendOne(opts.email, subject, html, text);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// EMAIL VERIFIED (user confirms their email address)
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface EmailVerifiedEmailOpts {
+  firstName: string;
+  email: string;
+  dashboardUrl: string;
+  userId: string;
+}
+
+export async function sendEmailVerifiedEmail(opts: EmailVerifiedEmailOpts) {
+  const firstName = (opts.firstName || 'there').trim().split(/\s+/)[0];
+  const { html, text } = await renderBoth(
+    <EmailVerified firstName={firstName} dashboardUrl={opts.dashboardUrl} />,
+  );
+  return sendOne(opts.email, "You're verified — welcome to Hey Lola", html, text);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// SUBSCRIBER BROADCAST
+// ────────────────────────────────────────────────────────────────────────────
 
 export async function sendSubscriberBroadcast(
   opts: SubscriberBroadcastEmailOpts,

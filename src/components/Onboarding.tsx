@@ -176,6 +176,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
 
       track('onboarding_completed', { hasPet: !isPetLover, petType: isPetLover ? 'none' : String(finalPetType) });
       if (!isPetLover) track('pet_created', { petType: String(finalPetType) });
+
+      // Best-effort "passport ready" email — only on first-run onboarding.
+      if (isFirstRun && auth.currentUser?.email) {
+        void fetch('/api/notify-onboarding-complete', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            email: auth.currentUser.email,
+            firstName: profile?.firstName || userName || '',
+            petName: isPetLover ? undefined : (petData.name || undefined),
+          }),
+        }).catch(() => { /* email is best-effort */ });
+      }
+
       onComplete();
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'pets/users');

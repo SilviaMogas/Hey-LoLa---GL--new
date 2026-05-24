@@ -157,6 +157,11 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
               <h1 id="passport-heading" className="text-5xl sm:text-6xl md:text-7xl font-serif italic tracking-tight leading-[0.9]">
                 Meet {dog.name}<span className="brand-dot" aria-hidden="true" />
               </h1>
+              {dog.ensName && (
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#7A8C6E] bg-[#F7F9F5] border border-[#e2ead9] px-3 py-1 rounded-full w-fit">
+                  <span className="opacity-60">◆</span> {dog.ensName}
+                </p>
+              )}
               <p className="text-base sm:text-lg text-stone-500 font-light italic leading-snug max-w-md">
                 A rescue dog looking for the right home through Hey Lola Foundation.
               </p>
@@ -200,6 +205,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
           {dog.breed && <IdRow label="Breed" value={dog.breed} />}
           {typeof dog.weightKg === 'number' && <IdRow label="Weight" value={`${dog.weightKg} kg`} />}
           {dog.location && <IdRow label="Location" value={dog.location} />}
+          {dog.ensName && <IdRow label="ENS domain" value={<span className="font-mono text-[#7A8C6E]">{dog.ensName}</span>} />}
           <IdRow label="Source partner" value={dog.partnerName} />
           {dog.sourceUrl && (
             <IdRow

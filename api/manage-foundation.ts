@@ -83,6 +83,7 @@ export default async function handler(req: any, res: any) {
         bio: d.bio?.trim() || '',
         shelter_id: d.shelter_id || null,
         status: d.status || 'available',
+        ens_name: d.ens_name?.trim() || null,
         passport: d.passport || {},
         data: d.extra || {},
         created_at: new Date().toISOString(),
@@ -109,6 +110,7 @@ export default async function handler(req: any, res: any) {
       if (d.bio !== undefined) update.bio = typeof d.bio === 'string' ? d.bio.trim() : d.bio;
       if (d.shelter_id !== undefined) update.shelter_id = d.shelter_id;
       if (d.status !== undefined) update.status = d.status;
+      if (d.ens_name !== undefined) update.ens_name = typeof d.ens_name === 'string' ? d.ens_name.trim() : d.ens_name;
       if (d.passport !== undefined) update.passport = d.passport;
 
       const { error } = await db.from('foundation_dogs')

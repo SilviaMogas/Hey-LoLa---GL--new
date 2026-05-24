@@ -136,6 +136,11 @@ function DogCard({ dog, delay, onClick }: { dog: FoundationDog; delay: number; o
         <p className="text-xs text-stone-500 font-light italic">
           {[dog.ageLabel, dog.breed, dog.sex !== 'unknown' ? capitalize(dog.sex) : null].filter(Boolean).join(' · ')}
         </p>
+        {dog.ensName && (
+          <p className="text-[10px] font-mono text-[#7A8C6E] bg-[#F7F9F5] border border-[#e2ead9] rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 w-fit">
+            <span className="opacity-60">◆</span> {dog.ensName}
+          </p>
+        )}
         {dog.location && (
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 inline-flex items-center gap-1">
             <MapPin size={10} /> {dog.location}

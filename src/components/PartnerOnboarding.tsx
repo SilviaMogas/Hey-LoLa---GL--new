@@ -358,7 +358,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 luxury-button bg-charcoal text-white h-12 px-8 text-[11px] font-black tracking-[0.25em] uppercase hover:bg-charcoal/80 mt-6"
+            className="inline-flex items-center gap-2 luxury-button bg-charcoal text-white h-10 px-8 text-[11px] font-black tracking-[0.25em] uppercase hover:bg-charcoal/80 mt-6"
           >
             Back to Hey Lola
           </button>
@@ -447,7 +447,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
             type="button"
             onClick={goBack}
             disabled={submitting}
-            className="luxury-button border border-stone-200 text-stone-600 hover:text-charcoal hover:border-charcoal h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:w-auto disabled:opacity-50"
+            className="luxury-button border border-stone-200 text-stone-600 hover:text-charcoal hover:border-charcoal h-10 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:w-auto disabled:opacity-50"
           >
             <ArrowLeft size={14} className="mr-2" />
             {stepIndex === 0 ? 'Cancel' : 'Back'}
@@ -457,7 +457,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
               type="button"
               onClick={handleSubmit}
               disabled={!isStepValid || submitting}
-              className="luxury-button bg-charcoal text-white hover:bg-charcoal/80 h-12 px-10 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:flex-1 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+              className="luxury-button bg-charcoal text-white hover:bg-charcoal/80 h-10 px-10 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:flex-1 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               Submit application
@@ -467,7 +467,7 @@ export const PartnerOnboarding: React.FC<PartnerOnboardingProps> = ({ onBack, on
               type="button"
               onClick={goNext}
               disabled={!isStepValid}
-              className="luxury-button bg-charcoal text-white hover:bg-charcoal/80 h-12 px-10 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:flex-1 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+              className="luxury-button bg-charcoal text-white hover:bg-charcoal/80 h-10 px-10 text-[10px] font-black tracking-[0.25em] uppercase transition-colors w-full sm:flex-1 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
               Continue <ArrowRight size={14} />
             </button>

@@ -257,7 +257,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
   return (
     <div className="min-h-screen bg-white text-charcoal flex flex-col font-sans">
       {/* Top bar */}
-      <div className="px-5 sm:px-8 py-3 sm:py-4 flex items-center justify-between">
+      <div className="px-5 sm:px-8 py-2 sm:py-3 flex items-center justify-between">
         {onBack ? (
           <button
             onClick={onBack}
@@ -271,16 +271,16 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         <div className="w-10" />
       </div>
 
-      <div className="flex-1 flex items-start sm:items-center justify-center px-5 sm:px-8 pb-4 pt-1">
-        <div className="w-full max-w-[420px] space-y-3 animate-fade-in">
+      <div className="flex-1 flex items-start sm:items-center justify-center px-5 sm:px-8 pb-3 pt-0">
+        <div className="w-full max-w-[420px] space-y-2 animate-fade-in">
           <div className="space-y-0.5 text-center sm:text-left">
-            <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-charcoal leading-tight">
+            <h1 className="text-lg sm:text-xl font-black tracking-tighter text-charcoal leading-tight">
               {headline}<span className="brand-dot" aria-hidden="true" />
             </h1>
-            <p className="text-[12px] text-stone-500 leading-snug">{sub}</p>
+            <p className="text-[11px] text-stone-500 leading-snug">{sub}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-2.5" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-2" noValidate>
             {resetSent ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -330,14 +330,14 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
               <>
                 {/* User type tabs (signup only) */}
                 {mode === 'signup' && (
-                  <div className="flex gap-1 bg-stone-50 p-1 rounded-full border border-stone-100">
+                  <div className="flex gap-1 bg-stone-50 p-0.5 rounded-full border border-stone-100">
                     {(['Dog Owner', 'Business'] as const).map((type) => (
                       <button
                         key={type}
                         type="button"
                         onClick={() => setUserType(type)}
                         className={cn(
-                          'flex-1 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all',
+                          'flex-1 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all',
                           userType === type
                             ? 'bg-white text-charcoal shadow-sm'
                             : 'text-stone-400 hover:text-charcoal'
@@ -350,7 +350,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                 )}
 
                 {mode === 'signup' && userType === 'Business' && (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     <Field label={t.auth.businessName}>
                       <input
                         type="text"
@@ -412,7 +412,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                       </div>
                     </Field>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <Field label={t.auth.firstName}>
                         <input
                           type="text"
@@ -527,12 +527,12 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {/* Terms checkbox — actually rendered now! */}
                 {mode === 'signup' && userType === 'Dog Owner' && (
-                  <label className="flex items-start gap-3 text-sm text-stone-500 cursor-pointer select-none">
+                  <label className="flex items-start gap-2.5 text-xs text-stone-500 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={termsAccepted}
                       onChange={(e) => setTermsAccepted(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-stone-300 text-charcoal focus:ring-stone-200 shrink-0 cursor-pointer accent-charcoal"
+                      className="mt-0.5 w-3.5 h-3.5 rounded border-stone-300 text-charcoal focus:ring-stone-200 shrink-0 cursor-pointer accent-charcoal"
                     />
                     <span className="leading-snug">
                       {t.auth.termsAgree} <a href="#terms" className="text-charcoal underline decoration-stone-300 underline-offset-2">{t.auth.termsLink}</a> {t.auth.andText} <a href="#privacy" className="text-charcoal underline decoration-stone-300 underline-offset-2">{t.auth.privacyLink}</a>.
@@ -550,7 +550,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-11 bg-charcoal text-white rounded-full font-black text-[11px] uppercase tracking-[0.25em] flex items-center justify-center gap-2 hover:bg-stone-800 transition-colors disabled:opacity-40"
+                  className="w-full h-10 bg-charcoal text-white rounded-full font-black text-[11px] uppercase tracking-[0.25em] flex items-center justify-center gap-2 hover:bg-stone-800 transition-colors disabled:opacity-40"
                 >
                   {loading ? (
                     <Loader2 className="animate-spin" size={16} />
@@ -567,7 +567,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {mode !== 'reset' && userType !== 'Business' && (
                   <>
-                    <div className="relative my-1">
+                    <div className="relative my-0.5">
                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-stone-100" /></div>
                       <div className="relative flex justify-center">
                         <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">{t.common.or}</span>
@@ -578,7 +578,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                       type="button"
                       onClick={handleGoogleSignIn}
                       disabled={loading}
-                      className="w-full h-11 bg-white border border-stone-200 rounded-full font-bold text-sm text-charcoal flex items-center justify-center gap-2.5 hover:bg-stone-50 transition-colors disabled:opacity-40"
+                      className="w-full h-10 bg-white border border-stone-200 rounded-full font-bold text-sm text-charcoal flex items-center justify-center gap-2.5 hover:bg-stone-50 transition-colors disabled:opacity-40"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -596,7 +596,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
           {/* Footer link to switch mode */}
           {!resetSent && !inquirySent && (
-            <p className="text-center text-sm text-stone-500 pt-2">
+            <p className="text-center text-xs text-stone-500 pt-1">
               {mode === 'login' && (
                 <>{t.auth.newHereCreate} <button type="button" onClick={() => switchMode('signup')} className="text-charcoal font-black hover:underline">{t.auth.createAccountLink}</button></>
               )}
@@ -624,7 +624,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       <div className="flex items-center justify-between px-1">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{label}</label>
         {extra}
@@ -643,16 +643,16 @@ function PasswordChecklist({ password, confirm }: { password: string; confirm: s
     { ok: confirm.length > 0 && password === confirm, label: t.auth.passwordsMatch },
   ];
   return (
-    <ul className="bg-stone-50/60 border border-stone-100 rounded-xl px-3 py-2.5 space-y-1.5" aria-live="polite">
+    <ul className="bg-stone-50/60 border border-stone-100 rounded-xl px-3 py-1.5 space-y-0.5" aria-live="polite">
       {rules.map((r) => (
         <li
           key={r.label}
           className={cn(
-            'flex items-center gap-2 text-[11px] transition-colors',
+            'flex items-center gap-2 text-[10px] transition-colors',
             r.ok ? 'text-emerald-600' : 'text-stone-400',
           )}
         >
-          {r.ok ? <Check size={12} /> : <X size={12} className="text-stone-300" />}
+          {r.ok ? <Check size={10} /> : <X size={10} className="text-stone-300" />}
           <span>{r.label}</span>
         </li>
       ))}

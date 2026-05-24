@@ -5,7 +5,7 @@ import React from 'react';
 // happens in one place — and so the static analyser doesn't keep flagging
 // two near-identical Field helpers as duplicate code.
 
-const INPUT_CLS = 'w-full bg-bone border border-stone-line rounded-2xl px-4 py-3 text-sm focus:outline-none focus-visible:outline-none focus:border-charcoal/30 focus:ring-2 focus:ring-stone-200 transition-colors';
+const INPUT_CLS = 'w-full bg-bone border border-stone-line rounded-xl px-3.5 py-2 text-sm focus:outline-none focus-visible:outline-none focus:border-charcoal/30 focus:ring-2 focus:ring-stone-200 transition-colors';
 
 export interface FormFieldProps {
   label: string;
@@ -19,8 +19,8 @@ export interface FormFieldProps {
 
 export function FormField({ label, value, onChange, type = 'text', required, multiline, placeholder }: FormFieldProps) {
   return (
-    <label className="space-y-1.5 block">
-      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400">
+    <label className="space-y-1 block">
+      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
         {label}{required && <span className="text-brand-orange ml-1">*</span>}
       </span>
       {multiline ? (
@@ -39,8 +39,8 @@ export function FormSelect({ label, value, onChange, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <label className="space-y-1.5 block">
-      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400">{label}</span>
+    <label className="space-y-1 block">
+      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{label}</span>
       <select value={value} onChange={onChange} className={INPUT_CLS}>
         {children}
       </select>

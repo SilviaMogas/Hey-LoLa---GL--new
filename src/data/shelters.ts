@@ -13,6 +13,7 @@ export interface ShelterDog {
   sex?: 'Male' | 'Female';
   photo?: string;
   bio: string;
+  ensName?: string;
 }
 
 export interface Shelter {

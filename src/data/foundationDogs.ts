@@ -29,6 +29,7 @@ export interface FoundationDog {
   status: DogStatus;
   lastSyncedAt?: string;
   passport: DogPassport;
+  ensName?: string;
 }
 
 /** Build a stable passport object for a dog. Used both for seed data
@@ -83,6 +84,7 @@ export const FOUNDATION_DOGS: FoundationDog[] = [
     status: 'available',
     lastSyncedAt: '2026-05-12',
     passport: buildPassport('Lucky', 'animal-haven', 'available'),
+    ensName: 'lucky.heylola.eth',
   },
   {
     id: 'pearl',
@@ -101,6 +103,7 @@ export const FOUNDATION_DOGS: FoundationDog[] = [
     status: 'available',
     lastSyncedAt: '2026-05-12',
     passport: buildPassport('Pearl', 'animal-haven', 'available'),
+    ensName: 'pearl.heylola.eth',
   },
   {
     id: 'rio',
@@ -120,5 +123,6 @@ export const FOUNDATION_DOGS: FoundationDog[] = [
     status: 'available',
     lastSyncedAt: '2026-05-12',
     passport: buildPassport('Rio', 'animal-haven', 'available'),
+    ensName: 'rio.heylola.eth',
   },
 ];

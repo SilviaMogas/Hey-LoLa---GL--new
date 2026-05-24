@@ -186,6 +186,11 @@ export const FoundationShelters: React.FC = () => {
                       <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[#C4622D] bg-[#FDF8F6] border border-[#f3e3da] rounded-full px-2 py-0.5">Adopt</span>
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{dog.breed} · {dog.age}{dog.sex ? ` · ${dog.sex}` : ''}</p>
+                    {dog.ensName && (
+                      <p className="text-[10px] font-mono text-[#7A8C6E] bg-[#F7F9F5] border border-[#e2ead9] rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 w-fit">
+                        <span className="opacity-60">◆</span> {dog.ensName}
+                      </p>
+                    )}
                     <p className="text-sm text-stone-500 font-light leading-relaxed flex-1">{dog.bio}</p>
                     <button
                       type="button"

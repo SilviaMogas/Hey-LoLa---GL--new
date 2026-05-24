@@ -6,7 +6,7 @@ import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { SEO } from '../lib/seo';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
 
-const blankDog = (): ShelterDog => ({ id: `dog-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name: '', breed: '', age: '', sex: undefined, photo: '', bio: '' });
+const blankDog = (): ShelterDog => ({ id: `dog-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name: '', breed: '', age: '', sex: undefined, photo: '', bio: '', ensName: '' });
 
 /**
  * Shelter self-service portal. A shelter opens a shareable link
@@ -115,7 +115,8 @@ export const ShelterPortal: React.FC = () => {
               <select value={d.sex ?? ''} onChange={(e) => patchDog(i, { sex: (e.target.value || undefined) as ShelterDog['sex'] })} className="luxury-input h-9 text-sm">
                 <option value="">Sex…</option><option value="Male">Male</option><option value="Female">Female</option>
               </select>
-              <input value={d.photo ?? ''} onChange={(e) => patchDog(i, { photo: e.target.value })} placeholder="Photo URL" className="luxury-input h-9 text-sm sm:col-span-2" />
+              <input value={d.photo ?? ''} onChange={(e) => patchDog(i, { photo: e.target.value })} placeholder="Photo URL" className="luxury-input h-9 text-sm" />
+              <input value={d.ensName ?? ''} onChange={(e) => patchDog(i, { ensName: e.target.value })} placeholder="ENS domain (e.g. name.heylola.eth)" className="luxury-input h-9 text-sm" />
               <textarea value={d.bio} onChange={(e) => patchDog(i, { bio: e.target.value })} placeholder="Short bio" rows={2} className="luxury-input p-2 text-sm w-full resize-none sm:col-span-2" />
               <button type="button" onClick={() => patch({ dogs: shelter.dogs.filter((_, j) => j !== i) })} className="text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] inline-flex items-center gap-1 sm:col-span-2"><Trash2 size={12} /> Remove dog</button>
             </div>

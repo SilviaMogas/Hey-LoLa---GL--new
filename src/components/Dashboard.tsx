@@ -76,14 +76,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     const fetchData = async () => {
       if (!user) return;
       try {
-        // Favorites — placeIds may point at Firestore docs OR at synthetic
-        // `curated_<name>` ids (Explore renders the curated seed when a venue
-        // hasn't been imported yet). Resolve from both sources.
+        // Favorites
         const { data: favRows } = await supabase.from('favorites').select('place_id').eq('user_id', user.id);
-        const favIds = (favRows || []).map(r => r.place_id as string);
+        const favIds = (favRows || []).map((r: Record<string, unknown>) => r.place_id as string);
         if (favIds.length > 0) {
-          const { data: placeRows } = await supabase.from('places').select('*');
-          const dbPlaces = (placeRows || []).map(r => ({ ...r, id: r.id })) as Place[];
+          const { data: dbRows } = await supabase.from('places').select('*');
+          const dbPlaces = (dbRows || []).map((r: Record<string, unknown>) => ({ ...r, id: r.id as string })) as Place[];
           const seedPlaces = curatedPlaces.map((cp) => ({
             ...cp,
             id: `curated_${cp.name.replace(/\s/g, '_')}`,
@@ -99,23 +97,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
           setFavorites([]);
         }
 
-        // Local community furrys — real public pet profiles from other users.
-        // Priority: user's local hub → home city → Miami → any city.
+        // Local community furrys
         const userCity = (profile?.localHub || profile?.homeCity || '').toLowerCase();
         const { data: petRows } = await supabase.from('pets').select('*').eq('is_public', true).limit(50);
         const allPublic = (petRows || [])
-          .map(r => ({
-            id: r.id,
-            userId: r.user_id,
-            name: r.name,
-            type: r.type,
-            sex: r.sex,
-            breed: r.breed,
-            photoURL: r.photo_url,
-            city: r.city,
-            isHidden: r.is_hidden,
-            isPublic: r.is_public,
-          } as PetData))
+          .map((r: Record<string, unknown>) => ({ ...r, id: r.id as string, userId: r.user_id as string, city: r.city as string, isHidden: r.is_hidden as boolean }) as unknown as PetData)
           .filter(p => !p.isHidden && p.userId !== user.id);
 
         const matchCity = (city: string) => allPublic.filter(p => (p.city || '').toLowerCase() === city);
@@ -142,19 +128,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
         const owners: Record<string, { name: string; photoURL: string }> = {};
         await Promise.all(ownerUids.map(async (uid) => {
           try {
-            const { data: userRow } = await supabase.from('users').select('display_name, first_name, last_name, photo_url').eq('id', uid).single();
-            if (userRow) {
-              const u = { displayName: userRow.display_name, firstName: userRow.first_name, lastName: userRow.last_name, photoURL: userRow.photo_url } as Partial<UserProfile>;
-              const fallback = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
+            const { data: uRow } = await supabase.from('users').select('display_name, first_name, last_name, photo_url').eq('id', uid).maybeSingle();
+            if (uRow) {
+              const u = uRow as Record<string, unknown>;
+              const fallback = `${(u.first_name as string) ?? ''} ${(u.last_name as string) ?? ''}`.trim();
               owners[uid] = {
-                name: u.displayName ?? (fallback || 'Member'),
-                photoURL: u.photoURL ?? '',
+                name: (u.display_name as string) ?? (fallback || 'Member'),
+                photoURL: (u.photo_url as string) ?? '',
               };
             }
           } catch (err) {
-            // Reading other users may be forbidden by Firestore rules — keep
-            // a silent fallback. Don't log the uid — it leaks identity in
-            // shared browser sessions / screenshots.
             void err;
           }
         }));
@@ -178,7 +161,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       // Mirror the Navbar fallback: when the Firestore profile has no photo
       // yet, fall back to the auth photoURL (e.g. Google sign-in avatar) so
       // the form preview always matches what the rest of the app shows.
-      setNewPhotoURL(profile.photoURL || user?.user_metadata?.avatar_url as string || '');
+      setNewPhotoURL(profile.photoURL || (user?.user_metadata?.avatar_url as string | undefined) || '');
     }
   }, [user, profile]);
 
@@ -193,7 +176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     setNewCity(profile.homeCity ?? '');
     setNewHandle(profile.username ?? '');
     setHandleError('');
-    setNewPhotoURL(profile.photoURL || user?.user_metadata?.avatar_url as string || '');
+    setNewPhotoURL(profile.photoURL || (user?.user_metadata?.avatar_url as string | undefined) || '');
   }, [showForm, profile, user]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,7 +206,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       updated_at: now,
     }).eq('id', user.id);
     await supabase.auth.updateUser({
-      data: { display_name: displayName, photo_url: newPhotoURL || undefined },
+      data: { display_name: displayName, avatar_url: newPhotoURL || undefined },
     });
   };
 
@@ -272,7 +255,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
             <div className="relative z-10">
               <div className="space-y-4">
               <div className="space-y-1">
-                <span className="text-stone-400 text-[10px] font-black uppercase tracking-[0.4em]">Profile Curation</span>
+                <span className="text-stone-400 text-[10px] font-black uppercase tracking-[0.4em]">{t.dashboardExtra.profileCuration}</span>
                 <h3 className="text-2xl md:text-3xl font-serif italic tracking-tight text-charcoal/90 leading-tight">{t.dashboard.ownerDetails}</h3>
                 <p className="text-sm text-stone-400 font-light italic">{t.dashboard.completeProfileDesc}</p>
               </div>
@@ -291,7 +274,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                       <UserIcon size={28} className="text-stone-300" />
                     )}
                     <span className="absolute inset-0 bg-black/40 text-white text-[9px] font-black uppercase tracking-[0.2em] flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Camera size={18} /> Change
+                      <Camera size={18} /> {t.common.change}
                     </span>
                   </button>
                   <input
@@ -302,15 +285,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                     className="hidden"
                   />
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Profile Photo</p>
-                    <p className="text-xs text-stone-400 italic">Click the avatar to upload an image.</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">{t.dashboardExtra.profilePhoto}</p>
+                    <p className="text-xs text-stone-400 italic">{t.dashboardExtra.clickAvatar}</p>
                     {newPhotoURL && (
                       <button
                         type="button"
                         onClick={() => setNewPhotoURL('')}
                         className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-charcoal underline-offset-4 hover:underline"
                       >
-                        Remove photo
+                        {t.dashboardExtra.removePhoto}
                       </button>
                     )}
                   </div>
@@ -350,11 +333,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                     placeholder="e.g. Barcelona"
                     className="luxury-input h-11 w-full text-sm font-medium"
                   />
-                  <p className="text-[10px] text-stone-400 ml-1">Where you live (free text).</p>
+                  <p className="text-[10px] text-stone-400 ml-1">{t.dashboardExtra.homeCityHint}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">Local Hub</label>
+                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboardExtra.localHub}</label>
                   <div className="flex flex-wrap gap-1.5">
                     {HUB_CITIES.map((h) => {
                       const selected = newLocalHub === h.id;
@@ -373,12 +356,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                       );
                     })}
                   </div>
-                  <p className="text-[10px] text-stone-400 ml-1">Your Hey Lola community city, can differ from where you live.</p>
-                  <p className="text-[10px] text-brand-orange/90 ml-1">Free plan includes one hub. Switch city once a year, or upgrade to join more.</p>
+                  <p className="text-[10px] text-stone-400 ml-1">{t.dashboardExtra.hubHint}</p>
+                  <p className="text-[10px] text-brand-orange/90 ml-1">{t.dashboardExtra.hubUpgradeHint}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">Handle</label>
+                  <label className="text-[10px] font-black uppercase font-sans tracking-[0.2em] text-stone-300 ml-1">{t.dashboardExtra.handle}</label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-medium">@</span>
                     <input
@@ -393,7 +376,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                   {handleError ? (
                     <p className="text-[11px] text-red-500 ml-1">{handleError}</p>
                   ) : (
-                    <p className="text-[11px] text-stone-400 ml-1">3-20 caracteres: letras, números o _. Te quedan {changesRemaining(profile?.usernameChangedAt)} cambios este mes.</p>
+                    <p className="text-[11px] text-stone-400 ml-1">{t.dashboardExtra.handleHint.replace('{n}', String(changesRemaining(profile?.usernameChangedAt)))}</p>
                   )}
                 </div>
 
@@ -402,7 +385,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                   <textarea
                     value={newBio}
                     onChange={(e) => setNewBio(e.target.value)}
-                    placeholder="Tell us about yourself and your furry friends..."
+                    placeholder={t.dashboardExtra.bioPlaceholder}
                     rows={3}
                     className="luxury-input p-4 h-24 resize-none w-full text-base font-medium"
                   />
@@ -485,7 +468,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 pt-2 pb-3 border-b border-stone-100">
          <div className="space-y-1.5">
            <div className="flex items-center gap-3">
-             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Welcome Back</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">{t.dashboardExtra.welcomeBack}</span>
              {(() => {
                const tier = getTier(profile?.memberPlan, isAdmin);
                return (
@@ -503,15 +486,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
               {t.dashboard.greeting} <span className="text-stone-300">{firstName}<span className="text-charcoal">.</span></span>
            </h1>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug">{t.dashboard.nextHeading}</p>
-           <div className="pt-0.5"><StatusComposer userId={user?.id} initialStatus={profile?.status} /></div>
-           <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug pt-2">What&apos;s on this week?</p>
+           <div className="pt-0.5"><StatusComposer userId={user?.id} initialStatus={profile?.status} presets={STATUS_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key], key: p.key }))} /></div>
+           <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug pt-2">{t.dashboardExtra.whatsOnThisWeek}</p>
            <div className="pt-0.5">
              <StatusComposer
                userId={user?.id}
                initialStatus={profile?.whatsOn}
                field="whatsOn"
-               presets={WHATS_ON_PRESETS}
-               placeholder="e.g. Park day, brunch, vet visit…"
+               presets={WHATS_ON_PRESET_ICONS.map(p => ({ icon: p.icon, label: t.dashboardExtra[p.key], key: p.key }))}
+               placeholder={t.dashboardExtra.whatsOnPlaceholder}
              />
            </div>
          </div>
@@ -525,7 +508,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
              </div>
              <div className="text-left">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal mb-0.5">{t.dashboard.ownerDetails}</p>
-                <p className="text-[8px] font-bold text-stone-300 uppercase tracking-[0.2em] leading-none">Settings</p>
+                <p className="text-[8px] font-bold text-stone-300 uppercase tracking-[0.2em] leading-none">{t.dashboardExtra.settings}</p>
              </div>
            </button>
          )}
@@ -609,11 +592,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                   <div className="flex items-center gap-4">
                     <div className="w-1.5 h-5 bg-stone-300 rounded-full" />
                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">
-                      Community Furrys{newCity ? ` • ${newCity}` : ''}
+                      {t.dashboardExtra.communityFurrys}{newCity ? ` • ${newCity}` : ''}
                     </h3>
                   </div>
                   <div className="flex items-center gap-2 text-[9px] font-black text-stone-400 uppercase tracking-[0.2em] bg-white px-3 py-1.5 rounded-full border border-stone-100">
-                     <div className="w-1.5 h-1.5 bg-charcoal rounded-full animate-pulse" /> Real Members
+                     <div className="w-1.5 h-1.5 bg-charcoal rounded-full animate-pulse" /> {t.dashboardExtra.realMembers}
                   </div>
                </div>
 
@@ -663,7 +646,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
                                }}
                                className="luxury-button-secondary w-full h-10 text-[9px] tracking-[0.2em] shadow-sm border-stone-100 disabled:opacity-40"
                              >
-                                <MessageSquare size={12} /> Send a message
+                                <MessageSquare size={12} /> {t.dashboardExtra.sendMessage}
                              </button>
                           </div>
                        </div>
@@ -811,6 +794,7 @@ function InsightsSection({
   onUpgrade: () => void;
   onExploreClick: () => void;
 }) {
+  const { t } = useTranslation();
   const d = getMembershipDerived(profile, pets, isAdmin);
   const tier = getTier(profile?.memberPlan, isAdmin);
   const verifBadge: Record<string, string> = {
@@ -820,14 +804,14 @@ function InsightsSection({
     'Not verified': 'bg-stone-50 text-stone-500',
   };
   const cityHero = profile?.memberPlan && profile.memberPlan !== 'free'
-    ? 'Rewards unlocking'
-    : 'Unlock your local perks';
+    ? t.dashboardExtra.rewardsUnlocking
+    : t.dashboardExtra.unlockPerks;
 
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-4 border-b border-stone-100 pb-3">
         <div className="w-1.5 h-5 bg-stone-300 rounded-full" />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">Insights</h3>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300">{t.dashboardExtra.insights}</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-3">
@@ -835,23 +819,23 @@ function InsightsSection({
           [
             {
               icon: <ShieldCheck size={18} />,
-              title: 'Verification Status',
+              title: t.dashboardExtra.verificationStatus,
               body: d.verificationCopy,
               badgeLabel: d.verification,
               badgeClass: verifBadge[d.verification] || 'bg-stone-50 text-stone-500',
             },
             {
               icon: <Sparkles size={18} />,
-              title: 'Member Level',
-              body: `You are ${d.level.badge}: ${d.level.label}. ${d.level.description}`,
+              title: t.dashboardExtra.memberLevel,
+              body: `${d.level.badge}: ${d.level.label}. ${d.level.description}`,
               badgeLabel: d.level.badge,
               badgeClass: cn(tier.bgClass, tier.textClass),
             },
             {
               icon: <ShieldCheck size={18} />,
-              title: 'Unlocking Records',
+              title: t.dashboardExtra.unlockingRecords,
               body: d.recordsCopy,
-              badgeLabel: `${d.recordsPercent}% complete`,
+              badgeLabel: `${d.recordsPercent}% ${t.dashboardExtra.complete}`,
               badgeClass: 'bg-stone-50 text-stone-500',
               progressPercent: d.recordsPercent,
             },
@@ -859,7 +843,7 @@ function InsightsSection({
               icon: <Compass size={18} />,
               title: cityHero,
               body: d.cityRewardsCopy,
-              badgeLabel: 'City Rewards',
+              badgeLabel: t.dashboardExtra.cityRewards,
               badgeClass: 'bg-white/10 text-white/40',
               variant: 'hero' as const,
             },
@@ -867,7 +851,7 @@ function InsightsSection({
               icon: <ArrowRight size={18} />,
               title: d.nextActionTitle,
               body: d.nextActionCopy,
-              badgeLabel: 'Next step',
+              badgeLabel: t.dashboardExtra.nextStep,
               badgeClass: 'text-brand-orange bg-transparent',
               variant: 'cta' as const,
               footer: (
@@ -875,7 +859,7 @@ function InsightsSection({
                   onClick={pets.length === 0 ? onUpgrade : onExploreClick}
                   className="text-[10px] font-black uppercase tracking-[0.25em] text-charcoal hover:tracking-[0.3em] transition-all underline-offset-4 hover:underline"
                 >
-                  Take the next step →
+                  {t.dashboardExtra.takeNextStep}
                 </button>
               ),
             },
@@ -899,6 +883,7 @@ const PLAN_LABEL: Record<string, string> = {
 };
 
 function MembershipCard({ profile, user }: { profile: UserProfile | null; user: any }) {
+  const { t } = useTranslation();
   const memberPlan = profile?.memberPlan ?? 'free';
   const membership = profile?.membership;
   const isPaid = memberPlan !== 'free';
@@ -921,7 +906,7 @@ function MembershipCard({ profile, user }: { profile: UserProfile | null; user: 
     <div className="bg-white p-5 rounded-2xl border border-stone-100 space-y-3 shadow-sm">
       {checkoutSuccess && (
         <div className="bg-emerald-50 text-emerald-700 text-xs font-medium px-3 py-2 rounded-xl">
-          Welcome! Your free trial has started. Enjoy your perks.
+          {t.dashboardExtra.trialStarted}
         </div>
       )}
       <div className="flex items-center justify-between">
@@ -936,35 +921,35 @@ function MembershipCard({ profile, user }: { profile: UserProfile | null; user: 
         </span>
       </div>
       <div className="space-y-1">
-        <h4 className="text-lg font-serif italic tracking-tight">Membership</h4>
+        <h4 className="text-lg font-serif italic tracking-tight">{t.dashboardExtra.membershipTitle}</h4>
         {isPaid && status === 'on_trial' && trialEndsAt && (
           <p className="text-sm text-stone-400 leading-snug italic font-light">
-            Free trial — billing starts {trialEndsAt.toLocaleDateString()}
+            {t.dashboardExtra.freeTrialBilling.replace('{date}', trialEndsAt.toLocaleDateString())}
           </p>
         )}
         {isPaid && status === 'active' && renewsAt && !membership?.cancelAtPeriodEnd && (
           <p className="text-sm text-stone-400 leading-snug italic font-light">
-            Renews on {renewsAt.toLocaleDateString()}
+            {t.dashboardExtra.renewsOn.replace('{date}', renewsAt.toLocaleDateString())}
           </p>
         )}
         {isPaid && status === 'active' && membership?.cancelAtPeriodEnd && renewsAt && (
           <p className="text-sm text-stone-400 leading-snug italic font-light">
-            Cancels on {renewsAt.toLocaleDateString()}
+            {t.dashboardExtra.cancelsOn.replace('{date}', renewsAt.toLocaleDateString())}
           </p>
         )}
         {isPaid && (status === 'past_due' || status === 'unpaid') && (
           <p className="text-sm text-amber-700 leading-snug italic font-light">
-            Payment issue — update your card to keep your perks.
+            {t.dashboardExtra.paymentIssue}
           </p>
         )}
         {isPaid && status === 'cancelled' && (
           <p className="text-sm text-stone-400 leading-snug italic font-light">
-            Cancelled — perks remain until {membership?.endsAt ? new Date(membership.endsAt).toLocaleDateString() : 'period end'}.
+            {t.dashboardExtra.cancelledPerks.replace('{date}', membership?.endsAt ? new Date(membership.endsAt).toLocaleDateString() : t.dashboardExtra.cancelledPerksEnd)}
           </p>
         )}
         {!isPaid && (
           <p className="text-sm text-stone-400 leading-snug italic font-light">
-            Free plan. Unlock perks with Local, Travel or Black.
+            {t.dashboardExtra.freePlanDesc}
           </p>
         )}
       </div>
@@ -975,7 +960,7 @@ function MembershipCard({ profile, user }: { profile: UserProfile | null; user: 
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-stone-500 hover:text-charcoal underline-offset-4 hover:underline"
         >
-          Manage subscription
+          {t.dashboardExtra.manageSubscription}
         </a>
       )}
       {!isPaid && (
@@ -983,7 +968,7 @@ function MembershipCard({ profile, user }: { profile: UserProfile | null; user: 
           href="/club"
           className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-stone-500 hover:text-charcoal underline-offset-4 hover:underline"
         >
-          Upgrade
+          {t.dashboardExtra.upgrade}
         </a>
       )}
     </div>
@@ -994,24 +979,25 @@ function MembershipCard({ profile, user }: { profile: UserProfile | null; user: 
 // Quick-pick chips + free-text answer to "Where are you and your
 // companions heading next?" — saves to users/{uid}.status
 
-const STATUS_PRESETS = [
-  { icon: Plane, label: 'Travelling' },
-  { icon: HomeIcon, label: 'At home' },
-  { icon: Compass, label: 'Planning a trip' },
+const STATUS_PRESET_ICONS = [
+  { icon: Plane, key: 'travelling' as const },
+  { icon: HomeIcon, key: 'atHome' as const },
+  { icon: Compass, key: 'planningTrip' as const },
 ];
 
-const WHATS_ON_PRESETS = [
-  { icon: Trees, label: 'Park day' },
-  { icon: Coffee, label: 'Brunch' },
-  { icon: Waves, label: 'Beach day' },
-  { icon: Stethoscope, label: 'Vet visit' },
-  { icon: Bed, label: 'Hotel stay' },
-  { icon: PartyPopper, label: 'Dog event' },
+const WHATS_ON_PRESET_ICONS = [
+  { icon: Trees, key: 'parkDay' as const },
+  { icon: Coffee, key: 'brunch' as const },
+  { icon: Waves, key: 'beachDay' as const },
+  { icon: Stethoscope, key: 'vetVisit' as const },
+  { icon: Bed, key: 'hotelStay' as const },
+  { icon: PartyPopper, key: 'dogEvent' as const },
 ];
 
 interface StatusPreset {
   icon: React.ComponentType<{ size?: number }>;
   label: string;
+  key?: string;
 }
 
 interface StatusComposerProps {
@@ -1024,7 +1010,8 @@ interface StatusComposerProps {
   placeholder?: string;
 }
 
-function StatusComposer({ userId, initialStatus, field = 'status', presets = STATUS_PRESETS, placeholder }: StatusComposerProps) {
+function StatusComposer({ userId, initialStatus, field = 'status', presets = [], placeholder }: StatusComposerProps) {
+  const { t: tr } = useTranslation();
   const [status, setStatus] = useState(initialStatus || '');
   const [draft, setDraft] = useState(initialStatus || '');
   const [editing, setEditing] = useState(!initialStatus);
@@ -1040,7 +1027,7 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
     const trimmed = value.trim();
     setSaving(true);
     try {
-      const snakeField = field.replace(/[A-Z]/g, c => `_${c.toLowerCase()}`);
+      const snakeField = field.replace(/([A-Z])/g, '_$1').toLowerCase();
       await supabase.from('users').update({
         [snakeField]: trimmed,
         [`${snakeField}_updated_at`]: new Date().toISOString(),
@@ -1055,7 +1042,10 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
     }
   };
 
-  // Display mode: shows the saved status with an edit pencil
+  // Display mode: shows the saved status with an edit pencil.
+  // Stored value may be a language-neutral key (e.g. 'travelling') or free text.
+  const displayLabel = presets.find(p => p.key === status)?.label || status;
+
   if (!editing && status) {
     return (
       <button
@@ -1063,7 +1053,7 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
         className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-stone-50 border border-stone-100 hover:border-stone-200 transition-colors max-w-full"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-        <span className="text-sm font-medium text-charcoal truncate">{status}</span>
+        <span className="text-sm font-medium text-charcoal truncate">{displayLabel}</span>
         <Pencil size={12} className="text-stone-300 group-hover:text-charcoal transition-colors shrink-0" />
       </button>
     );
@@ -1073,11 +1063,11 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
     <div className="space-y-3 pt-1">
       {/* Preset chips */}
       <div className="flex flex-wrap gap-2">
-        {presets.map(({ icon: Icon, label }) => (
+        {presets.map(({ icon: Icon, label, key: presetKey }) => (
           <button
-            key={label}
+            key={presetKey || label}
             type="button"
-            onClick={() => save(label)}
+            onClick={() => save(presetKey || label)}
             disabled={saving}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-[11px] font-medium text-charcoal hover:bg-stone-50 hover:border-stone-300 transition-colors disabled:opacity-40"
           >
@@ -1099,7 +1089,7 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, 80))}
-          placeholder={placeholder ?? 'Or write your own answer…'}
+          placeholder={placeholder ?? tr.dashboardExtra.orWriteOwn}
           className="flex-1 h-10 px-4 rounded-full bg-white border border-stone-200 text-sm placeholder:text-stone-300 focus:outline-none focus:border-charcoal focus:ring-2 focus:ring-stone-100 transition-colors"
           maxLength={80}
         />
@@ -1117,7 +1107,7 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
             onClick={() => { setDraft(status); setEditing(false); }}
             className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300 hover:text-charcoal transition-colors px-2"
           >
-            Cancel
+            {tr.common.cancel}
           </button>
         )}
       </form>

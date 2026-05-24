@@ -290,7 +290,7 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                   <button
                     disabled={loading}
                     type="submit"
-                    className="w-full luxury-button bg-charcoal text-white h-14 mt-4 uppercase tracking-[0.25em] text-[11px] font-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
+                    className="w-full luxury-button bg-charcoal text-white h-11 mt-4 uppercase tracking-[0.25em] text-[11px] font-black hover:bg-stone-800 transition-all flex items-center justify-center gap-2"
                   >
                     {loading && <Loader2 size={16} className="animate-spin" />}
                     Submit

@@ -50,7 +50,7 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ email, onResend }) => 
           <button 
             onClick={handleResend}
             disabled={resending}
-            className="w-full h-14 bg-charcoal text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl disabled:opacity-50 transition-all"
+            className="w-full h-11 bg-charcoal text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl disabled:opacity-50 transition-all"
           >
             {resending ? <Loader2 className="animate-spin" size={16} /> : <RefreshCw size={16} />}
             {resending ? 'Sending...' : 'Resend link'}

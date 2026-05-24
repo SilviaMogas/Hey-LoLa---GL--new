@@ -57,6 +57,31 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Convert a snake_case Supabase row into a camelCase FoundationDog.
+ *  DB columns differ from the TS interface in both casing and naming. */
+export function rowToFoundationDog(row: Record<string, unknown>): FoundationDog {
+  return {
+    id: row.id as string,
+    name: (row.name as string) ?? '',
+    partnerId: (row.shelter_id as string) ?? (row.partner_id as string) ?? '',
+    partnerName: (row.partner_name as string) ?? '',
+    sourceUrl: row.source_url as string | undefined,
+    imageUrl: (row.photo as string) ?? (row.image_url as string | undefined),
+    sex: (row.sex as Sex) ?? 'unknown',
+    ageLabel: (row.age as string) ?? (row.age_label as string | undefined),
+    breed: row.breed as string | undefined,
+    weightKg: row.weight_kg as number | undefined,
+    location: row.location as string | undefined,
+    description: (row.bio as string) ?? (row.description as string) ?? '',
+    specialCareNotes: row.special_care_notes as string | undefined,
+    adoptionFeeUsd: row.adoption_fee_usd as number | undefined,
+    status: (row.status as DogStatus) ?? 'available',
+    lastSyncedAt: row.last_synced_at as string | undefined,
+    passport: row.passport as DogPassport ?? { slug: '', publicUrl: '', visibility: 'hidden' as const, verificationStatus: 'pending' as const, createdAt: '', updatedAt: '' },
+    ensName: row.ens_name as string | undefined,
+  };
+}
+
 /* ── Seed data ────────────────────────────────────────────────────────
  *
  * Marked as Preview content on the directory page. When the Animal

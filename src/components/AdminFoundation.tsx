@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Copy, QrCode, Eye, EyeOff, Mail, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import type { FoundationDog } from '../data/foundationDogs';
+import { type FoundationDog, rowToFoundationDog } from '../data/foundationDogs';
 import { passportUrl, qrCodeUrl } from '../lib/passportShare';
 
 type FoundationInterestStatus = 'new' | 'contacted' | 'closed';
@@ -36,7 +36,7 @@ export const AdminFoundation: React.FC = () => {
 
   useEffect(() => {
     const fetchDogs = () => supabase.from('foundation_dogs').select('*').order('created_at', { ascending: false })
-      .then(({ data }) => { if (data) setDogs(data as FoundationDog[]); });
+      .then(({ data }) => { if (data) setDogs(data.map((d: Record<string, unknown>) => rowToFoundationDog(d))); });
     const fetchInterests = () => supabase.from('foundation_interests').select('*').order('created_at', { ascending: false })
       .then(({ data }) => { if (data) setInterests(data as FoundationInterest[]); });
     fetchDogs();

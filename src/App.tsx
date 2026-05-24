@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef, lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './lib/useAuth';
 import { isAdminEmail } from './lib/admin';
@@ -28,6 +28,7 @@ import { motion } from 'motion/react';
 import { LanguageProvider } from './lib/LanguageContext';
 import { CookieBanner } from './components/CookieBanner';
 import { ComingSoon, hasAccess } from './components/ComingSoon';
+import { VerifyEmailBanner } from './components/VerifyEmailBanner';
 
 import { WaitlistModal, WaitlistType } from './components/WaitlistModal';
 
@@ -217,23 +218,11 @@ function AppContent() {
     }
   }, [user]);
 
-  // Global verify-email gate. A signed-in but unverified user can only see
-  // /verify-email and the auth pages. Public marketing pages (/, /about,
-  // /explore, /perks, etc.) ALSO redirect to /verify-email — otherwise
-  // a fresh signup lands on the homepage and never sees the verification
-  // step. Verified users are free to roam.
-  useEffect(() => {
-    if (!user) return;
-    if (user.emailVerified) return;
-    const allowedUnverifiedPaths = new Set<string>([
-      paths.verifyEmail,
-      paths.login,
-      paths.signup,
-    ]);
-    if (!allowedUnverifiedPaths.has(location.pathname)) {
-      navigate(paths.verifyEmail, { replace: true });
-    }
-  }, [user, location.pathname, navigate]);
+  // Soft verify-email nudge: after signup the onSuccess handler already
+  // navigates to /onboarding, so the user is not dumped on a blank
+  // verify-email wall. The banner component (VerifyEmailBanner) handles
+  // the reminder UX inline, and the verify-email page is still reachable
+  // if the user navigates there manually.
 
   // Bounce signed-out users off authenticated routes
   const authenticatedPaths = useRef<Set<string>>(new Set([
@@ -249,9 +238,9 @@ function AppContent() {
     }
   }, [user, location.pathname, navigate]);
 
-  // Run any deferred action once auth + verification both succeed
+  // Run any deferred action once auth succeeds
   useEffect(() => {
-    if (user && user.emailVerified && pendingAuthAction) {
+    if (user && pendingAuthAction) {
       pendingAuthAction.action();
       setPendingAuthAction(null);
     }
@@ -260,7 +249,7 @@ function AppContent() {
   // Live pet collection — drives Dashboard / Passport / Explore behavior
   useEffect(() => {
     if (!user) return;
-    if (!user.emailVerified && !verificationChecked) return;
+    // Allow pet fetching for unverified users so onboarding works immediately
 
     const q = query(collection(db, 'pets'), where('userId', '==', user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
@@ -279,7 +268,7 @@ function AppContent() {
     });
 
     return () => unsubscribe();
-  }, [user, verificationChecked, profile?.onboarded, location.pathname, navigate]);
+  }, [user, profile?.onboarded, location.pathname, navigate]);
 
   if (authLoading) {
     return (
@@ -351,6 +340,10 @@ function AppContent() {
         />
       )}
 
+      {user && !user.emailVerified && !hideChrome && (
+        <VerifyEmailBanner email={user.email} />
+      )}
+
       <main className={`flex-grow ${mainPadding}`}>
         <Suspense fallback={<ViewFallback />}>
           <Routes>
@@ -397,7 +390,7 @@ function AppContent() {
                 <Club
                   onBack={() => navigate(paths.home)}
                   onSignUp={() => navigate(paths.signup)}
-                  isLoggedIn={!!user && !!user.emailVerified}
+                  isLoggedIn={!!user}
                   currentPlan={profile?.memberPlan}
                   onRequireLogin={() => navigate(paths.signup)}
                   onJoinWaitlist={(plan) => openWaitlist('member', plan)}

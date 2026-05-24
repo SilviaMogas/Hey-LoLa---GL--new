@@ -37,37 +37,37 @@ export const Footer: React.FC = () => {
 
   const columns: FooterColumn[] = [
     {
-      heading: 'Discover',
+      heading: t.footerCta.discover,
       links: [
-        { label: 'Explore Gems', path: paths.explore },
-        { label: 'Community', path: paths.community },
-        { label: 'The Journal', path: paths.blog },
-        { label: "What's On", path: paths.whatsOn },
-        { label: 'FAQ', path: paths.faq },
+        { label: t.footerCta.exploreGems, path: paths.explore },
+        { label: t.footerCta.community, path: paths.community },
+        { label: t.footerCta.theJournal, path: paths.blog },
+        { label: t.footerCta.whatsOn, path: paths.whatsOn },
+        { label: t.footerCta.faq, path: paths.faq },
       ],
     },
     {
-      heading: 'Membership',
+      heading: t.footerCta.membership,
       links: [
-        { label: 'Hey Lola Club', path: paths.club },
-        { label: 'Join Hey Lola', path: paths.start },
-        { label: 'Manifesto', path: paths.about },
+        { label: t.footerCta.heyLolaClub, path: paths.club },
+        { label: t.footerCta.joinHeyLola, path: paths.start },
+        { label: t.footerCta.manifesto, path: paths.about },
       ],
     },
     {
-      heading: 'Brand',
+      heading: t.footerCta.brand,
       links: [
-        { label: 'Brand Book', path: paths.brandBook },
-        { label: 'The Concierges', path: paths.concierges },
-        { label: 'Foundation', path: paths.foundation },
-        { label: 'Press & Media', path: paths.media },
+        { label: t.footerCta.brandBook, path: paths.brandBook },
+        { label: t.footerCta.theConcierges, path: paths.concierges },
+        { label: t.footerCta.foundation, path: paths.foundation },
+        { label: t.footerCta.pressMedia, path: paths.media },
       ],
     },
     {
-      heading: 'Partners',
+      heading: t.footerCta.partners,
       links: [
-        { label: 'Partner Network', path: paths.partners },
-        { label: 'Creator Partners', path: paths.creators },
+        { label: t.footerCta.partnerNetwork, path: paths.partners },
+        { label: t.footerCta.creatorPartners, path: paths.creators },
         { label: t.footer.privacy, path: paths.privacy },
         { label: t.footer.terms, path: paths.terms },
       ],
@@ -85,13 +85,13 @@ export const Footer: React.FC = () => {
       <section className="bg-charcoal text-white px-5 sm:px-6 py-16 sm:py-20">
         <div className="max-w-5xl mx-auto text-center space-y-3">
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">
-            Still exploring?
+            {t.footerCta.stillExploring}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif italic tracking-tight leading-[0.95]">
-            Find your way in<span className="brand-dot" aria-hidden="true" />
+            {t.footerCta.findYourWay}<span className="brand-dot" aria-hidden="true" />
           </h2>
           <p className="text-sm sm:text-base text-white/50 font-light italic max-w-md mx-auto leading-snug">
-            Two ways to step into the Hey Lola world — as a dog parent, or as a partner who welcomes them.
+            {t.footerCta.twoWays}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-7 max-w-2xl mx-auto text-left">
@@ -101,12 +101,12 @@ export const Footer: React.FC = () => {
               className="group rounded-[1.25rem] bg-bone text-charcoal p-6 flex flex-col gap-3 hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-500"
             >
               <PawPrint size={18} className="text-brand-orange" />
-              <span className="text-lg font-serif italic">Join Hey Lola</span>
+              <span className="text-lg font-serif italic">{t.footerCta.joinHeyLola}</span>
               <span className="text-xs text-stone-500 font-light leading-snug">
-                Organise your dog's life, discover trusted places and unlock curated local perks.
+                {t.footerCta.joinDesc}
               </span>
               <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] pt-1">
-                Get started <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                {t.common.getStarted} <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
 
@@ -116,18 +116,18 @@ export const Footer: React.FC = () => {
               className="group rounded-[1.25rem] bg-white/[0.06] border border-white/10 text-white p-6 flex flex-col gap-3 hover:bg-white/[0.1] hover:-translate-y-0.5 transition-all duration-500"
             >
               <Store size={18} className="text-white/70" />
-              <span className="text-lg font-serif italic">Become a Partner</span>
+              <span className="text-lg font-serif italic">{t.footerCta.becomePartner}</span>
               <span className="text-xs text-white/50 font-light leading-snug">
-                Be discovered by modern dog parents and earn the Hey Lola Verified badge.
+                {t.footerCta.partnerDesc}
               </span>
               <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] pt-1">
-                Partner with us <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                {t.footerCta.partnerWithUs} <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
           </div>
 
           <div className="pt-10 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Want to talk?</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">{t.footerCta.wantToTalk}</p>
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
               onClick={handleCopyEmail}
@@ -136,7 +136,7 @@ export const Footer: React.FC = () => {
               {SUPPORT_EMAIL}
               {copied && (
                 <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600">
-                  <Check size={10} /> Copied
+                  <Check size={10} /> {t.common.copied}
                 </span>
               )}
             </a>
@@ -179,7 +179,7 @@ export const Footer: React.FC = () => {
                   <Linkedin size={15} />
                 </span>
                 <span className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-300 self-center">
-                  Soon
+                  {t.common.soon}
                 </span>
               </div>
             </div>

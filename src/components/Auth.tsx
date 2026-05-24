@@ -17,6 +17,7 @@ import { ArrowRight, ArrowLeft, Loader2, AtSign, Check, X, AlertCircle, Eye, Eye
 import { cn } from '../lib/utils';
 import { track } from '../lib/analytics';
 import { BrandLogo } from './BrandLogo';
+import { useTranslation } from '../lib/LanguageContext';
 
 interface AuthProps {
   onSuccess: (isNew: boolean) => void;
@@ -26,6 +27,7 @@ interface AuthProps {
 }
 
 export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'login' }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'login' | 'signup' | 'reset'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -168,7 +170,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         await signInWithRedirect(auth, googleProvider);
         return; // page navigates away; provisioning happens on return
       } catch (err: any) {
-        setError(err?.message || 'Google sign-in failed');
+        setError(err?.message || t.auth.googleFailed);
         setLoading(false);
         return;
       }
@@ -183,9 +185,9 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-environment' || code === 'auth/cancelled-popup-request') {
         try { await signInWithRedirect(auth, googleProvider); return; } catch { /* fall through to message */ }
       }
-      let message = err.message || 'Google sign-in failed';
+      let message = err.message || t.auth.googleFailed;
       if (code === 'auth/operation-not-allowed') {
-        message = 'Google Sign-In is not enabled in Firebase. Please use email signup.';
+        message = t.auth.googleNotEnabled;
       } else if (code === 'auth/popup-closed-by-user') {
         message = '';
       }
@@ -204,7 +206,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       if (mode === 'signup') {
         if (userType === 'Business') {
           if (!businessName || !contactRole || !businessLocation || !businessReason || !email) {
-            setError('Please fill out all fields.');
+            setError(t.auth.errorFillAll);
             return;
           }
           const docRef = await addDoc(collection(db, 'business_leads'), {
@@ -227,31 +229,31 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
         }
 
         if (!firstName || !lastName || !username) {
-          setError('Please fill out your name and username.');
+          setError(t.auth.errorFillName);
           return;
         }
         if (usernameStatus === 'taken') {
-          setError('That username is already taken.');
+          setError(t.auth.errorUsernameTaken);
           return;
         }
         if (usernameStatus === 'invalid') {
-          setError('Username must be at least 3 characters.');
+          setError(t.auth.errorUsernameMin);
           return;
         }
         if (usernameStatus === 'checking') {
-          setError('We are still checking that username. Please wait a moment.');
+          setError(t.auth.errorUsernameChecking);
           return;
         }
         if (password.length < 8) {
-          setError('Password must be at least 8 characters.');
+          setError(t.auth.errorPasswordMin);
           return;
         }
         if (password !== passwordConfirm) {
-          setError('Passwords do not match.');
+          setError(t.auth.errorPasswordMismatch);
           return;
         }
         if (!termsAccepted) {
-          setError('Please accept the terms to continue.');
+          setError(t.auth.errorAcceptTerms);
           return;
         }
 
@@ -264,12 +266,12 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
           const existing = await getDoc(usernameRef);
           if (existing.exists()) {
             setUsernameStatus('taken');
-            setError('That username was just taken. Please pick another.');
+            setError(t.auth.errorUsernameJustTaken);
             return;
           }
         } catch (err) {
           console.error('Final username availability check failed', err);
-          setError('Could not verify the username. Please try again.');
+          setError(t.auth.errorUsernameVerify);
           return;
         }
 
@@ -338,17 +340,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
       }
     } catch (err: any) {
       const code = err?.code as string | undefined;
-      const messages: Record<string, string> = {
-        'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
-        'auth/invalid-email': 'That email address is invalid.',
-        'auth/weak-password': 'Password must be at least 8 characters.',
-        'auth/user-not-found': "We can't find an account with that email.",
-        'auth/wrong-password': 'Incorrect password. Try again or reset it.',
-        'auth/invalid-credential': 'Incorrect email or password.',
-        'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
-        'auth/network-request-failed': 'Network error. Check your connection and try again.',
-      };
-      setError((code && messages[code]) || err.message || 'Something went wrong. Please try again.');
+      setError(err.message || t.auth.googleFailed);
       if (code) handleFirestoreError(err, OperationType.WRITE, 'auth');
     } finally {
       setLoading(false);
@@ -366,14 +358,14 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
   };
 
   const headline =
-    mode === 'login' ? 'Welcome back' :
-    mode === 'reset' ? 'Reset password' :
-    'Create your account';
+    mode === 'login' ? t.auth.access :
+    mode === 'reset' ? t.auth.reset :
+    t.auth.createAccount;
 
   const sub =
-    mode === 'login' ? 'Sign in to access your dashboard, saved spots, and community.' :
-    mode === 'reset' ? "Enter your email and we'll send you a reset link." :
-    'Free to join. Bring your pet along for the ride.';
+    mode === 'login' ? t.auth.loginSubtitle :
+    mode === 'reset' ? t.auth.resetSubtitle :
+    t.auth.signupSubtitle;
 
   return (
     <div className="min-h-screen bg-white text-charcoal flex flex-col font-sans">
@@ -385,7 +377,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
             className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 hover:text-charcoal transition-colors"
           >
             <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-            Home
+            {t.common.home}
           </button>
         ) : <div />}
         <BrandLogo size="sm" />
@@ -412,18 +404,18 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                   <Check size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-black text-charcoal">Check your inbox</h3>
-                  <p className="text-sm text-stone-500">We sent a reset link to <strong className="text-charcoal">{email}</strong>.</p>
+                  <h3 className="text-base font-black text-charcoal">{t.auth.checkInbox}</h3>
+                  <p className="text-sm text-stone-500">{t.auth.resetSentTo} <strong className="text-charcoal">{email}</strong>.</p>
                 </div>
                 <p className="text-[10px] uppercase tracking-widest text-amber-700 font-black">
-                  ⚠ Check your spam folder if you don't see it.
+                  ⚠ {t.auth.checkSpam}
                 </p>
                 <button
                   type="button"
                   onClick={() => { setResetSent(false); switchMode('login'); }}
-                  className="w-full h-12 bg-charcoal text-white rounded-full font-black text-[10px] uppercase tracking-[0.25em] hover:bg-stone-800 transition-colors"
+                  className="w-full h-11 bg-charcoal text-white rounded-full font-black text-[10px] uppercase tracking-[0.25em] hover:bg-stone-800 transition-colors"
                 >
-                  Back to sign in
+                  {t.auth.backToSignIn}
                 </button>
               </motion.div>
             ) : inquirySent ? (
@@ -436,15 +428,15 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                   <Check size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-black text-charcoal">Inquiry received</h3>
-                  <p className="text-sm text-stone-500">Our team will reach out shortly.</p>
+                  <h3 className="text-base font-black text-charcoal">{t.auth.inquiryReceived}</h3>
+                  <p className="text-sm text-stone-500">{t.auth.teamReachOut}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => { setInquirySent(false); switchMode('login'); }}
-                  className="w-full h-12 bg-charcoal text-white rounded-full font-black text-[10px] uppercase tracking-[0.25em] hover:bg-stone-800 transition-colors"
+                  className="w-full h-11 bg-charcoal text-white rounded-full font-black text-[10px] uppercase tracking-[0.25em] hover:bg-stone-800 transition-colors"
                 >
-                  Back to sign in
+                  {t.auth.backToSignIn}
                 </button>
               </motion.div>
             ) : (
@@ -464,7 +456,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                             : 'text-stone-400 hover:text-charcoal'
                         )}
                       >
-                        {type}
+                        {type === 'Dog Owner' ? t.auth.dogOwner : t.auth.business}
                       </button>
                     ))}
                   </div>
@@ -472,7 +464,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {mode === 'signup' && userType === 'Business' && (
                   <div className="space-y-2.5">
-                    <Field label="Business name">
+                    <Field label={t.auth.businessName}>
                       <input
                         type="text"
                         value={businessName}
@@ -482,7 +474,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         autoComplete="organization"
                       />
                     </Field>
-                    <Field label="Your role">
+                    <Field label={t.auth.contactRole}>
                       <input
                         type="text"
                         value={contactRole}
@@ -491,7 +483,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         className="apple-input"
                       />
                     </Field>
-                    <Field label="City">
+                    <Field label={t.auth.city}>
                       <input
                         type="text"
                         value={businessLocation}
@@ -501,11 +493,11 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         autoComplete="address-level2"
                       />
                     </Field>
-                    <Field label="Why HeyLola?">
+                    <Field label={t.auth.whyHeyLola}>
                       <textarea
                         value={businessReason}
                         onChange={(e) => setBusinessReason(e.target.value)}
-                        placeholder="Tell us about your venue and what you're hoping for"
+                        placeholder={t.auth.whyHeyLolaPlaceholder}
                         className="apple-input resize-none h-16 py-2.5"
                       />
                     </Field>
@@ -514,7 +506,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {mode === 'signup' && userType === 'Dog Owner' && (
                   <>
-                    <Field label="Username">
+                    <Field label={t.auth.username}>
                       <div className="relative">
                         <AtSign size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-300 pointer-events-none" />
                         <input
@@ -534,7 +526,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                     </Field>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <Field label="First name">
+                      <Field label={t.auth.firstName}>
                         <input
                           type="text"
                           value={firstName}
@@ -543,7 +535,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                           autoComplete="given-name"
                         />
                       </Field>
-                      <Field label="Last name">
+                      <Field label={t.auth.lastName}>
                         <input
                           type="text"
                           value={lastName}
@@ -556,7 +548,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                   </>
                 )}
 
-                <Field label="Email">
+                <Field label={t.auth.email}>
                   <input
                     type="email"
                     value={email}
@@ -570,7 +562,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {mode !== 'reset' && userType !== 'Business' && (
                   <Field
-                    label="Password"
+                    label={t.auth.password}
                     extra={
                       mode === 'login' && (
                         <button
@@ -578,7 +570,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                           onClick={() => switchMode('reset')}
                           className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 hover:text-charcoal transition-colors"
                         >
-                          Forgot?
+                          {t.auth.forgot}
                         </button>
                       )
                     }
@@ -588,7 +580,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                        placeholder={mode === 'signup' ? t.auth.atLeast8 : '••••••••'}
                         className="apple-input pr-10"
                         autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                       />
@@ -605,13 +597,13 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                 )}
 
                 {mode === 'signup' && userType !== 'Business' && (
-                  <Field label="Confirm password">
+                  <Field label={t.auth.confirmPassword}>
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={passwordConfirm}
                         onChange={(e) => setPasswordConfirm(e.target.value)}
-                        placeholder="Repeat your password"
+                        placeholder={t.auth.repeatPassword}
                         className="apple-input pr-10"
                         autoComplete="new-password"
                       />
@@ -633,12 +625,12 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
 
                 {/* Referral code — shown on signup, pre-filled from ?ref= URL param */}
                 {mode === 'signup' && userType === 'Dog Owner' && (
-                  <Field label="Referral code (optional)">
+                  <Field label={t.auth.referralCode}>
                     <input
                       type="text"
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                      placeholder="e.g. LOLA2025"
+                      placeholder={t.auth.referralPlaceholder}
                       className="apple-input uppercase tracking-[0.15em]"
                       autoComplete="off"
                       maxLength={20}
@@ -656,7 +648,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                       className="mt-0.5 w-4 h-4 rounded border-stone-300 text-charcoal focus:ring-stone-200 shrink-0 cursor-pointer accent-charcoal"
                     />
                     <span className="leading-snug">
-                      I agree to the <a href="#terms" className="text-charcoal underline decoration-stone-300 underline-offset-2">Terms</a> and <a href="#privacy" className="text-charcoal underline decoration-stone-300 underline-offset-2">Privacy Policy</a>.
+                      {t.auth.termsAgree} <a href="#terms" className="text-charcoal underline decoration-stone-300 underline-offset-2">{t.auth.termsLink}</a> {t.auth.andText} <a href="#privacy" className="text-charcoal underline decoration-stone-300 underline-offset-2">{t.auth.privacyLink}</a>.
                     </span>
                   </label>
                 )}
@@ -677,10 +669,10 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                     <Loader2 className="animate-spin" size={16} />
                   ) : (
                     <>
-                      {mode === 'login' && 'Sign in'}
-                      {mode === 'reset' && 'Send reset link'}
-                      {mode === 'signup' && userType === 'Business' && 'Submit application'}
-                      {mode === 'signup' && userType === 'Dog Owner' && 'Create account'}
+                      {mode === 'login' && t.auth.signInButton}
+                      {mode === 'reset' && t.auth.sendResetLink}
+                      {mode === 'signup' && userType === 'Business' && t.auth.submitApplication}
+                      {mode === 'signup' && userType === 'Dog Owner' && t.auth.createAccount}
                       <ArrowRight size={14} />
                     </>
                   )}
@@ -691,7 +683,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                     <div className="relative my-1">
                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-stone-100" /></div>
                       <div className="relative flex justify-center">
-                        <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">or</span>
+                        <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">{t.common.or}</span>
                       </div>
                     </div>
 
@@ -707,7 +699,7 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
-                      Continue with Google
+                      {t.auth.continueGoogle}
                     </button>
                   </>
                 )}
@@ -719,13 +711,13 @@ export const Auth: React.FC<AuthProps> = ({ onSuccess, onBack, initialMode = 'lo
           {!resetSent && !inquirySent && (
             <p className="text-center text-sm text-stone-500 pt-2">
               {mode === 'login' && (
-                <>New here? <button type="button" onClick={() => switchMode('signup')} className="text-charcoal font-black hover:underline">Create account</button></>
+                <>{t.auth.newHereCreate} <button type="button" onClick={() => switchMode('signup')} className="text-charcoal font-black hover:underline">{t.auth.createAccountLink}</button></>
               )}
               {mode === 'signup' && (
-                <>Already a member? <button type="button" onClick={() => switchMode('login')} className="text-charcoal font-black hover:underline">Sign in</button></>
+                <>{t.auth.alreadyMemberLink} <button type="button" onClick={() => switchMode('login')} className="text-charcoal font-black hover:underline">{t.auth.signInLink}</button></>
               )}
               {mode === 'reset' && (
-                <>Remembered it? <button type="button" onClick={() => switchMode('login')} className="text-charcoal font-black hover:underline">Sign in</button></>
+                <>{t.auth.rememberedIt} <button type="button" onClick={() => switchMode('login')} className="text-charcoal font-black hover:underline">{t.auth.signInLink}</button></>
               )}
             </p>
           )}
@@ -756,11 +748,12 @@ function Field({
 }
 
 function PasswordChecklist({ password, confirm }: { password: string; confirm: string }) {
+  const { t } = useTranslation();
   const rules = [
-    { ok: password.length >= 8, label: 'At least 8 characters' },
-    { ok: /[A-Za-z]/.test(password), label: 'Contains a letter' },
-    { ok: /\d/.test(password), label: 'Contains a number' },
-    { ok: confirm.length > 0 && password === confirm, label: 'Passwords match' },
+    { ok: password.length >= 8, label: t.auth.atLeast8Rule },
+    { ok: /[A-Za-z]/.test(password), label: t.auth.containsLetter },
+    { ok: /\d/.test(password), label: t.auth.containsNumber },
+    { ok: confirm.length > 0 && password === confirm, label: t.auth.passwordsMatch },
   ];
   return (
     <ul className="bg-stone-50/60 border border-stone-100 rounded-xl px-3 py-2.5 space-y-1.5" aria-live="polite">

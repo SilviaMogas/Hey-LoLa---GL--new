@@ -302,13 +302,13 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => navigate(paths.signup)}
-                  className="luxury-button-primary h-12 w-full text-[10px] tracking-[0.25em]"
+                  className="luxury-button-primary h-10 w-full text-[10px] tracking-[0.25em]"
                 >
                   {t.common.signUp}
                 </button>
                 <button
                   onClick={() => navigate(paths.login)}
-                  className="luxury-button-secondary h-12 w-full text-[10px] tracking-[0.25em]"
+                  className="luxury-button-secondary h-10 w-full text-[10px] tracking-[0.25em]"
                 >
                   {t.common.login}
                 </button>

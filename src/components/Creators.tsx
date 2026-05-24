@@ -221,12 +221,12 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
               </div>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-[1.5rem] border border-stone-100 p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-[1.5rem] border border-stone-100 p-5 sm:p-6">
               {/* Personal info */}
-              <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.aboutYou}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-2">
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-3">{t.creators.aboutYou}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.fullName} *</label>
                     <input
                       required
@@ -234,10 +234,10 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.name}
                       onChange={update('name')}
                       placeholder={t.creators.yourName}
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.email} *</label>
                     <input
                       required
@@ -245,11 +245,11 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.email}
                       onChange={update('email')}
                       placeholder="hello@yoursite.com"
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.yourCity} *</label>
                   <input
                     required
@@ -257,53 +257,53 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.city}
                     onChange={update('city')}
                     placeholder="Barcelona, Miami, NYC…"
-                    className="luxury-input h-10 w-full text-sm"
+                    className="luxury-input h-9 w-full text-sm"
                   />
                 </div>
               </div>
 
               {/* Social profiles */}
-              <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourChannels}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-2">
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-3">{t.creators.yourChannels}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.instagramHandle}</label>
                     <input
                       type="text"
                       value={form.instagram}
                       onChange={update('instagram')}
                       placeholder="@yourhandle"
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.tiktokHandle}</label>
                     <input
                       type="text"
                       value={form.tiktok}
                       onChange={update('tiktok')}
                       placeholder="@yourhandle"
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.websiteOrBlog}</label>
                   <input
                     type="url"
                     value={form.website}
                     onChange={update('website')}
                     placeholder="https://yourblog.com"
-                    className="luxury-input h-10 w-full text-sm"
+                    className="luxury-input h-9 w-full text-sm"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.audienceSize} *</label>
                   <select
                     required
                     value={form.audience}
                     onChange={update('audience')}
-                    className="luxury-input h-10 w-full text-sm"
+                    className="luxury-input h-9 w-full text-sm"
                   >
                     <option value="">{t.creators.selectRange}</option>
                     <option value="under_1k">{t.creators.under1k}</option>
@@ -315,10 +315,10 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
               </div>
 
               {/* About your dog */}
-              <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourDog}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-2">
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-3">{t.creators.yourDog}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.dogName} *</label>
                     <input
                       required
@@ -326,26 +326,26 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                       value={form.dogName}
                       onChange={update('dogName')}
                       placeholder="Lola, Max, Luna…"
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.breed}</label>
                     <input
                       type="text"
                       value={form.dogBreed}
                       onChange={update('dogBreed')}
                       placeholder="Golden Retriever, Mixed…"
-                      className="luxury-input h-10 w-full text-sm"
+                      className="luxury-input h-9 w-full text-sm"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Content & motivation */}
-              <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourContent}</h3>
-                <div className="space-y-2">
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-3">{t.creators.yourContent}</h3>
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.contentType} *</label>
                   <input
                     required
@@ -353,10 +353,10 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.contentType}
                     onChange={update('contentType')}
                     placeholder={t.creators.contentPlaceholder}
-                    className="luxury-input h-10 w-full text-sm"
+                    className="luxury-input h-9 w-full text-sm"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.bestPostLink} *</label>
                   <input
                     required
@@ -364,17 +364,17 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     value={form.best_post_url}
                     onChange={update('best_post_url')}
                     placeholder="https://…"
-                    className="luxury-input h-10 w-full text-sm"
+                    className="luxury-input h-9 w-full text-sm"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.whyPartner} *</label>
                   <textarea
                     required
                     value={form.motivation}
                     onChange={update('motivation')}
                     placeholder={t.creators.whyPartnerPlaceholder}
-                    className="luxury-input p-4 h-32 resize-none w-full text-sm"
+                    className="luxury-input p-3 h-24 resize-none w-full text-sm"
                   />
                 </div>
               </div>
@@ -386,7 +386,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="luxury-button-primary w-full h-11 text-[10px] tracking-[0.25em] flex items-center justify-center gap-2 disabled:opacity-40 shadow-md"
+                className="luxury-button-primary w-full h-10 text-[10px] tracking-[0.25em] flex items-center justify-center gap-2 disabled:opacity-40 shadow-md"
               >
                 {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <>{t.creators.submitApplication} <ArrowRight size={14} /></>}
               </button>

@@ -295,7 +295,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
             <button
               type="button"
               onClick={() => setShowInterest(true)}
-              className="luxury-button bg-white text-charcoal h-12 px-8 text-[11px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 transition-colors inline-flex items-center gap-2"
+              className="luxury-button bg-white text-charcoal h-10 px-8 text-[11px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 transition-colors inline-flex items-center gap-2"
             >
               I'm interested <ArrowRight size={13} />
             </button>
@@ -513,7 +513,7 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
             <button
               type="submit"
               disabled={!valid || submitting}
-              className="luxury-button bg-charcoal text-white h-12 w-full text-[11px] font-black tracking-[0.3em] uppercase hover:bg-charcoal/80 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="luxury-button bg-charcoal text-white h-10 w-full text-[11px] font-black tracking-[0.3em] uppercase hover:bg-charcoal/80 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               I'm interested

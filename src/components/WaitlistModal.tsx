@@ -155,7 +155,7 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                 </p>
                 <button
                   onClick={onClose}
-                  className="mt-6 luxury-button bg-stone-100 text-charcoal px-8 h-12 uppercase tracking-[0.25em] text-[10px] font-black w-full hover:bg-stone-200"
+                  className="mt-6 luxury-button bg-stone-100 text-charcoal px-8 h-10 uppercase tracking-[0.25em] text-[10px] font-black w-full hover:bg-stone-200"
                 >
                   Close
                 </button>
@@ -183,25 +183,25 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">First Name *</label>
-                          <input required type="text" value={firstName} onChange={e => setFirstName(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="text" value={firstName} onChange={e => setFirstName(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Last Name</label>
-                          <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Email *</label>
-                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">City *</label>
-                          <input required type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Miami" className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Miami" className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Plan *</label>
-                          <select required value={plan} onChange={e => setPlan(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-4 text-sm focus:outline-none focus:border-stone-400 text-stone-600">
+                          <select required value={plan} onChange={e => setPlan(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400 text-stone-600">
                             <option value="local">Local</option>
                             <option value="plus">Travel / Plus</option>
                             <option value="black">Black</option>
@@ -211,16 +211,16 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Dog's Name</label>
-                          <input type="text" value={dogName} onChange={e => setDogName(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input type="text" value={dogName} onChange={e => setDogName(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Breed / Type</label>
-                          <input type="text" value={dogType} onChange={e => setDogType(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input type="text" value={dogType} onChange={e => setDogType(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Preferred Perks (Optional)</label>
-                        <textarea value={perks} onChange={e => setPerks(e.target.value)} placeholder="What perks would you use most?" className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-5 text-sm min-h-[80px] focus:outline-none focus:border-stone-400 resize-none"></textarea>
+                        <textarea value={perks} onChange={e => setPerks(e.target.value)} placeholder="What perks would you use most?" className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3.5 text-sm min-h-[70px] focus:outline-none focus:border-stone-400 resize-none"></textarea>
                       </div>
                       <div className="flex items-start gap-3 mt-4">
                         <input required type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-1 flex-shrink-0" id="waitlist-consent" />
@@ -234,49 +234,49 @@ export function WaitlistModal({ isOpen, onClose, type, initialPlan }: WaitlistMo
                       {/* Partner Form */}
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Business Name *</label>
-                        <input required type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                        <input required type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Category *</label>
-                          <input required type="text" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Café, Hotel" className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="text" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Café, Hotel" className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">City *</label>
-                          <input required type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Address</label>
-                        <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                        <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Contact Name *</label>
-                          <input required type="text" value={contactName} onChange={e => setContactName(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="text" value={contactName} onChange={e => setContactName(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Email *</label>
-                          <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Website</label>
-                          <input type="url" value={website} onChange={e => setWebsite(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input type="url" value={website} onChange={e => setWebsite(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Instagram</label>
-                          <input type="text" value={instagram} onChange={e => setInstagram(e.target.value)} className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                          <input type="text" value={instagram} onChange={e => setInstagram(e.target.value)} className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                         </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Dog Policy *</label>
-                        <input required type="text" value={policy} onChange={e => setPolicy(e.target.value)} placeholder="e.g. Allowed inside and on terrace" className="w-full h-12 bg-stone-50 border border-stone-200 rounded-2xl px-5 text-sm focus:outline-none focus:border-stone-400" />
+                        <input required type="text" value={policy} onChange={e => setPolicy(e.target.value)} placeholder="e.g. Allowed inside and on terrace" className="w-full h-10 bg-stone-50 border border-stone-200 rounded-xl px-4 text-sm focus:outline-none focus:border-stone-400" />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1.5 ml-3">Suggested Perk (Optional)</label>
-                        <textarea value={suggestedPerk} onChange={e => setSuggestedPerk(e.target.value)} placeholder="e.g. Free puppuccino, 10% off" className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-5 text-sm min-h-[80px] focus:outline-none focus:border-stone-400 resize-none"></textarea>
+                        <textarea value={suggestedPerk} onChange={e => setSuggestedPerk(e.target.value)} placeholder="e.g. Free puppuccino, 10% off" className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3.5 text-sm min-h-[70px] focus:outline-none focus:border-stone-400 resize-none"></textarea>
                       </div>
                       <div className="flex items-start gap-3 mt-4">
                         <input type="checkbox" checked={claimProfile} onChange={e => setClaimProfile(e.target.checked)} className="mt-1 flex-shrink-0" id="waitlist-claim" />

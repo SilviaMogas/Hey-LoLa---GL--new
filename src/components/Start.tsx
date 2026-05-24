@@ -214,13 +214,13 @@ const FormShell: React.FC<{
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0 }}
     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-    className="max-w-xl mx-auto bg-white rounded-[2rem] border border-stone-100 shadow-soft p-7 sm:p-6 space-y-8"
+    className="max-w-xl mx-auto bg-white rounded-[2rem] border border-stone-100 shadow-soft p-5 sm:p-6 space-y-5"
   >
     <div className="space-y-2">
       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">
         {kicker}
       </span>
-      <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-tight">{title}</h2>
+      <h2 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-tight">{title}</h2>
       <p className="text-sm text-stone-500 font-light italic">{subtitle}</p>
     </div>
     {children}
@@ -288,14 +288,14 @@ const PetParentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       title={t.start.joinAsPetParentTitle}
       subtitle={t.start.fewDetails}
     >
-      <form onSubmit={submit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={submit} className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.firstName} required value={data.firstName} onChange={(e) => setData({ ...data, firstName: e.target.value })} />
           <FormField label={t.start.lastName} required value={data.lastName} onChange={(e) => setData({ ...data, lastName: e.target.value })} />
         </div>
         <FormField label={t.start.email} required type="email" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
         <FormField label={t.start.city} required value={data.city} onChange={(e) => setData({ ...data, city: e.target.value })} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.petName} required value={data.petName} onChange={(e) => setData({ ...data, petName: e.target.value })} />
           <FormSelect label={t.start.petType} value={data.petType} onChange={(e) => setData({ ...data, petType: e.target.value as any })}>
             <option value="Dog">{t.start.dog}</option>
@@ -384,8 +384,8 @@ const AnimalLoverForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
       title={t.start.joinAsAnimalLoverTitle}
       subtitle={t.start.noPetRequired}
     >
-      <form onSubmit={submit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={submit} className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.firstName} required value={data.firstName} onChange={(e) => setData({ ...data, firstName: e.target.value })} />
           <FormField label={t.start.lastName} required value={data.lastName} onChange={(e) => setData({ ...data, lastName: e.target.value })} />
         </div>
@@ -509,24 +509,24 @@ const VenueForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       title={t.start.claimVenueTitle}
       subtitle={t.start.venueSubtitle}
     >
-      <form onSubmit={submit} className="space-y-5">
+      <form onSubmit={submit} className="space-y-3">
         <FormField label={t.start.businessName} required value={data.businessName} onChange={(e) => setData({ ...data, businessName: e.target.value })} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormSelect label={t.start.category} value={data.category} onChange={(e) => setData({ ...data, category: e.target.value as any })}>
             {VENUE_CATEGORIES.map((c) => <option key={c} value={c}>{catLabels[c] || c}</option>)}
           </FormSelect>
           <FormField label={t.start.city} required value={data.city} onChange={(e) => setData({ ...data, city: e.target.value })} />
         </div>
         <FormField label={t.start.address} required value={data.address} onChange={(e) => setData({ ...data, address: e.target.value })} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.website} value={data.website} onChange={(e) => setData({ ...data, website: e.target.value })} placeholder="https://" />
           <FormField label={t.start.instagram} value={data.instagram} onChange={(e) => setData({ ...data, instagram: e.target.value })} placeholder="@handle" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.contactPerson} required value={data.contactPerson} onChange={(e) => setData({ ...data, contactPerson: e.target.value })} />
           <FormField label={t.start.role} value={data.role} onChange={(e) => setData({ ...data, role: e.target.value })} placeholder={t.start.rolePlaceholder} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField label={t.start.email} required type="email" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
           <FormField label={t.start.phoneWhatsApp} required value={data.phone} onChange={(e) => setData({ ...data, phone: e.target.value })} />
         </div>

@@ -178,7 +178,7 @@ export function ClaimPlaceDialog({ place, open, onClose, onSubmitted }: ClaimPla
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
-                className="w-full bg-charcoal text-white h-12 rounded-full text-[10px] font-black uppercase tracking-[0.25em] hover:bg-stone-800 transition-all shadow-lg active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+                className="w-full bg-charcoal text-white h-10 rounded-full text-[10px] font-black uppercase tracking-[0.25em] hover:bg-stone-800 transition-all shadow-lg active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={13} />}
                 {t.explore.claimSubmit}

@@ -49,7 +49,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               <div className="h-4 sm:h-6 md:h-8 w-px bg-stone-200" />
             </div>
 
-            <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-stone-500 font-light max-w-2xl mx-auto leading-relaxed italic px-4 sm:px-6 md:px-8">
+            <p className="text-sm sm:text-base md:text-lg text-stone-500 font-light max-w-2xl mx-auto leading-relaxed italic px-4 sm:px-6 md:px-8">
               {t.home.heroSubtitle}
             </p>
           </motion.div>
@@ -62,13 +62,13 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
           >
             <button
               onClick={onSignUp}
-              className="luxury-button-primary w-full sm:w-auto h-11 sm:h-12 px-9 sm:px-11 text-[11px] sm:text-xs shadow-lg"
+              className="luxury-button-primary w-full sm:w-auto h-10 sm:h-11 px-9 sm:px-11 text-[11px] shadow-lg"
             >
               {t.home.ctaPrimary}
             </button>
             <button
               onClick={onExplore}
-              className="luxury-button-secondary w-full sm:w-auto h-11 sm:h-12 px-9 sm:px-11 text-[11px] sm:text-xs bg-white/60 backdrop-blur-md"
+              className="luxury-button-secondary w-full sm:w-auto h-10 sm:h-11 px-9 sm:px-11 text-[11px] bg-white/60 backdrop-blur-md"
             >
               {t.home.ctaSecondary}
             </button>
@@ -104,7 +104,7 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             <h2 className="text-3xl md:text-4xl font-serif tracking-tight leading-[0.85] text-charcoal italic">
               {t.home.trustedLabel} <br /><span className="text-stone-300">{t.home.citiesLabel}<span className="brand-dot" aria-hidden="true" /></span>
             </h2>
-            <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light leading-snug italic max-w-xl">
+            <p className="text-sm sm:text-base md:text-lg text-stone-400 font-light leading-snug italic max-w-xl">
               {t.home.networkDesc}
             </p>
           </div>
@@ -180,9 +180,9 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
             <div className="space-y-5 sm:space-y-6 md:space-y-8 max-w-2xl border-l border-stone-200 pl-5 sm:pl-8 md:pl-10">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-stone-400">{t.home.editorialHub}</span>
               <h2 className="text-3xl sm:text-3xl lg:text-3xl tracking-tight leading-[0.9] font-serif italic text-charcoal">{t.home.travelLabel} <span className="text-stone-300">{t.home.hubLabel}</span><span className="brand-dot" aria-hidden="true" /></h2>
-              <p className="text-base sm:text-lg md:text-2xl text-stone-400 font-light italic leading-snug">{t.blog.description}</p>
+              <p className="text-sm sm:text-base md:text-lg text-stone-400 font-light italic leading-snug">{t.blog.description}</p>
             </div>
-            <button onClick={onBlog} className="luxury-button-secondary h-11 md:h-12 px-8 md:px-12 group self-start lg:self-auto">
+            <button onClick={onBlog} className="luxury-button-secondary h-10 md:h-11 px-8 md:px-12 group self-start lg:self-auto">
               {t.blog.exploreAll} <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
@@ -218,13 +218,13 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                 <Send size={14} /> {t.blog.cta}
               </div>
               <div className="space-y-3 md:space-y-4">
-                <h3 className="text-3xl sm:text-3xl md:text-4xl font-serif italic font-light tracking-tight leading-none text-charcoal/80">{t.blog.participateTitle}</h3>
-                <p className="text-base sm:text-lg md:text-xl text-stone-400 font-light italic tracking-tight">{t.blog.participateDesc}</p>
+                <h3 className="text-2xl sm:text-3xl font-serif italic font-light tracking-tight leading-none text-charcoal/80">{t.blog.participateTitle}</h3>
+                <p className="text-sm sm:text-base md:text-lg text-stone-400 font-light italic tracking-tight">{t.blog.participateDesc}</p>
               </div>
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); goToCreatorApply(); }}
-              className="luxury-button-primary w-full lg:w-auto px-10 md:px-16 h-11 md:h-12 lg:h-11 text-[11px] shrink-0 shadow-xl md:shadow-2xl"
+              className="luxury-button-primary w-full lg:w-auto px-10 md:px-16 h-10 md:h-11 text-[11px] shrink-0 shadow-xl md:shadow-2xl"
             >
               {t.blog.ctaButton}
             </button>
@@ -270,10 +270,10 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
                   Hey Lola<br /><span className="text-white/30">Club</span><span className="brand-dot" aria-hidden="true" />
                 </h2>
               </div>
-              <p className="text-2xl sm:text-3xl text-white/70 font-light italic leading-snug">
+              <p className="text-lg sm:text-xl text-white/70 font-light italic leading-snug">
                 {t.home.clubSubtitle}
               </p>
-              <p className="text-base sm:text-lg text-stone-400 font-light leading-relaxed max-w-lg">
+              <p className="text-sm sm:text-base text-stone-400 font-light leading-relaxed max-w-lg">
                 {t.home.clubDesc1}
               </p>
               <p className="text-sm text-stone-500 leading-relaxed max-w-lg">
@@ -282,13 +282,13 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <button
                   onClick={onSignUp}
-                  className="luxury-button bg-white text-charcoal h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 hover:scale-[1.02] transition-all shadow-xl"
+                  className="luxury-button bg-white text-charcoal h-10 px-8 text-[10px] font-black tracking-[0.25em] uppercase hover:bg-stone-100 hover:scale-[1.02] transition-all shadow-xl"
                 >
                   {t.home.joinHeyLola}
                 </button>
                 <button
                   onClick={onExplore}
-                  className="luxury-button border border-white/20 text-white/70 hover:text-white hover:border-white/40 h-12 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-all"
+                  className="luxury-button border border-white/20 text-white/70 hover:text-white hover:border-white/40 h-10 px-8 text-[10px] font-black tracking-[0.25em] uppercase transition-all"
                 >
                   {t.home.exploreCity}
                 </button>
@@ -335,17 +335,17 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight leading-none">
                 {t.home.builtWithLocal}<br /><span className="text-stone-300">{t.home.dogVoices}</span><span className="brand-dot" aria-hidden="true" />
               </h2>
-              <p className="text-xl text-stone-500 font-light italic leading-snug">
+              <p className="text-base text-stone-500 font-light italic leading-snug">
                 {t.home.creatorDesc1}
               </p>
-              <p className="text-base text-stone-400 leading-relaxed">
+              <p className="text-sm text-stone-400 leading-relaxed">
                 {t.home.creatorDesc2}
               </p>
             </div>
             <div className="shrink-0">
               <button
                 onClick={onCreators}
-                className="luxury-button-primary h-11 px-12 text-[11px] group shadow-xl"
+                className="luxury-button-primary h-10 px-12 text-[11px] group shadow-xl"
               >
                 {t.home.becomeCreatorPartner} <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -427,10 +427,10 @@ export const Home: React.FC<HomeProps> = ({ onExplore, onSignUp, onBlog, onClub,
               <span className="text-white/40 font-black uppercase tracking-[0.35em] sm:tracking-[0.5em] text-[10px]">{t.home.boutiqueClub}</span>
               <h2 className="text-3xl md:text-3xl lg:text-3xl text-white tracking-tight leading-[0.85] sm:leading-[0.8] font-serif italic max-w-3xl mx-auto">{t.home.readyForLiftoff}</h2>
             </div>
-            <p className="text-stone-400 text-base sm:text-lg md:text-xl font-light max-w-lg mx-auto italic leading-snug px-5 sm:px-8">{t.home.joinThousands}</p>
+            <p className="text-stone-400 text-sm sm:text-base md:text-lg font-light max-w-lg mx-auto italic leading-snug px-5 sm:px-8">{t.home.joinThousands}</p>
             <button
               onClick={onSignUp}
-              className="luxury-button bg-white text-charcoal w-full sm:w-auto px-12 h-11 sm:h-11 hover:bg-stone-100 hover:scale-[1.02] active:scale-95 transition-all text-[11px] sm:text-xs font-black tracking-[0.25em] uppercase shadow-lg"
+              className="luxury-button bg-white text-charcoal w-full sm:w-auto px-12 h-10 sm:h-11 hover:bg-stone-100 hover:scale-[1.02] active:scale-95 transition-all text-[11px] font-black tracking-[0.25em] uppercase shadow-lg"
             >
               {t.common.getStarted}
             </button>

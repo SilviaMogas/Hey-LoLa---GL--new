@@ -41,7 +41,7 @@ export default async function handler(req: any, res: any) {
 
   // createdAt here is an ISO string (Auth.tsx writes `new Date().toISOString()`),
   // not a Firestore Timestamp.
-  const createdMs = Date.parse(String(data.createdAt || '')) || 0;
+  const createdMs = Date.parse(String(data.created_at || data.createdAt || '')) || 0;
   if (createdMs && Date.now() - createdMs > RECENT_WINDOW_MS) {
     res.status(409).json({ success: false, error: 'Lead is not recent.' });
     return;
@@ -53,8 +53,8 @@ export default async function handler(req: any, res: any) {
   }
 
   const result = await sendBusinessLeadEmails({
-    businessName: String(data.businessName || 'New business'),
-    contactRole: typeof data.contactRole === 'string' ? data.contactRole : undefined,
+    businessName: String(data.business_name || data.businessName || 'New business'),
+    contactRole: typeof data.contact_role === 'string' ? data.contact_role : (typeof data.contactRole === 'string' ? data.contactRole : undefined),
     location: typeof data.location === 'string' ? data.location : undefined,
     reason: typeof data.reason === 'string' ? data.reason : undefined,
     email: String(data.email),

@@ -54,7 +54,7 @@ export default async function handler(req: any, res: any) {
   // Look up the dog passport for the name + partner name (best-effort).
   let dogName = 'a rescue dog';
   let partnerName: string | undefined;
-  let dogSlug = String(data.dogSlug || '');
+  let dogSlug = String(data.dog_slug || data.dogSlug || '');
   if (data.dog_id) {
     const { data: dogRow } = await db.from('foundation_dogs').select('*').eq('id', String(data.dog_id)).maybeSingle();
     if (dogRow) {

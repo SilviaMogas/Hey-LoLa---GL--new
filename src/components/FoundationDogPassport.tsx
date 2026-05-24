@@ -16,7 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
+import { FOUNDATION_DOGS, type FoundationDog, rowToFoundationDog } from '../data/foundationDogs';
 import {
   copyToClipboard,
   emailShareUrl,
@@ -50,7 +50,7 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
     void (async () => {
       try {
         const { data } = await supabase.from('foundation_dogs').select('*').eq('passport->>slug', slug).maybeSingle();
-        if (data) setLiveDog(data as FoundationDog);
+        if (data) setLiveDog(rowToFoundationDog(data as Record<string, unknown>));
         else setLiveDog(null);
       } catch { setLiveDog(null); }
       setLoading(false);

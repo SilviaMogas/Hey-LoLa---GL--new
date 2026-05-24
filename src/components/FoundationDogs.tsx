@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, MapPin, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
+import { FOUNDATION_DOGS, type FoundationDog, rowToFoundationDog } from '../data/foundationDogs';
 import { SEO } from '../lib/seo';
 
 interface FoundationDogsProps {
@@ -29,7 +29,7 @@ export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPa
     const fetchDogs = async () => {
       try {
         const { data } = await supabase.from('foundation_dogs').select('*').eq('status', 'available');
-        const dogs = (data || []).filter((d: any) => d.passport?.visibility === 'public') as FoundationDog[];
+        const dogs = (data || []).map((d: Record<string, unknown>) => rowToFoundationDog(d)).filter((d) => d.passport?.visibility === 'public');
         setLive(dogs);
       } catch { setLive([]); }
     };

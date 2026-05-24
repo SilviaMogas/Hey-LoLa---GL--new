@@ -19,6 +19,8 @@ export {
   sendWaitlistEmails,
   sendBusinessLeadEmails,
   sendSignupEmails,
+  sendOnboardingCompleteEmail,
+  sendEmailVerifiedEmail,
   sendSubscriberBroadcast,
 } from './senders.js';
 
@@ -34,6 +36,8 @@ export type {
   WaitlistEmailOpts,
   BusinessLeadEmailOpts,
   SignupEmailOpts,
+  OnboardingCompleteEmailOpts,
+  EmailVerifiedEmailOpts,
   SubscriberBroadcastEmailOpts,
   BroadcastRecipient,
 } from './senders.js';

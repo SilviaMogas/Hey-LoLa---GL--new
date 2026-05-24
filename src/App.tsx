@@ -212,6 +212,16 @@ function AppContent() {
         if (auth.currentUser?.emailVerified) {
           clearInterval(interval);
           setVerificationChecked(true);
+          // Best-effort "you're verified" email via Resend.
+          void fetch('/api/notify-email-verified', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              userId: auth.currentUser.uid,
+              email: auth.currentUser.email,
+              firstName: profile?.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
+            }),
+          }).catch(() => { /* email is best-effort */ });
         }
       }, 3000);
       return () => clearInterval(interval);

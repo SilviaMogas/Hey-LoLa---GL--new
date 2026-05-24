@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check, Loader2 } from 'lucide-react';
+import { useTranslation } from '../lib/LanguageContext';
 
 export interface MembershipPlan {
   id: string;
@@ -24,7 +25,8 @@ interface MembershipCardProps {
 }
 
 export const MembershipCard: React.FC<MembershipCardProps> = ({ plan, onClick, busy = false, isCurrent = false }) => {
-  const cta = isCurrent ? 'Current plan' : plan.cta;
+  const { t } = useTranslation();
+  const cta = isCurrent ? t.membership.currentPlan : plan.cta;
   return (
     <div
       className={`relative flex flex-col h-full rounded-[1.5rem] border p-6 space-y-4 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 font-boutique ${
@@ -44,7 +46,7 @@ export const MembershipCard: React.FC<MembershipCardProps> = ({ plan, onClick, b
           </div>
           {plan.comingSoon && plan.badge !== 'Coming Soon' && (
             <div className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap bg-[#EBF1E9] text-[#7A8C6E] border border-[#7A8C6E]/10">
-              Coming Soon
+              {t.membership.comingSoon}
             </div>
           )}
         </div>
@@ -65,7 +67,7 @@ export const MembershipCard: React.FC<MembershipCardProps> = ({ plan, onClick, b
           </div>
         ) : (
           <div className="h-10 flex items-center">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">Waitlist Open</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">{t.membership.waitlistOpen}</span>
           </div>
         )}
         <p className={`text-[13px] font-light leading-snug ${plan.highlight ? 'text-white/70' : 'text-stone-500'}`}>

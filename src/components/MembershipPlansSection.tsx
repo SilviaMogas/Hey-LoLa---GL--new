@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { MembershipCard, type MembershipPlan } from './MembershipCard';
-import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
+import { getTranslatedFreePlan } from '../data/membershipPlans';
+import { useTranslation } from '../lib/LanguageContext';
 
 /**
  * Paid tiers (Local / Plus / Black) are pre-reveal and activate city by city
@@ -9,7 +10,7 @@ import { MEMBERSHIP_PLANS } from '../data/membershipPlans';
  * only surface the live (non-comingSoon) plans publicly. Flip the `comingSoon`
  * flags in data/membershipPlans.ts to bring the paid tiers back.
  */
-const VISIBLE_PLANS = MEMBERSHIP_PLANS.filter((p) => !p.comingSoon);
+
 
 interface MembershipPlansSectionProps {
   onSelect: (plan: MembershipPlan) => void;
@@ -21,11 +22,14 @@ interface MembershipPlansSectionProps {
 
 export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
   onSelect,
-  description = "Everything is free right now. Paid memberships open city by city as our partner network grows — founding members will keep their early-access rate for life.",
+  description,
   busyPlanId,
   currentPlanId,
   sectionRef,
 }) => {
+  const { t } = useTranslation();
+  const VISIBLE_PLANS = [getTranslatedFreePlan(t.membership)];
+  const desc = description ?? t.home.membershipFreeDesc;
   return (
     <section ref={sectionRef} id="pricing" className="py-8 sm:py-10 px-5 sm:px-6 max-w-7xl mx-auto scroll-mt-8">
       <motion.div
@@ -34,11 +38,11 @@ export const MembershipPlansSection: React.FC<MembershipPlansSectionProps> = ({
         viewport={{ once: true }}
         className="text-center space-y-4 mb-6"
       >
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Membership</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.home.membershipLabel}</span>
         <h2 className="text-3xl sm:text-3xl md:text-4xl font-serif italic tracking-tight leading-[0.85]">
-          Free to <span className="text-stone-300">start</span><span className="brand-dot" aria-hidden="true" />
+          {t.home.membershipFreeTitle}<span className="brand-dot" aria-hidden="true" />
         </h2>
-        <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">{description}</p>
+        <p className="text-lg text-stone-400 font-light italic max-w-xl mx-auto">{desc}</p>
       </motion.div>
 
       <div className={`grid gap-4 ${VISIBLE_PLANS.length === 1 ? 'max-w-md mx-auto grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4'}`}>

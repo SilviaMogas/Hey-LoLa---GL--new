@@ -74,7 +74,7 @@ export const SoftPaywall: React.FC<SoftPaywallProps> = ({ isOpen, onClose, onAut
               <div className="space-y-3 pt-2">
                 <button
                   onClick={() => handleAuth("signup")}
-                  className="w-full h-14 bg-charcoal text-white rounded-full font-black font-sans text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-stone-800 hover:shadow-xl transition-all duration-500 group"
+                  className="w-full h-11 bg-charcoal text-white rounded-full font-black font-sans text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-stone-800 hover:shadow-xl transition-all duration-500 group"
                 >
                   Join for Free
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { auth } from '../lib/firebase';
 import { sendEmailVerification } from 'firebase/auth';
 import { AlertCircle, X, RefreshCw } from 'lucide-react';
+import { useTranslation } from '../lib/LanguageContext';
 
 interface VerifyEmailBannerProps {
   email: string | null;
 }
 
 export function VerifyEmailBanner({ email }: VerifyEmailBannerProps) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
@@ -32,8 +34,8 @@ export function VerifyEmailBanner({ email }: VerifyEmailBannerProps) {
       <AlertCircle size={14} className="shrink-0" />
       <span>
         {resent
-          ? 'Verification link sent — check your inbox.'
-          : `Verify your email (${email ?? 'unknown'}) to unlock all features.`}
+          ? t.verifyBanner.verificationSent
+          : t.verifyBanner.verifyEmail.replace('{email}', email ?? 'unknown')}
       </span>
       {!resent && (
         <button
@@ -42,7 +44,7 @@ export function VerifyEmailBanner({ email }: VerifyEmailBannerProps) {
           className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:text-amber-900 disabled:opacity-50"
         >
           <RefreshCw size={12} className={resending ? 'animate-spin' : ''} />
-          Resend
+          {t.verifyBanner.resend}
         </button>
       )}
       <button

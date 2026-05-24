@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, Loader2, PawPrint } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useTranslation } from '../lib/LanguageContext';
 
 interface CreatorsProps {
   onBack: () => void;
@@ -38,14 +39,8 @@ const EMPTY_FORM: ApplicationForm = {
   motivation: '',
 };
 
-const BENEFITS = [
-  { label: 'Your name on every guide', desc: 'Every place you recommend shows your name and links to your profile — permanently.' },
-  { label: 'Affiliate income — no cap', desc: 'Earn commission on every booking and signup that comes from your content. Tracked via your personal link.' },
-  { label: 'Distribution to 1,200+ dog parents', desc: 'Your guides land directly in our verified waitlist — an audience already searching for exactly what you write.' },
-  { label: 'Co-marketing on every post', desc: 'We amplify your content across Instagram, Pinterest, and our newsletter. Your audience grows with ours.' },
-];
-
 export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState<ApplicationForm>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -75,7 +70,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
       });
       setIsSubmitted(true);
     } catch {
-      setError('Something went wrong. Please try again or email hey@heylola.co');
+      setError(t.creators.errorGeneric);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +86,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
             onClick={onBack}
             className="inline-flex items-center gap-2 text-stone-400 hover:text-charcoal transition-colors text-[10px] font-black uppercase tracking-[0.3em]"
           >
-            <ArrowLeft size={14} /> Back
+            <ArrowLeft size={14} /> {t.creators.back}
           </button>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -99,12 +94,12 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4 max-w-3xl"
           >
-            <span className="text-stone-400 font-black uppercase tracking-[0.4em] text-[10px]">Creator Partners</span>
+            <span className="text-stone-400 font-black uppercase tracking-[0.4em] text-[10px]">{t.creators.kicker}</span>
             <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter leading-[0.9] text-charcoal">
-              Write for the dog parents who are <span className="text-stone-300">actually going places</span><span className="brand-dot" aria-hidden="true" />
+              {t.creators.heroTitle} <span className="text-stone-300">{t.creators.heroTitleHighlight}</span><span className="brand-dot" aria-hidden="true" />
             </h1>
             <p className="text-lg font-medium text-stone-400 max-w-2xl italic leading-tight">
-              Partner with Hey Lola — publish pet travel guides, reach 1,200+ verified dog parents, and earn affiliate income when your content converts.
+              {t.creators.heroSubtitle}
             </p>
           </motion.div>
         </div>
@@ -118,19 +113,24 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
           viewport={{ once: true }}
           className="space-y-3 mb-6 border-l-2 border-stone-200 pl-8"
         >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">What you get</span>
-          <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight">Why become a Creator Partner<span className="text-brand-orange">?</span></h2>
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.creators.whatYouGet}</span>
+          <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight">{t.creators.whyBecome}<span className="text-brand-orange">?</span></h2>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {BENEFITS.map(({ label, desc }, i) => (
+          {[
+            { label: t.creators.benefit1Label, desc: t.creators.benefit1Desc },
+            { label: t.creators.benefit2Label, desc: t.creators.benefit2Desc },
+            { label: t.creators.benefit3Label, desc: t.creators.benefit3Desc },
+            { label: t.creators.benefit4Label, desc: t.creators.benefit4Desc },
+          ].map(({ label, desc }, i) => (
             <motion.div
-              key={label}
+              key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="p-8 rounded-[1.5rem] border border-stone-100 space-y-3 hover:border-stone-200 hover:shadow-xl transition-all duration-500"
+              className="p-6 rounded-[1.5rem] border border-stone-100 space-y-3 hover:border-stone-200 hover:shadow-xl transition-all duration-500"
             >
               <div className="flex items-start gap-3">
                 <Check size={16} className="text-charcoal/50 mt-0.5 shrink-0" />
@@ -152,15 +152,15 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
           viewport={{ once: true }}
           className="space-y-3 mb-6 border-l-2 border-stone-200 pl-8"
         >
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">The process</span>
-          <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight">How it works<span className="brand-dot" aria-hidden="true" /></h2>
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.creators.theProcess}</span>
+          <h2 className="text-3xl sm:text-4xl font-serif italic tracking-tight">{t.creators.howItWorks}<span className="brand-dot" aria-hidden="true" /></h2>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            { step: '01', title: 'Apply', desc: 'Tell us your city and share a link to your best pet travel content. We review every application personally.' },
-            { step: '02', title: 'Get your brief', desc: 'We send you a venue list, a content angle, and our brand guidelines. You write, we handle the rest.' },
-            { step: '03', title: 'Publish and earn', desc: 'Your guide goes live on Hey Lola. We distribute it. You earn affiliate commission on every conversion.' },
+            { step: '01', title: t.creators.step1Title, desc: t.creators.step1Desc },
+            { step: '02', title: t.creators.step2Title, desc: t.creators.step2Desc },
+            { step: '03', title: t.creators.step3Title, desc: t.creators.step3Desc },
           ].map(({ step, title, desc }, i) => (
             <motion.div
               key={step}
@@ -187,12 +187,12 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
             viewport={{ once: true }}
             className="space-y-3 mb-8"
           >
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">Apply to join</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-stone-400">{t.creators.applyToJoin}</span>
             <h2 className="text-3xl sm:text-3xl font-serif italic tracking-tight">
-              Creator application<span className="brand-dot" aria-hidden="true" />
+              {t.creators.creatorApplication}<span className="brand-dot" aria-hidden="true" />
             </h2>
             <p className="text-stone-400 font-light italic">
-              Tell us about your content and your city. We're looking for writers who know their dog-friendly spots and want to build something with us.
+              {t.creators.applicationIntro}
             </p>
           </motion.div>
 
@@ -206,29 +206,29 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                 <PawPrint size={36} className="text-white" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-3xl font-serif italic text-charcoal">Application received<span className="brand-dot" aria-hidden="true" /></h3>
-                <p className="text-stone-400 font-light italic">We'll review your application and get back to you within a few days.</p>
+                <h3 className="text-3xl font-serif italic text-charcoal">{t.creators.applicationReceived}<span className="brand-dot" aria-hidden="true" /></h3>
+                <p className="text-stone-400 font-light italic">{t.creators.applicationReviewMsg}</p>
               </div>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-[1.5rem] border border-stone-100 p-6">
               {/* Personal info */}
               <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">About you</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.aboutYou}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Full name *</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.fullName} *</label>
                     <input
                       required
                       type="text"
                       value={form.name}
                       onChange={update('name')}
-                      placeholder="Your name"
+                      placeholder={t.creators.yourName}
                       className="luxury-input h-10 w-full text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Email *</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.email} *</label>
                     <input
                       required
                       type="email"
@@ -240,7 +240,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Your city *</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.yourCity} *</label>
                   <input
                     required
                     type="text"
@@ -254,10 +254,10 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
 
               {/* Social profiles */}
               <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">Your channels</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourChannels}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Instagram handle</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.instagramHandle}</label>
                     <input
                       type="text"
                       value={form.instagram}
@@ -267,7 +267,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">TikTok handle</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.tiktokHandle}</label>
                     <input
                       type="text"
                       value={form.tiktok}
@@ -278,7 +278,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Website or blog</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.websiteOrBlog}</label>
                   <input
                     type="url"
                     value={form.website}
@@ -288,28 +288,28 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Approximate audience size *</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.audienceSize} *</label>
                   <select
                     required
                     value={form.audience}
                     onChange={update('audience')}
                     className="luxury-input h-10 w-full text-sm"
                   >
-                    <option value="">Select range…</option>
-                    <option value="under_1k">Under 1,000</option>
-                    <option value="1k_10k">1,000 – 10,000</option>
-                    <option value="10k_50k">10,000 – 50,000</option>
-                    <option value="50k_plus">50,000+</option>
+                    <option value="">{t.creators.selectRange}</option>
+                    <option value="under_1k">{t.creators.under1k}</option>
+                    <option value="1k_10k">{t.creators.range1k10k}</option>
+                    <option value="10k_50k">{t.creators.range10k50k}</option>
+                    <option value="50k_plus">{t.creators.range50kPlus}</option>
                   </select>
                 </div>
               </div>
 
               {/* About your dog */}
               <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">Your dog</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourDog}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Dog's name *</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.dogName} *</label>
                     <input
                       required
                       type="text"
@@ -320,7 +320,7 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Breed</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.breed}</label>
                     <input
                       type="text"
                       value={form.dogBreed}
@@ -334,20 +334,20 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
 
               {/* Content & motivation */}
               <div className="space-y-5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">Your content</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 border-b border-stone-100 pb-4">{t.creators.yourContent}</h3>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Type of content you create *</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.contentType} *</label>
                   <input
                     required
                     type="text"
                     value={form.contentType}
                     onChange={update('contentType')}
-                    placeholder="City guides, pet lifestyle, travel, vet tips…"
+                    placeholder={t.creators.contentPlaceholder}
                     className="luxury-input h-10 w-full text-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Link to your best pet travel post *</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.bestPostLink} *</label>
                   <input
                     required
                     type="url"
@@ -358,12 +358,12 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Why do you want to partner with Hey Lola? *</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">{t.creators.whyPartner} *</label>
                   <textarea
                     required
                     value={form.motivation}
                     onChange={update('motivation')}
-                    placeholder="Tell us what excites you about this partnership and what you'd bring…"
+                    placeholder={t.creators.whyPartnerPlaceholder}
                     className="luxury-input p-4 h-32 resize-none w-full text-sm"
                   />
                 </div>
@@ -376,9 +376,9 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="luxury-button-primary w-full h-14 text-xs flex items-center justify-center gap-3 disabled:opacity-40 shadow-xl"
+                className="luxury-button-primary w-full h-11 text-[10px] tracking-[0.25em] flex items-center justify-center gap-2 disabled:opacity-40 shadow-md"
               >
-                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <>Submit application <ArrowRight size={16} /></>}
+                {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <>{t.creators.submitApplication} <ArrowRight size={14} /></>}
               </button>
             </form>
           )}

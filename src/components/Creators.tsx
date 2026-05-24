@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, Loader2, PawPrint } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 interface CreatorsProps {
   onBack: () => void;
@@ -68,10 +67,10 @@ export const Creators: React.FC<CreatorsProps> = ({ onBack }) => {
     setError('');
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'creator_applications'), {
+      await supabase.from('creator_applications').insert({
         ...form,
         status: 'pending',
-        createdAt: serverTimestamp(),
+        created_at: new Date().toISOString(),
       });
       setIsSubmitted(true);
     } catch {

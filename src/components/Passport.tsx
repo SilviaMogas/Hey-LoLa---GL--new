@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PetData, MemberPlan } from '../types';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { ShieldCheck, Calendar, Weight, PawPrint, Info, AlertCircle, MapPin, Edit2, Save, X, Camera, Loader2 } from 'lucide-react';
 import { cn, compressDataUrl } from '../lib/utils';
 import { getTier } from '../lib/membership';
@@ -88,15 +88,23 @@ export const Passport: React.FC<PassportProps> = ({ petData, setPetData, ownerMe
     setSaving(true);
     try {
       if (petData.id) {
-        const petRef = doc(db, 'pets', petData.id);
-        await updateDoc(petRef, { ...editedData });
+        await supabase.from('pets').update({
+          name: editedData.name,
+          type: editedData.type,
+          breed: editedData.breed,
+          sex: editedData.sex,
+          birth_date: editedData.birthDate,
+          photo_url: editedData.photoURL,
+          city: editedData.city,
+          is_public: editedData.isPublic,
+          is_hidden: editedData.isHidden,
+        }).eq('id', petData.id);
         setPetData(editedData);
         setIsEditing(false);
-        // Keep the public profile card in sync with safe fields only.
         void syncPetPublicCard(petData.id, { ...editedData, userId: editedData.userId || petData.userId }, profile);
       }
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `pets/${petData.id}`);
+      handleSupabaseError(error, OperationType.UPDATE, `pets/${petData.id}`);
     } finally {
       setSaving(false);
     }

@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { auth, db } from '../lib/firebase';
-import { collection, query, where, getDocs, doc, getDoc, setDoc, limit } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 import { Heart, MapPin, Calendar, Compass, ShieldCheck, ChevronRight, User as UserIcon, Plus, MessageSquare, Loader2, ArrowRight, Plane, Home as HomeIcon, Pencil, Check, Camera, Sparkles, Coffee, Trees, Waves, Stethoscope, Bed, PartyPopper } from 'lucide-react';
-import type { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import { UserProfile, PetData, Place } from '../types';
 import { useTranslation } from '../lib/LanguageContext';
 import { cn, compressDataUrl } from '../lib/utils';
@@ -49,7 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     if (!user || !pets || pets.length === 0) return;
     pets.forEach((p) => { if (p.id) void syncPetPublicCard(p.id, p, profile); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.uid, pets.length, profile?.username]);
+  }, [user?.id, pets.length, profile?.username]);
   const [petOwners, setPetOwners] = useState<Record<string, { name: string; photoURL: string }>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [newFirstName, setNewFirstName] = useState('');
@@ -81,11 +79,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
         // Favorites — placeIds may point at Firestore docs OR at synthetic
         // `curated_<name>` ids (Explore renders the curated seed when a venue
         // hasn't been imported yet). Resolve from both sources.
-        const favSnap = await getDocs(query(collection(db, 'favorites'), where('userId', '==', user.uid)));
-        const favIds = favSnap.docs.map(doc => doc.data().placeId as string);
+        const { data: favRows } = await supabase.from('favorites').select('place_id').eq('user_id', user.id);
+        const favIds = (favRows || []).map(r => r.place_id as string);
         if (favIds.length > 0) {
-          const placesSnapshot = await getDocs(collection(db, 'places'));
-          const dbPlaces = placesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Place[];
+          const { data: placeRows } = await supabase.from('places').select('*');
+          const dbPlaces = (placeRows || []).map(r => ({ ...r, id: r.id })) as Place[];
           const seedPlaces = curatedPlaces.map((cp) => ({
             ...cp,
             id: `curated_${cp.name.replace(/\s/g, '_')}`,
@@ -104,10 +102,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
         // Local community furrys — real public pet profiles from other users.
         // Priority: user's local hub → home city → Miami → any city.
         const userCity = (profile?.localHub || profile?.homeCity || '').toLowerCase();
-        const petSnap = await getDocs(query(collection(db, 'pets'), where('isPublic', '==', true), limit(50)));
-        const allPublic = petSnap.docs
-          .map(d => ({ id: d.id, ...d.data() } as PetData))
-          .filter(p => !p.isHidden && p.userId !== user.uid);
+        const { data: petRows } = await supabase.from('pets').select('*').eq('is_public', true).limit(50);
+        const allPublic = (petRows || [])
+          .map(r => ({
+            id: r.id,
+            userId: r.user_id,
+            name: r.name,
+            type: r.type,
+            sex: r.sex,
+            breed: r.breed,
+            photoURL: r.photo_url,
+            city: r.city,
+            isHidden: r.is_hidden,
+            isPublic: r.is_public,
+          } as PetData))
+          .filter(p => !p.isHidden && p.userId !== user.id);
 
         const matchCity = (city: string) => allPublic.filter(p => (p.city || '').toLowerCase() === city);
         let bucket: PetData[] = userCity ? matchCity(userCity) : [];
@@ -133,9 +142,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
         const owners: Record<string, { name: string; photoURL: string }> = {};
         await Promise.all(ownerUids.map(async (uid) => {
           try {
-            const userDoc = await getDoc(doc(db, 'users', uid));
-            if (userDoc.exists()) {
-              const u = userDoc.data() as Partial<UserProfile>;
+            const { data: userRow } = await supabase.from('users').select('display_name, first_name, last_name, photo_url').eq('id', uid).single();
+            if (userRow) {
+              const u = { displayName: userRow.display_name, firstName: userRow.first_name, lastName: userRow.last_name, photoURL: userRow.photo_url } as Partial<UserProfile>;
               const fallback = `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim();
               owners[uid] = {
                 name: u.displayName ?? (fallback || 'Member'),
@@ -169,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       // Mirror the Navbar fallback: when the Firestore profile has no photo
       // yet, fall back to the auth photoURL (e.g. Google sign-in avatar) so
       // the form preview always matches what the rest of the app shows.
-      setNewPhotoURL(profile.photoURL || user?.photoURL || '');
+      setNewPhotoURL(profile.photoURL || user?.user_metadata?.avatar_url as string || '');
     }
   }, [user, profile]);
 
@@ -184,7 +193,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
     setNewCity(profile.homeCity ?? '');
     setNewHandle(profile.username ?? '');
     setHandleError('');
-    setNewPhotoURL(profile.photoURL || user?.photoURL || '');
+    setNewPhotoURL(profile.photoURL || user?.user_metadata?.avatar_url as string || '');
   }, [showForm, profile, user]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,23 +212,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
   const persistProfile = async () => {
     const now = new Date().toISOString();
     const displayName = `${newFirstName} ${newLastName}`;
-    await setDoc(doc(db, 'users', user.uid), {
-      firstName: newFirstName,
-      lastName: newLastName,
-      displayName,
+    await supabase.from('users').update({
+      first_name: newFirstName,
+      last_name: newLastName,
+      display_name: displayName,
       bio: newBio,
-      homeCity: newCity,
-      localHub: newLocalHub,
-      photoURL: newPhotoURL,
-      updatedAt: now,
-    }, { merge: true });
-    if (auth.currentUser) {
-      // Firebase Auth's `photoURL` is hard-capped (~1024 chars) so a data
-      // URL never fits. We persist the image only on Firestore and just
-      // sync `displayName` (and external URLs) on the auth profile.
-      const safePhotoURL = newPhotoURL && !newPhotoURL.startsWith('data:') ? newPhotoURL : undefined;
-      await updateProfile(auth.currentUser, { displayName, photoURL: safePhotoURL });
-    }
+      home_city: newCity,
+      local_hub: newLocalHub,
+      photo_url: newPhotoURL,
+      updated_at: now,
+    }).eq('id', user.id);
+    await supabase.auth.updateUser({
+      data: { display_name: displayName, photo_url: newPhotoURL || undefined },
+    });
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
@@ -233,7 +238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       const current = (profile?.username || '').toLowerCase();
       if (desired && desired !== current) {
         const res = await setHandle({
-          uid: user.uid,
+          uid: user.id,
           currentHandle: profile?.username,
           newHandle: desired,
           changedAt: profile?.usernameChangedAt,
@@ -250,7 +255,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
       .finally(() => setIsUpdating(false));
   };
 
-  const firstName = profile?.firstName || user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
+  const firstName = profile?.firstName || (user?.user_metadata?.display_name as string | undefined)?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
 
   return (
     <div className="space-y-8 pb-10 animate-fade-in font-boutique">
@@ -498,11 +503,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
               {t.dashboard.greeting} <span className="text-stone-300">{firstName}<span className="text-charcoal">.</span></span>
            </h1>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug">{t.dashboard.nextHeading}</p>
-           <div className="pt-0.5"><StatusComposer userId={user?.uid} initialStatus={profile?.status} /></div>
+           <div className="pt-0.5"><StatusComposer userId={user?.id} initialStatus={profile?.status} /></div>
            <p className="text-sm md:text-base font-light text-stone-400 italic leading-snug pt-2">What&apos;s on this week?</p>
            <div className="pt-0.5">
              <StatusComposer
-               userId={user?.uid}
+               userId={user?.id}
                initialStatus={profile?.whatsOn}
                field="whatsOn"
                presets={WHATS_ON_PRESETS}
@@ -591,7 +596,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, profile, pets, onAdd
 
           {/* DM Inbox */}
           <DmInbox
-            meUid={user?.uid}
+            meUid={user?.id}
             onOpenThread={(otherUid, otherName, _otherPhoto, contextPet) =>
               onOpenDm?.(otherUid, otherName, contextPet)
             }
@@ -1035,11 +1040,11 @@ function StatusComposer({ userId, initialStatus, field = 'status', presets = STA
     const trimmed = value.trim();
     setSaving(true);
     try {
-      await setDoc(
-        doc(db, 'users', userId),
-        { [field]: trimmed, [`${field}UpdatedAt`]: new Date().toISOString() },
-        { merge: true }
-      );
+      const snakeField = field.replace(/[A-Z]/g, c => `_${c.toLowerCase()}`);
+      await supabase.from('users').update({
+        [snakeField]: trimmed,
+        [`${snakeField}_updated_at`]: new Date().toISOString(),
+      }).eq('id', userId);
       setStatus(trimmed);
       setDraft(trimmed);
       setEditing(false);

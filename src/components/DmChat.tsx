@@ -9,7 +9,7 @@ import {
   subscribeThreadMessages,
   threadIdFor,
 } from '../lib/dm';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { UserProfile } from '../types';
 
 interface DmChatProps {
@@ -22,7 +22,12 @@ interface DmChatProps {
 }
 
 export const DmChat: React.FC<DmChatProps> = ({ meProfile, otherUid, otherName, otherPhoto, petName, onClose }) => {
-  const meUid = auth.currentUser?.uid || meProfile?.uid;
+  const [meUid, setMeUid] = useState<string | undefined>(meProfile?.uid);
+  useEffect(() => {
+    if (!meUid) {
+      supabase.auth.getUser().then(({ data: { user } }) => { if (user) setMeUid(user.id); });
+    }
+  }, [meUid]);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DmMessage[]>([]);
   const [draft, setDraft] = useState('');

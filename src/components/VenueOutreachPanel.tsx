@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { Place } from '../types';
 import {
   Check, Copy, Download, ExternalLink, Globe, Instagram,
@@ -95,10 +95,10 @@ export const VenueOutreachPanel: React.FC = () => {
   const fetchPlaces = async () => {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, 'places'));
-      setPlaces(snap.docs.map(d => ({ id: d.id, ...d.data() } as Place)));
+      const { data } = await supabase.from('places').select('*');
+      setPlaces((data || []) as Place[]);
     } catch (err) {
-      handleFirestoreError(err, OperationType.GET, 'places');
+      handleSupabaseError(err, OperationType.GET, 'places');
     } finally {
       setLoading(false);
     }
@@ -142,11 +142,11 @@ export const VenueOutreachPanel: React.FC = () => {
   };
 
   const enrichVenue = async (place: Place): Promise<void> => {
-    const user = auth.currentUser;
-    if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
     setEnrichingIds(prev => new Set([...prev, place.id]));
     try {
-      const idToken = await user.getIdToken();
+      const idToken = session.access_token;
       const res = await fetch('/api/enrich-venue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
@@ -172,33 +172,33 @@ export const VenueOutreachPanel: React.FC = () => {
     const now = todayISO();
     const followUp = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().split('T')[0];
     try {
-      await updateDoc(doc(db, 'places', place.id), {
-        verificationStatus: 'invitation_sent',
-        lastContactedDate: now,
-        nextAction: 'follow_up',
-        nextFollowUpDate: followUp,
-        updatedAt: new Date().toISOString(),
-      });
+      await supabase.from('places').update({
+        verification_status: 'invitation_sent',
+        last_contacted_date: now,
+        next_action: 'follow_up',
+        next_follow_up_date: followUp,
+        updated_at: new Date().toISOString(),
+      }).eq('id', place.id);
       await fetchPlaces();
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `places/${place.id}`);
+      handleSupabaseError(err, OperationType.UPDATE, `places/${place.id}`);
     }
   };
 
   const applyDiff = async (item: DiffItem) => {
     if (!diff) return;
     try {
-      await updateDoc(doc(db, 'places', diff.place.id), {
+      await supabase.from('places').update({
         [item.field]: item.suggested,
-        updatedAt: new Date().toISOString(),
-      });
+        updated_at: new Date().toISOString(),
+      }).eq('id', diff.place.id);
       setDiff(prev => prev
         ? { ...prev, diff: prev.diff.filter(d => d.field !== item.field) }
         : null,
       );
       await fetchPlaces();
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `places/${diff.place.id}`);
+      handleSupabaseError(err, OperationType.UPDATE, `places/${diff.place.id}`);
     }
   };
 

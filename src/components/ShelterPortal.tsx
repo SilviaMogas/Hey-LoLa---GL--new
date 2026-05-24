@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
 import { Loader2, PawPrint, Plus, Save, Trash2 } from 'lucide-react';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { SEO } from '../lib/seo';
 import { dogSlug, type Shelter, type ShelterDog } from '../data/shelters';
 
@@ -30,16 +30,16 @@ export const ShelterPortal: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDoc(doc(db, 'shelters', shelterId));
+        const { data: row, error: fetchErr } = await supabase.from('shelters').select('*').eq('id', shelterId).maybeSingle();
         if (cancelled) return;
-        if (snap.exists()) {
-          const s = { id: snap.id, ...(snap.data() as Omit<Shelter, 'id'>) };
-          setShelter({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] });
+        if (row) {
+          const s = { ...row, dogs: Array.isArray(row.dogs) ? row.dogs : [] } as Shelter;
+          setShelter(s);
         } else {
-          setError('Shelter not found.');
+          setError(fetchErr ? 'Could not load shelter.' : 'Shelter not found.');
         }
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'shelters');
+        handleSupabaseError(err, OperationType.READ, 'shelters');
         setError('Could not load this shelter.');
       } finally {
         if (!cancelled) setLoading(false);

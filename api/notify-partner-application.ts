@@ -1,4 +1,4 @@
-import { getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 import { sendPartnerApplicationEmails } from '../src/lib/email/index.js';
 
 // Public endpoint called by the client immediately after a partner_application
@@ -25,24 +25,24 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-partner-application: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('partner_applications').doc(applicationId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('partner_applications').select('*').eq('id', applicationId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Application not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
   // Replay protection — the doc must be recent.
-  const createdAtMs = data.createdAt?._seconds ? data.createdAt._seconds * 1000 : 0;
+  const createdAtMs = Date.parse(String(data.created_at || '')) || 0;
   if (createdAtMs && Date.now() - createdAtMs > RECENT_WINDOW_MS) {
     res.status(409).json({ success: false, error: 'Application is not recent.' });
     return;
@@ -73,7 +73,7 @@ export default async function handler(req: any, res: any) {
       return 3;
     })();
     const now = Date.now();
-    await db.collection('crm_leads').add({
+    await db.from('crm_leads').insert({
       businessName: String(data.businessName || 'New partner'),
       category: typeof data.category === 'string' ? data.category : 'other',
       tier,

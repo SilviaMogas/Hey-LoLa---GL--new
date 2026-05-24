@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { collection, doc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { Place, PlaceCategory } from '../types';
 import { curatedPlaces } from '../data/curatedPlaces';
 import { ArrowLeft, Loader2, MapPin, Heart, Trash2, Compass } from 'lucide-react';
@@ -40,11 +39,11 @@ export const SavedPlaces: React.FC<SavedPlacesProps> = ({ user, onBack, onExplor
     let active = true;
     (async () => {
       try {
-        const favSnap = await getDocs(query(collection(db, 'favorites'), where('userId', '==', user.uid)));
-        const favEntries = favSnap.docs.map(d => ({ favId: d.id, placeId: d.data().placeId as string }));
+        const { data: favData } = await supabase.from('favorites').select('id, place_id').eq('user_id', user.uid);
+        const favEntries = (favData || []).map(d => ({ favId: d.id, placeId: d.place_id as string }));
 
-        const placesSnapshot = await getDocs(collection(db, 'places'));
-        const dbPlaces = placesSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Place[];
+        const { data: placesData } = await supabase.from('places').select('*');
+        const dbPlaces = (placesData || []) as Place[];
         const seedPlaces = curatedPlaces.map((cp) => ({
           ...cp,
           id: `curated_${cp.name.replace(/\s/g, '_')}`,
@@ -90,7 +89,7 @@ export const SavedPlaces: React.FC<SavedPlacesProps> = ({ user, onBack, onExplor
   const handleRemove = async (favId: string) => {
     setRemoving(favId);
     try {
-      await deleteDoc(doc(db, 'favorites', favId));
+      await supabase.from('favorites').delete().eq('id', favId);
       setRows(prev => prev.filter(r => r.favId !== favId));
     } catch (err) {
       console.error('Remove favorite error', err);

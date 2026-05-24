@@ -1,15 +1,4 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  limit,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import { db } from './firebase';
+import { supabase } from './supabase';
 
 export type ConnectionStatus = 'pending' | 'accepted' | 'declined';
 
@@ -26,7 +15,6 @@ export interface ConnectionDoc {
   createdAt?: unknown;
 }
 
-/** Deterministic key for a pair of users, order-independent. */
 export function pairKey(a: string, b: string): string {
   return [a, b].sort().join('_');
 }
@@ -40,46 +28,50 @@ export interface SendConnectionArgs {
   message: string;
 }
 
-/** Create a pending connection request. Returns the new doc id. */
 export async function sendConnectionRequest(args: SendConnectionArgs): Promise<string> {
-  const ref = await addDoc(collection(db, 'connections'), {
-    fromUid: args.fromUid,
-    toUid: args.toUid,
-    fromName: args.fromName,
-    fromPhoto: args.fromPhoto ?? '',
-    toName: args.toName ?? '',
+  const { data } = await supabase.from('connections').insert({
+    from_uid: args.fromUid,
+    to_uid: args.toUid,
+    from_name: args.fromName,
+    from_photo: args.fromPhoto ?? '',
+    to_name: args.toName ?? '',
     message: args.message,
     status: 'pending' as ConnectionStatus,
     participants: [args.fromUid, args.toUid],
     pair: pairKey(args.fromUid, args.toUid),
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+    created_at: new Date().toISOString(),
+  }).select('id').single();
+  return data?.id ?? '';
 }
 
-/** All connection docs (any status) the user is part of. Client filters. */
 export async function listConnections(uid: string): Promise<ConnectionDoc[]> {
-  const snap = await getDocs(query(
-    collection(db, 'connections'),
-    where('participants', 'array-contains', uid),
-    limit(200),
-  ));
-  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ConnectionDoc, 'id'>) }));
+  const { data } = await supabase
+    .from('connections')
+    .select('*')
+    .contains('participants', [uid])
+    .limit(200);
+  return (data || []).map((r) => ({
+    id: r.id,
+    fromUid: r.from_uid,
+    toUid: r.to_uid,
+    fromName: r.from_name,
+    fromPhoto: r.from_photo,
+    toName: r.to_name,
+    message: r.message,
+    status: r.status as ConnectionStatus,
+    participants: r.participants,
+    createdAt: r.created_at,
+  }));
 }
 
 export async function acceptConnection(id: string): Promise<void> {
-  await updateDoc(doc(db, 'connections', id), { status: 'accepted' as ConnectionStatus });
+  await supabase.from('connections').update({ status: 'accepted' }).eq('id', id);
 }
 
 export async function declineConnection(id: string): Promise<void> {
-  await updateDoc(doc(db, 'connections', id), { status: 'declined' as ConnectionStatus });
+  await supabase.from('connections').update({ status: 'declined' }).eq('id', id);
 }
 
-/**
- * Resolve the connection state between the viewer and another user from a
- * pre-fetched list: none | pending-out (I sent) | pending-in (they sent) |
- * connected | declined.
- */
 export type PairState = 'none' | 'pending-out' | 'pending-in' | 'connected' | 'declined';
 
 export function pairState(list: ConnectionDoc[], me: string, other: string): { state: PairState; doc?: ConnectionDoc } {
@@ -88,6 +80,5 @@ export function pairState(list: ConnectionDoc[], me: string, other: string): { s
   if (!found) return { state: 'none' };
   if (found.status === 'accepted') return { state: 'connected', doc: found };
   if (found.status === 'declined') return { state: 'declined', doc: found };
-  // pending
   return { state: found.fromUid === me ? 'pending-out' : 'pending-in', doc: found };
 }

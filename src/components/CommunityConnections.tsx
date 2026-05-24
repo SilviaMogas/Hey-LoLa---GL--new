@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Check, Loader2, MessageSquare, UserPlus, X } from 'lucide-react';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { useAuth } from '../lib/useAuth';
 import { syncMemberPublicCard } from '../lib/memberPublic';
 import {
@@ -36,10 +36,10 @@ export const CommunityConnections: React.FC<Props> = ({ onOpenDm }) => {
     let cancelled = false;
     (async () => {
       try {
-        const list = await listConnections(user.uid);
+        const list = await listConnections(user.id);
         if (!cancelled) setConns(list);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'connections');
+        handleSupabaseError(err, OperationType.READ, 'connections');
       }
     })();
     return () => { cancelled = true; };
@@ -53,11 +53,11 @@ export const CommunityConnections: React.FC<Props> = ({ onOpenDm }) => {
     setSavingOptIn(true);
     setOptIn(next);
     try {
-      await setDoc(doc(db, 'users', user.uid), { communityOptIn: next, updatedAt: new Date().toISOString() }, { merge: true });
-      await syncMemberPublicCard(user.uid, { ...profile, communityOptIn: next }, next);
+      await supabase.from('users').update({ community_opt_in: next, updated_at: new Date().toISOString() }).eq('id', user.id);
+      await syncMemberPublicCard(user.id, { ...profile, communityOptIn: next }, next);
     } catch (err) {
-      setOptIn(!next); // revert on failure
-      handleFirestoreError(err, OperationType.WRITE, 'users');
+      setOptIn(!next);
+      handleSupabaseError(err, OperationType.WRITE, 'users');
     } finally {
       setSavingOptIn(false);
     }
@@ -69,13 +69,13 @@ export const CommunityConnections: React.FC<Props> = ({ onOpenDm }) => {
       if (accept) await acceptConnection(id); else await declineConnection(id);
       setConns((prev) => prev.map((c) => (c.id === id ? { ...c, status: accept ? 'accepted' : 'declined' } : c)));
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'connections');
+      handleSupabaseError(err, OperationType.WRITE, 'connections');
     } finally {
       setBusyId(null);
     }
   };
 
-  const incoming = conns.filter((c) => c.toUid === user.uid && c.status === 'pending');
+  const incoming = conns.filter((c) => c.toUid === user.id && c.status === 'pending');
   const accepted = conns.filter((c) => c.status === 'accepted');
 
   return (
@@ -134,8 +134,8 @@ export const CommunityConnections: React.FC<Props> = ({ onOpenDm }) => {
         <div className="space-y-2">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Connected</p>
           {accepted.map((c) => {
-            const otherUid = c.fromUid === user.uid ? c.toUid : c.fromUid;
-            const otherName = c.fromUid === user.uid ? (c.toName || 'Member') : c.fromName;
+            const otherUid = c.fromUid === user.id ? c.toUid : c.fromUid;
+            const otherName = c.fromUid === user.id ? (c.toName || 'Member') : c.fromName;
             return (
               <div key={c.id} className="flex items-center gap-3 rounded-xl border border-stone-100 p-3">
                 <p className="flex-1 min-w-0 text-sm font-serif italic text-charcoal truncate">{otherName}</p>

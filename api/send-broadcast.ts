@@ -1,4 +1,4 @@
-import { getAdminAuth, getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 import { sendSubscriberBroadcast, type BroadcastRecipient } from '../src/lib/email/index.js';
 import { isAdminEmail } from '../src/lib/admin.js';
 
@@ -24,11 +24,9 @@ export default async function handler(req: any, res: any) {
   }
 
   // Authenticate: require a valid Firebase ID token from an admin user.
-  let adminAuth: ReturnType<typeof getAdminAuth>;
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    adminAuth = getAdminAuth();
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('[send-broadcast] admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
@@ -43,8 +41,9 @@ export default async function handler(req: any, res: any) {
   const idToken = authHeader.slice(7);
   let callerEmail: string | undefined;
   try {
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    callerEmail = decoded.email;
+    const { data: { user }, error } = await db.auth.getUser(idToken);
+    if (error || !user) throw error || new Error('No user');
+    callerEmail = user.email;
   } catch (err: any) {
     res.status(401).json({ success: false, error: 'Invalid or expired token.' });
     return;
@@ -93,13 +92,13 @@ export default async function handler(req: any, res: any) {
 
   if (audience === 'all' || audience === 'users') {
     try {
-      const snap = await db.collection('users').get();
-      for (const doc of snap.docs) {
-        const data = doc.data();
-        const email = data.email as string | undefined;
+      const { data: rows } = await db.from('users').select('email, first_name');
+      for (const row of rows || []) {
+        const r = row as Record<string, any>;
+        const email = r.email as string | undefined;
         if (email && !seen.has(email.toLowerCase())) {
           seen.add(email.toLowerCase());
-          recipients.push({ email, firstName: data.firstName || undefined });
+          recipients.push({ email, firstName: r.first_name || undefined });
         }
       }
     } catch (err: unknown) {
@@ -111,13 +110,13 @@ export default async function handler(req: any, res: any) {
 
   if (audience === 'all' || audience === 'waitlist') {
     try {
-      const snap = await db.collection('waitlist').get();
-      for (const doc of snap.docs) {
-        const data = doc.data();
-        const email = data.email as string | undefined;
+      const { data: rows } = await db.from('waitlist').select('email, first_name');
+      for (const row of rows || []) {
+        const r = row as Record<string, any>;
+        const email = r.email as string | undefined;
         if (email && !seen.has(email.toLowerCase())) {
           seen.add(email.toLowerCase());
-          recipients.push({ email, firstName: data.firstName || undefined });
+          recipients.push({ email, firstName: r.first_name || undefined });
         }
       }
     } catch (err: unknown) {

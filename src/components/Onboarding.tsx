@@ -2,9 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { paths } from '../lib/routes';
-import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { syncPetPublicCard } from '../lib/petPublic';
 import { HUB_CITIES } from '../lib/hubs';
 import { ArrowRight, ArrowLeft, PawPrint, ShieldCheck, Weight, Calendar, Info, Loader2, Camera, X, MapPin } from 'lucide-react';
@@ -123,9 +122,36 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
           userId,
           createdAt: new Date().toISOString()
         };
-        const petRef = await addDoc(collection(db, 'pets'), petPayload);
-        // Mirror a safe public card so the pet gets a shareable profile.
-        void syncPetPublicCard(petRef.id, petPayload, profile);
+        const { data: petRow } = await supabase.from('pets').insert({
+          user_id: userId,
+          name: petData.name || '',
+          type: finalPetType,
+          sex: petData.sex,
+          breed: petData.breed || '',
+          birth_date: petData.birthDate,
+          current_weight: petData.currentWeight,
+          weight_history: petData.weightHistory || [],
+          vaccinations: petData.vaccinations || [],
+          vax_status: petData.vaxStatus || '',
+          special_needs: petData.specialNeeds || '',
+          photo_url: petData.photoURL,
+          country_of_birth: petData.countryOfBirth || '',
+          residence_country: petData.residenceCountry || '',
+          travel_history: petData.travelHistory || [],
+          planned_destinations: petData.plannedDestinations,
+          activities: petData.activities,
+          microchip_id: petData.microchipID || '',
+          hobbies: petData.hobbies || '',
+          passport_number: petData.passportNumber,
+          is_public: petData.isPublic ?? false,
+          city: petData.city,
+          emergency_contacts: petData.emergencyContacts,
+          health_timeline: petData.healthTimeline,
+          created_at: new Date().toISOString(),
+        }).select('id').single();
+        if (petRow) {
+          void syncPetPublicCard(petRow.id, { ...petData, type: finalPetType, userId } as PetData, profile);
+        }
       }
 
       // Update User Profile — only write profile fields that are non-empty so we
@@ -138,15 +164,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
       if (userProfileData.appIntents.length) profilePatch.appIntents = userProfileData.appIntents;
       if (userProfileData.relationshipStatus) profilePatch.relationshipStatus = userProfileData.relationshipStatus;
 
-      const userRef = doc(db, 'users', userId);
       const isFirstRun = !profile?.onboarded;
-      await setDoc(userRef, {
-        ...profilePatch,
+      const userPatch: Record<string, unknown> = {
+        ...(profilePatch.homeCity ? { home_city: profilePatch.homeCity } : {}),
+        ...(profilePatch.localHub ? { local_hub: profilePatch.localHub } : {}),
+        ...(profilePatch.dreamDestination ? { dream_destination: profilePatch.dreamDestination } : {}),
+        ...(profilePatch.appIntents ? { app_intents: profilePatch.appIntents } : {}),
+        ...(profilePatch.relationshipStatus ? { relationship_status: profilePatch.relationshipStatus } : {}),
         ...(isFirstRun
           ? {
-              onboardingStep: 3,
+              onboarding_step: 3,
               onboarded: true,
-              onboardingStatus: {
+              onboarding_status: {
                 hasSelectedPetType: true,
                 selectedPetType: isPetLover ? 'pet_lover_no_pet' : String(finalPetType).toLowerCase(),
                 hasPet: !isPetLover,
@@ -155,8 +184,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
               },
             }
           : {}),
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+        updated_at: new Date().toISOString()
+      };
+      await supabase.from('users').update(userPatch).eq('id', userId);
 
       // Claim the chosen handle — initial claim, not counted against the
       // monthly change limit. Best-effort: never blocks onboarding completion.
@@ -178,22 +208,25 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
       if (!isPetLover) track('pet_created', { petType: String(finalPetType) });
 
       // Best-effort "passport ready" email — only on first-run onboarding.
-      if (isFirstRun && auth.currentUser?.email) {
-        void fetch('/api/notify-onboarding-complete', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            email: auth.currentUser.email,
-            firstName: profile?.firstName || userName || '',
-            petName: isPetLover ? undefined : (petData.name || undefined),
-          }),
-        }).catch(() => { /* email is best-effort */ });
+      if (isFirstRun) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser?.email) {
+          void fetch('/api/notify-onboarding-complete', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              email: currentUser.email,
+              firstName: profile?.firstName || userName || '',
+              petName: isPetLover ? undefined : (petData.name || undefined),
+            }),
+          }).catch(() => { /* email is best-effort */ });
+        }
       }
 
       onComplete();
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'pets/users');
+      handleSupabaseError(error, OperationType.WRITE, 'pets/users');
     } finally {
       setLoading(false);
     }
@@ -209,12 +242,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
     // onboarding state.
     if (profile?.onboarded) return;
     try {
-      await setDoc(doc(db, 'users', userId), {
-        onboardingStep: newStep,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      await supabase.from('users').update({
+        onboarding_step: newStep,
+        updated_at: new Date().toISOString()
+      }).eq('id', userId);
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${userId}`);
+      handleSupabaseError(e, OperationType.UPDATE, `users/${userId}`);
     }
   };
   const prevStep = () => {
@@ -278,7 +311,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ userId, userName, profil
 
       {/* Escape hatch — always allow signing out, even if onboarding is incomplete. */}
       <button
-        onClick={() => signOut(auth)}
+        onClick={() => supabase.auth.signOut()}
         className="fixed top-4 right-4 z-50 text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-charcoal bg-white/80 backdrop-blur border border-stone-100 px-4 py-2 rounded-full shadow-sm transition-colors"
       >
         Log out

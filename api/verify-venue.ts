@@ -1,14 +1,7 @@
 import { timingSafeEqual } from 'crypto';
-import { getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 
-// Server-side endpoint for the click-to-verify email-link flow.
-//
 // POST /api/verify-venue { placeId, token }
-//
-// Validates the token against /place_secrets/{placeId} (admin-only,
-// not exposed to the client) using a constant-time comparison. On match,
-// promotes /places/{placeId}.status from 'Pending verification' to
-// 'Verified', stamps verifiedAt + claimedBy, and marks the secret consumed.
 
 function tokensMatch(a: string, b: string): boolean {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
@@ -31,9 +24,9 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err: any) {
     console.error('verify-venue: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured for verification yet.' });
@@ -41,47 +34,44 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const secretRef = db.collection('place_secrets').doc(placeId);
-    const secretSnap = await secretRef.get();
-    if (!secretSnap.exists) {
+    const { data: secretRow } = await db.from('place_secrets').select('*').eq('id', placeId).maybeSingle();
+    if (!secretRow) {
       res.status(404).json({ success: false, error: 'No verification request on file for this listing.' });
       return;
     }
-    const secret = secretSnap.data() || {};
-    const expected = String(secret.verificationToken || '');
+    const secret = secretRow as Record<string, any>;
+    const expected = String(secret.verification_token || '');
 
     if (!expected || !tokensMatch(expected, token)) {
       res.status(403).json({ success: false, error: 'This verification link is invalid or has already been used.' });
       return;
     }
 
-    if (secret.verificationStatus === 'verified') {
+    if (secret.verification_status === 'verified') {
       res.status(200).json({
         success: true,
         alreadyVerified: true,
-        placeName: secret.placeName || null,
-        verifiedAt: secret.verifiedAt || null,
+        placeName: secret.place_name || null,
+        verifiedAt: secret.verified_at || null,
       });
       return;
     }
 
     const now = new Date().toISOString();
-    const placeRef = db.collection('places').doc(placeId);
-    const placeSnap = await placeRef.get();
+    const { data: placeRow } = await db.from('places').select('id').eq('id', placeId).maybeSingle();
     const placePatch: Record<string, unknown> = {
       status: 'Verified',
-      claimApprovedAt: now,
-      updatedAt: now,
+      claim_approved_at: now,
+      updated_at: now,
     };
-    if (secret.businessEmail) placePatch.contactEmail = secret.businessEmail;
+    if (secret.business_email) placePatch.contact_email = secret.business_email;
 
-    if (placeSnap.exists) {
-      await placeRef.update(placePatch);
+    if (placeRow) {
+      await db.from('places').update(placePatch).eq('id', placeId);
     } else {
-      // First-time verify on a curated-only listing — promote it to a real
-      // Firestore document using the admin-side seed fields.
-      await placeRef.set({
-        name: secret.placeName || placeId,
+      await db.from('places').insert({
+        id: placeId,
+        name: secret.place_name || placeId,
         city: secret.city || 'Miami',
         category: secret.category || 'Other',
         description: secret.description || '',
@@ -94,15 +84,15 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    await secretRef.update({
-      verificationStatus: 'verified',
-      verifiedAt: now,
-    });
+    await db.from('place_secrets').update({
+      verification_status: 'verified',
+      verified_at: now,
+    }).eq('id', placeId);
 
     res.status(200).json({
       success: true,
       alreadyVerified: false,
-      placeName: secret.placeName || null,
+      placeName: secret.place_name || null,
       verifiedAt: now,
     });
   } catch (err: any) {

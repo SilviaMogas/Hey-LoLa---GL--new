@@ -15,8 +15,7 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react';
-import { addDoc, collection, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { FOUNDATION_DOGS, type FoundationDog } from '../data/foundationDogs';
 import {
   copyToClipboard,
@@ -48,21 +47,14 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
 
   // Prefer the live Firestore record when it exists; fall back to seed.
   useEffect(() => {
-    const q = query(collection(db, 'foundationDogs'), where('passport.slug', '==', slug));
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        const first = snap.docs[0];
-        if (first) {
-          setLiveDog({ id: first.id, ...(first.data() as Omit<FoundationDog, 'id'>) });
-        } else {
-          setLiveDog(null);
-        }
-        setLoading(false);
-      },
-      () => { setLiveDog(null); setLoading(false); },
-    );
-    return () => unsubscribe();
+    void (async () => {
+      try {
+        const { data } = await supabase.from('foundation_dogs').select('*').eq('passport->>slug', slug).maybeSingle();
+        if (data) setLiveDog(data as FoundationDog);
+        else setLiveDog(null);
+      } catch { setLiveDog(null); }
+      setLoading(false);
+    })();
   }, [slug]);
 
   const dog = liveDog ?? seedDog;
@@ -439,25 +431,25 @@ function InterestModal({ dog, onClose }: { dog: FoundationDog; onClose: () => vo
     setSubmitting(true);
     setError(null);
     try {
-      const docRef = await addDoc(collection(db, 'foundation_interests'), {
-        dogId: dog.id,
-        dogName: dog.name,
-        dogSlug: dog.passport.slug,
-        partnerId: dog.partnerId,
-        partnerName: dog.partnerName,
+      const { data: row } = await supabase.from('foundation_interests').insert({
+        dog_id: dog.id,
+        dog_name: dog.name,
+        dog_slug: dog.passport.slug,
+        partner_id: dog.partnerId,
+        partner_name: dog.partnerName,
         contact: { name, email, phone },
         message,
         source: 'rescue_passport',
         status: 'new',
-        createdAt: serverTimestamp(),
-      });
-      // Fire-and-forget notification (confirmation to submitter + admin alert).
-      // The endpoint re-reads the doc via the Admin SDK so it cannot be spoofed.
-      void fetch('/api/notify-foundation-interest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interestId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
+      if (row) {
+        void fetch('/api/notify-foundation-interest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interestId: row.id }),
+        }).catch(() => { /* email is best-effort */ });
+      }
       setSubmitted(true);
     } catch (err) {
       setError((err as Error).message || 'Something went wrong. Please try again.');

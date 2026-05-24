@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, UserCircle, Globe, Menu, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { auth } from '../lib/firebase';
-import { signOut, type User } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
 import { useTranslation } from '../lib/LanguageContext';
 import { BrandLogo } from './BrandLogo';
 import { getTier } from '../lib/membership';
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
   }, [location.pathname]);
 
   const handleSignOut = () => {
-    signOut(auth);
+    supabase.auth.signOut();
     navigate(paths.home);
   };
 
@@ -128,8 +128,8 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
                 >
                   <div className="relative">
                     <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-md bg-white ring-1 ring-stone-100 transition-all group-hover:ring-stone-200">
-                      {(profile?.photoURL || user.photoURL) ? (
-                        <img src={profile?.photoURL || user.photoURL} alt="" className="w-full h-full object-cover" />
+                      {(profile?.photoURL || (user.user_metadata?.avatar_url as string)) ? (
+                        <img src={profile?.photoURL || (user.user_metadata?.avatar_url as string)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-stone-300 group-hover:text-charcoal transition-colors">
                           <UserCircle size={18} />
@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
                   </div>
                   <div className="hidden md:flex flex-col items-start leading-none gap-1">
                     <span className="text-[10px] font-black uppercase tracking-[0.15em] text-charcoal transition-colors">
-                      {profile?.firstName || profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || user.email?.split('@')[0]}
+                      {profile?.firstName || profile?.displayName?.split(' ')[0] || (user.user_metadata?.display_name as string)?.split(' ')[0] || user.email?.split('@')[0]}
                     </span>
                     <span className={cn(
                       'text-[8px] font-bold uppercase tracking-widest',
@@ -275,15 +275,15 @@ export const Navbar: React.FC<NavbarProps> = ({ user, profile, isAdmin = false, 
                   className="flex items-center gap-3 group flex-1 min-w-0"
                 >
                   <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow ring-1 ring-stone-100 bg-white flex items-center justify-center text-stone-400">
-                    {(profile?.photoURL || user.photoURL) ? (
-                      <img src={profile?.photoURL || user.photoURL} alt="" className="w-full h-full object-cover" />
+                    {(profile?.photoURL || (user.user_metadata?.avatar_url as string)) ? (
+                      <img src={profile?.photoURL || (user.user_metadata?.avatar_url as string)} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <UserCircle size={20} />
                     )}
                   </div>
                   <div className="flex flex-col items-start leading-tight min-w-0">
                     <span className="text-sm font-black truncate max-w-[180px]">
-                      {profile?.firstName || profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || user.email?.split('@')[0]}
+                      {profile?.firstName || profile?.displayName?.split(' ')[0] || (user.user_metadata?.display_name as string)?.split(' ')[0] || user.email?.split('@')[0]}
                     </span>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400">
                       {t.common.dashboard}

@@ -1,4 +1,4 @@
-import { getAdminDb } from './_admin.js';
+import { getAdminClient } from './_supabase.js';
 import { sendWaitlistEmails } from '../src/lib/email/index.js';
 
 // POST /api/notify-waitlist
@@ -23,23 +23,23 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('notify-waitlist: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured.' });
     return;
   }
 
-  const snap = await db.collection('waitlist').doc(entryId).get();
-  if (!snap.exists) {
+  const { data: row } = await db.from('waitlist').select('*').eq('id', entryId).maybeSingle();
+  if (!row) {
     res.status(404).json({ success: false, error: 'Waitlist entry not found.' });
     return;
   }
-  const data = snap.data() || {};
+  const data = row as Record<string, any>;
 
-  const createdAtMs = data.createdAt?._seconds ? data.createdAt._seconds * 1000 : 0;
+  const createdAtMs = Date.parse(String(data.created_at || '')) || 0;
   if (createdAtMs && Date.now() - createdAtMs > RECENT_WINDOW_MS) {
     res.status(409).json({ success: false, error: 'Entry is not recent.' });
     return;

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, Clock, Heart, Loader2, MapPin, PawPrint, Send, UserPlus, Users } from 'lucide-react';
-import { collection, doc, getDoc, getDocs, limit, query, where } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { useAuth } from '../lib/useAuth';
 import { COMMUNITY_GROUPS } from '../data/communityGroups';
 import { paths, buildPath } from '../lib/routes';
@@ -54,37 +54,35 @@ export const PetProfile: React.FC = () => {
     setLoading(true);
     (async () => {
       try {
-        const snap = await getDoc(doc(db, 'pet_public', petId));
-        if (!cancelled && snap.exists()) {
-          setCard({ petId: snap.id, ...(snap.data() as Omit<PetPublicCard, 'petId'>) });
+        const { data: pubRow } = await supabase.from('pet_public').select('*').eq('pet_id', petId).maybeSingle();
+        if (!cancelled && pubRow) {
+          setCard({ petId: pubRow.pet_id, ownerId: pubRow.owner_id, name: pubRow.name, type: pubRow.type ?? 'Dog', sex: pubRow.sex, breed: pubRow.breed, photoURL: pubRow.photo_url, city: pubRow.city, activities: pubRow.activities, hobbies: pubRow.hobbies, isPublic: pubRow.is_public !== false, isHidden: pubRow.is_hidden === true, ownerName: pubRow.owner_name, ownerHandle: pubRow.owner_handle, ownerPhoto: pubRow.owner_photo, ownerCity: pubRow.owner_city, ownerBio: pubRow.owner_bio });
           setLoading(false);
           return;
         }
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'pet_public');
+        handleSupabaseError(err, OperationType.READ, 'pet_public');
       }
-      // Fallback: owner/admin can read their own /pets doc directly.
       try {
-        const petSnap = await getDoc(doc(db, 'pets', petId));
-        if (!cancelled && petSnap.exists()) {
-          const p = petSnap.data() as Record<string, unknown>;
+        const { data: petRow } = await supabase.from('pets').select('*').eq('id', petId).maybeSingle();
+        if (!cancelled && petRow) {
           setCard({
             petId,
-            ownerId: String(p.userId ?? ''),
-            name: String(p.name ?? ''),
-            type: (p.type as PetPublicCard['type']) ?? 'Dog',
-            sex: p.sex as PetPublicCard['sex'],
-            breed: p.breed as string | undefined,
-            photoURL: p.photoURL as string | undefined,
-            city: p.city as string | undefined,
-            activities: p.activities as Activity[] | undefined,
-            hobbies: p.hobbies as string | undefined,
-            isPublic: p.isPublic !== false,
-            isHidden: p.isHidden === true,
+            ownerId: String(petRow.user_id ?? ''),
+            name: String(petRow.name ?? ''),
+            type: (petRow.type as PetPublicCard['type']) ?? 'Dog',
+            sex: petRow.sex as PetPublicCard['sex'],
+            breed: petRow.breed as string | undefined,
+            photoURL: petRow.photo_url as string | undefined,
+            city: petRow.city as string | undefined,
+            activities: petRow.activities as Activity[] | undefined,
+            hobbies: petRow.hobbies as string | undefined,
+            isPublic: petRow.is_public !== false,
+            isHidden: petRow.is_hidden === true,
           });
         }
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'pets');
+        handleSupabaseError(err, OperationType.READ, 'pets');
       }
       if (!cancelled) setLoading(false);
     })();
@@ -99,22 +97,21 @@ export const PetProfile: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDocs(query(
-          collection(db, 'group_memberships'),
-          where('userId', '==', ownerId),
-          limit(50),
-        ));
+        const { data: memberRows } = await supabase
+          .from('group_memberships')
+          .select('group_id, group_name')
+          .eq('user_id', ownerId)
+          .limit(50);
         if (cancelled) return;
         const seen = new Set<string>();
-        const list = snap.docs.map((d) => {
-          const data = d.data() as Record<string, unknown>;
-          const gid = String(data.groupId ?? '');
+        const list = (memberRows || []).map((d) => {
+          const gid = String(d.group_id ?? '');
           const meta = COMMUNITY_GROUPS.find((g) => g.id === gid);
-          return { id: gid, name: meta?.name ?? String(data.groupName ?? gid), emoji: meta?.emoji };
+          return { id: gid, name: meta?.name ?? String(d.group_name ?? gid), emoji: meta?.emoji };
         }).filter((g) => g.id && !seen.has(g.id) && seen.add(g.id));
         setGroups(list);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'group_memberships');
+        handleSupabaseError(err, OperationType.READ, 'group_memberships');
       }
     })();
     return () => { cancelled = true; };
@@ -123,14 +120,14 @@ export const PetProfile: React.FC = () => {
   // Load my connection state with this furry parent.
   useEffect(() => {
     const ownerId = card?.ownerId;
-    if (!user || !ownerId || ownerId === user.uid) { setConns([]); return; }
+    if (!user || !ownerId || ownerId === user.id) { setConns([]); return; }
     let cancelled = false;
     (async () => {
       try {
-        const list = await listConnections(user.uid);
+        const list = await listConnections(user.id);
         if (!cancelled) setConns(list);
       } catch (err) {
-        handleFirestoreError(err, OperationType.READ, 'connections');
+        handleSupabaseError(err, OperationType.READ, 'connections');
       }
     })();
     return () => { cancelled = true; };
@@ -138,7 +135,7 @@ export const PetProfile: React.FC = () => {
 
   const viewerName = profile?.displayName
     || [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
-    || user?.displayName || 'Member';
+    || (user?.user_metadata?.display_name as string) || 'Member';
 
   const sendRequest = async () => {
     if (!user || !card?.ownerId || connBusy) return;
@@ -148,21 +145,21 @@ export const PetProfile: React.FC = () => {
     const ownerId = card.ownerId;
     try {
       const id = await sendConnectionRequest({
-        fromUid: user.uid,
+        fromUid: user.id,
         fromName: viewerName,
-        fromPhoto: profile?.photoURL ?? user.photoURL ?? '',
+        fromPhoto: profile?.photoURL ?? user.user_metadata?.photo_url ?? '',
         toUid: ownerId,
         toName: card.ownerName,
         message: msg,
       });
       setConns((prev) => [...prev, {
-        id, fromUid: user.uid, toUid: ownerId, fromName: viewerName,
-        message: msg, status: 'pending', participants: [user.uid, ownerId],
+        id, fromUid: user.id, toUid: ownerId, fromName: viewerName,
+        message: msg, status: 'pending', participants: [user.id, ownerId],
       }]);
       setConnOpen(false);
       setConnMsg('');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'connections');
+      handleSupabaseError(err, OperationType.WRITE, 'connections');
     } finally {
       setConnBusy(false);
     }
@@ -174,7 +171,7 @@ export const PetProfile: React.FC = () => {
       await acceptConnection(id);
       setConns((prev) => prev.map((c) => (c.id === id ? { ...c, status: 'accepted' } : c)));
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'connections');
+      handleSupabaseError(err, OperationType.WRITE, 'connections');
     } finally {
       setConnBusy(false);
     }
@@ -189,7 +186,7 @@ export const PetProfile: React.FC = () => {
   }
 
   // Not found OR hidden/private → soft empty state.
-  if (!card || card.isHidden || (card.isPublic === false && card.ownerId !== user?.uid)) {
+  if (!card || card.isHidden || (card.isPublic === false && card.ownerId !== user?.id)) {
     return (
       <div className="max-w-2xl mx-auto px-5 sm:px-6 py-16 text-center font-boutique">
         <h1 className="text-3xl font-serif italic tracking-tight">This profile is private<span className="brand-dot" aria-hidden="true" /></h1>
@@ -209,9 +206,9 @@ export const PetProfile: React.FC = () => {
   // Pronoun for the "Meet ___" eyebrow, from the pet's sex.
   const pronoun = card.sex === 'Male' ? 'him' : card.sex === 'Female' ? 'her' : 'them';
   // Connection state with the furry parent (only when signed in & not self).
-  const canConnect = !!user && !!card.ownerId && card.ownerId !== user.uid;
+  const canConnect = !!user && !!card.ownerId && card.ownerId !== user.id;
   const connState = canConnect
-    ? pairState(conns, user!.uid, card.ownerId)
+    ? pairState(conns, user!.id, card.ownerId)
     : { state: 'none' as const, doc: undefined };
 
   return (
@@ -391,7 +388,7 @@ export const PetProfile: React.FC = () => {
         )}
 
         {/* Owner-only hint when their pet isn't public yet. */}
-        {card.ownerId === user?.uid && card.isPublic === false && (
+        {card.ownerId === user?.id && card.isPublic === false && (
           <p className="-mt-10 mb-16 text-center text-[11px] text-stone-400 italic">
             Only you can see this preview — turn on a public profile in your dashboard to share it.
           </p>

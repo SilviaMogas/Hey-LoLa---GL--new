@@ -14,9 +14,7 @@ import { ProtectedRoute, AdminRoute, GuestOnlyRoute } from './lib/guards';
 import { DraftRoute } from './components/DraftRoute';
 import { UpgradeModal } from './components/UpgradeModal';
 import { PetData, UserProfile } from './types';
-import { db, auth } from './lib/firebase';
-import { sendEmailVerification } from 'firebase/auth';
-import { collection, query, where, setDoc, doc, onSnapshot } from 'firebase/firestore';
+import { supabase } from './lib/supabase';
 import { Home } from './components/Home';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -206,20 +204,19 @@ function AppContent() {
 
   // Poll for email verification while the user is unverified
   useEffect(() => {
-    if (user && !user.emailVerified) {
+    if (user && !user.email_confirmed_at) {
       const interval = setInterval(async () => {
-        await auth.currentUser?.reload();
-        if (auth.currentUser?.emailVerified) {
+        const { data: { user: freshUser } } = await supabase.auth.getUser();
+        if (freshUser?.email_confirmed_at) {
           clearInterval(interval);
           setVerificationChecked(true);
-          // Best-effort "you're verified" email via Resend.
           void fetch('/api/notify-email-verified', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
-              userId: auth.currentUser.uid,
-              email: auth.currentUser.email,
-              firstName: profile?.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
+              userId: freshUser.id,
+              email: freshUser.email,
+              firstName: profile?.firstName || freshUser.user_metadata?.first_name || '',
             }),
           }).catch(() => { /* email is best-effort */ });
         }
@@ -261,23 +258,102 @@ function AppContent() {
     if (!user) return;
     // Allow pet fetching for unverified users so onboarding works immediately
 
-    const q = query(collection(db, 'pets'), where('userId', '==', user.uid));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const fetchedPets = snap.docs.map(d => ({ id: d.id, ...d.data() } as PetData));
-      setPets(fetchedPets);
+    // Initial fetch
+    supabase
+      .from('pets')
+      .select('*')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        const fetchedPets = (data || []).map((row: any) => ({
+          id: row.id,
+          userId: row.user_id,
+          name: row.name,
+          type: row.type,
+          sex: row.sex,
+          breed: row.breed,
+          birthDate: row.birth_date,
+          currentWeight: row.current_weight || { value: '', date: '' },
+          weightHistory: row.weight_history || [],
+          vaccinations: row.vaccinations || [],
+          vaxStatus: row.vax_status || '',
+          specialNeeds: row.special_needs || '',
+          photoURL: row.photo_url,
+          countryOfBirth: row.country_of_birth || '',
+          residenceCountry: row.residence_country || '',
+          travelHistory: row.travel_history || [],
+          plannedDestinations: row.planned_destinations,
+          activities: row.activities,
+          microchipID: row.microchip_id || '',
+          hobbies: row.hobbies || '',
+          passportNumber: row.passport_number,
+          isPublic: row.is_public,
+          isHidden: row.is_hidden,
+          city: row.city,
+          emergencyContacts: row.emergency_contacts,
+          healthTimeline: row.health_timeline,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        })) as PetData[];
+        setPets(fetchedPets);
 
-      const profileLoaded = profile !== null;
-      const needsOnboarding = profileLoaded && !profile.onboarded && fetchedPets.length === 0;
+        const profileLoaded = profile !== null;
+        const needsOnboarding = profileLoaded && !profile.onboarded && fetchedPets.length === 0;
 
-      if (needsOnboarding && location.pathname !== paths.onboarding) {
-        navigate(paths.onboarding, { replace: true });
-      } else if (fetchedPets.length > 0 && profileLoaded && !profile.onboarded) {
-        // Has pets but profile not flagged — silent fix-up
-        setDoc(doc(db, 'users', user.uid), { onboarded: true, onboardingStep: 3 }, { merge: true });
-      }
-    });
+        if (needsOnboarding && location.pathname !== paths.onboarding) {
+          navigate(paths.onboarding, { replace: true });
+        } else if (fetchedPets.length > 0 && profileLoaded && !profile.onboarded) {
+          supabase.from('users').update({ onboarded: true, onboarding_step: 3 }).eq('id', user.id);
+        }
+      });
 
-    return () => unsubscribe();
+    // Realtime subscription
+    const channel = supabase
+      .channel(`user-pets-${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'pets',
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        // Re-fetch on any change
+        supabase.from('pets').select('*').eq('user_id', user.id).then(({ data }) => {
+          if (data) {
+            setPets(data.map((row: any) => ({
+              id: row.id,
+              userId: row.user_id,
+              name: row.name,
+              type: row.type,
+              sex: row.sex,
+              breed: row.breed,
+              birthDate: row.birth_date,
+              currentWeight: row.current_weight || { value: '', date: '' },
+              weightHistory: row.weight_history || [],
+              vaccinations: row.vaccinations || [],
+              vaxStatus: row.vax_status || '',
+              specialNeeds: row.special_needs || '',
+              photoURL: row.photo_url,
+              countryOfBirth: row.country_of_birth || '',
+              residenceCountry: row.residence_country || '',
+              travelHistory: row.travel_history || [],
+              plannedDestinations: row.planned_destinations,
+              activities: row.activities,
+              microchipID: row.microchip_id || '',
+              hobbies: row.hobbies || '',
+              passportNumber: row.passport_number,
+              isPublic: row.is_public,
+              isHidden: row.is_hidden,
+              city: row.city,
+              emergencyContacts: row.emergency_contacts,
+              healthTimeline: row.health_timeline,
+              createdAt: row.created_at,
+              updatedAt: row.updated_at,
+            })) as PetData[]);
+          }
+        });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user, profile?.onboarded, location.pathname, navigate]);
 
   if (authLoading) {
@@ -350,8 +426,8 @@ function AppContent() {
         />
       )}
 
-      {user && !user.emailVerified && !hideChrome && (
-        <VerifyEmailBanner email={user.email} />
+      {user && !user.email_confirmed_at && !hideChrome && (
+        <VerifyEmailBanner email={user.email ?? null} />
       )}
 
       <main className={`flex-grow ${mainPadding}`}>
@@ -563,26 +639,20 @@ function AppContent() {
             <Route path={paths.verifyEmail} element={
               <ProtectedRoute>
                 <FadeIn><VerifyEmail email={user?.email || ''} onResend={async () => {
-                  if (!auth.currentUser) return;
-                  // GUARANTEED: re-send Firebase's native verification email
-                  // (works with no server config). Sets the same emailVerified
-                  // flag the app gates on.
-                  try { await sendEmailVerification(auth.currentUser); } catch (e) { console.error('resend verification failed', e); }
-                  // Best-effort branded Hey Lola welcome via Resend (same
-                  // endpoint as signup). Pass profile data so it can send even
-                  // if Firebase Admin is broken.
+                  if (!user?.email) return;
+                  try { await supabase.auth.resend({ type: 'signup', email: user.email }); } catch (e) { console.error('resend verification failed', e); }
                   await fetch('/api/notify-signup', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify({
-                      userId: auth.currentUser.uid,
-                      email: auth.currentUser.email,
-                      firstName: profile?.firstName || auth.currentUser.displayName?.split(' ')[0] || '',
+                      userId: user.id,
+                      email: user.email,
+                      firstName: profile?.firstName || user.user_metadata?.first_name || '',
                       lastName: profile?.lastName,
                       username: profile?.username,
                       signupMethod: 'email',
                     }),
-                  }).catch(() => { /* swallow — UI shows generic "Sending..." */ });
+                  }).catch(() => { /* swallow */ });
                 }} /></FadeIn>
               </ProtectedRoute>
             } />
@@ -590,8 +660,8 @@ function AppContent() {
               <ProtectedRoute>
                 <FadeIn>
                   <Onboarding
-                    userId={user?.uid || ''}
-                    userName={user?.displayName || ''}
+                    userId={user?.id || ''}
+                    userName={(user?.user_metadata?.display_name as string) || (user?.user_metadata?.full_name as string) || ''}
                     profile={profile}
                     onComplete={() => navigate(paths.dashboard)}
                     onBack={() => navigate(paths.home)}
@@ -643,7 +713,7 @@ function AppContent() {
               <ProtectedRoute>
                 <FadeIn className="px-4 sm:px-6 py-6 max-w-5xl mx-auto">
                   <SavedPlaces
-                    user={user ? { uid: user.uid } : null}
+                    user={user ? { uid: user.id } : null}
                     onBack={() => navigate(paths.dashboard)}
                     onExplore={() => navigate(paths.explore)}
                   />
@@ -873,7 +943,7 @@ function ClaimByPartnerRoute({ user }: { user: any }) {
     <FadeIn>
       <ClaimByPartner
         slug={slug}
-        user={user ? { uid: user.uid, email: user.email } : null}
+        user={user ? { uid: user.id, email: user.email } : null}
         onBack={() => navigate(buildPath.venue(slug))}
         onLogin={() => navigate(`${paths.login}?from=${encodeURIComponent(`${paths.claim}?partner=${slug}`)}`)}
         onSubmitted={() => { /* success state lives inside the page */ }}

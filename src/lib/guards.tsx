@@ -58,7 +58,7 @@ export function GuestOnlyRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) return <Loading />;
-  if (user && user.emailVerified) {
+  if (user && user.email_confirmed_at) {
     return <Navigate to={paths.dashboard} replace />;
   }
   return <>{children}</>;

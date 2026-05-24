@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { collection, doc, getDocs, limit, query, setDoc } from 'firebase/firestore';
 import { ArrowLeft, Loader2, ShieldCheck, Send } from 'lucide-react';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { Place } from '../types';
 import { curatedPlaces } from '../data/curatedPlaces';
 import { venueSlug } from '../lib/utils';
@@ -45,10 +45,10 @@ export const ClaimByPartner: React.FC<ClaimByPartnerProps> = ({ slug, user, onBa
     const fromSeed = curatedPlaces.find(p => placeMatches(p, slug));
     (async () => {
       try {
-        const snap = await getDocs(query(collection(db, 'places'), limit(500)));
+        const { data: rows } = await supabase.from('places').select('*').limit(500);
         if (!active) return;
-        const fromDb = snap.docs
-          .map(d => ({ id: d.id, ...(d.data() as Omit<Place, 'id'>) }))
+        const fromDb = (rows || [])
+          .map(d => ({ ...d } as Place))
           .find(p => placeMatches(p, slug) && !p.isHidden);
         const found = fromDb ?? (fromSeed ? ({ ...fromSeed, id: `seed-${slug}` } as Place) : null);
         setPlace(found);
@@ -98,7 +98,7 @@ export const ClaimByPartner: React.FC<ClaimByPartnerProps> = ({ slug, user, onBa
 
   const handleSubmit = async () => {
     setError(null);
-    if (!user || !auth.currentUser) {
+    if (!user) {
       setError('Please sign in to submit this claim.');
       return;
     }
@@ -106,33 +106,35 @@ export const ClaimByPartner: React.FC<ClaimByPartnerProps> = ({ slug, user, onBa
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      const ref = collection(db, 'claim_requests');
-      const docRef = doc(ref);
-      await setDoc(docRef, {
-        userId: auth.currentUser.uid,
-        placeId: place.id,
-        placeName: place.name,
-        businessName: form.businessName.trim(),
-        contactPerson: form.contactPerson.trim(),
-        businessEmail: form.businessEmail.trim(),
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) { setError('Please sign in.'); setSubmitting(false); return; }
+      const { data: row } = await supabase.from('claim_requests').insert({
+        user_id: currentUser.id,
+        place_id: place.id,
+        place_name: place.name,
+        business_name: form.businessName.trim(),
+        contact_person: form.contactPerson.trim(),
+        business_email: form.businessEmail.trim(),
         phone: form.phone.trim(),
         website: form.website.trim(),
         message: form.message.trim(),
         source: 'partner_link',
-        partnerSlug: slug,
+        partner_slug: slug,
         status: 'Pending review',
-        createdAt: new Date().toISOString(),
-      });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
       track('place_claimed', { placeId: place.id, placeName: place.name, city: place.city });
-      void fetch('/api/notify-claim', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ claimId: docRef.id }),
-      }).catch(() => { /* email is best-effort */ });
+      if (row) {
+        void fetch('/api/notify-claim', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ claimId: row.id }),
+        }).catch(() => {});
+      }
       setDone(true);
       onSubmitted();
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, 'claim_requests');
+      handleSupabaseError(e, OperationType.CREATE, 'claim_requests');
       setError('We could not submit your claim. Please try again.');
     } finally {
       setSubmitting(false);

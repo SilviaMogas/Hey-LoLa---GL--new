@@ -9,8 +9,8 @@ import { StatusBadge, ClaimedBadge, PartnerBadge, PerkBadge, ReservationsBadge }
 import { buildOpenTableUrl, logReservationClick } from '../lib/reservations';
 import { venueSlug } from '../lib/utils';
 import { ClaimPlaceDialog } from './ClaimPlaceDialog';
-import { db, auth, handleFirestoreError, OperationType, toggleOwnedDoc } from '../lib/firebase';
-import { collection, query, getDocs, doc, where } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType, toggleOwnedDoc } from '../lib/dbHelpers';
 import { Place, PlaceCategory } from '../types';
 import { cn } from '../lib/utils';
 import { track } from '../lib/analytics';
@@ -610,32 +610,28 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const q = query(collection(db, 'places'));
-        const snapshot = await getDocs(q);
-        const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Place));
+        const { data: placesRows } = await supabase.from('places').select('*');
+        const fetched = (placesRows || []) as Place[];
         setDbPlaces(fetched);
 
-        if (isLoggedIn && auth.currentUser) {
-          const favRef = collection(db, 'favorites');
-          const favQ = query(favRef, where('userId', '==', auth.currentUser.uid));
-          const favSnapshot = await getDocs(favQ);
-          setFavorites(favSnapshot.docs.map(doc => doc.data().placeId));
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (isLoggedIn && currentUser) {
+          const { data: favRows } = await supabase.from('favorites').select('place_id').eq('user_id', currentUser.id);
+          setFavorites((favRows || []).map(r => r.place_id));
 
-          const votesRef = collection(db, 'city_votes');
-          const votesSnapshot = await getDocs(votesRef);
+          const { data: votesRows } = await supabase.from('city_votes').select('user_id, city');
           const counts: Record<string, number> = {};
           const mine = new Set<string>();
-          votesSnapshot.docs.forEach(d => {
-            const data = d.data() as { userId?: string; city?: string };
-            if (!data.city) return;
-            counts[data.city] = (counts[data.city] || 0) + 1;
-            if (data.userId === auth.currentUser?.uid) mine.add(data.city);
+          (votesRows || []).forEach((d: { user_id?: string; city?: string }) => {
+            if (!d.city) return;
+            counts[d.city] = (counts[d.city] || 0) + 1;
+            if (d.user_id === currentUser.id) mine.add(d.city);
           });
           setVoteCounts(counts);
           setUserVotes(mine);
         }
       } catch (e) {
-        handleFirestoreError(e, OperationType.GET, 'data');
+        handleSupabaseError(e, OperationType.GET, 'data');
       }
     };
     fetchData();
@@ -651,7 +647,7 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
   }, []);
 
   const castVote = useCallback(async (cityName: string, continent: ContinentId) => {
-    if (!isLoggedIn || !auth.currentUser) { onRequireAuth(); return; }
+    if (!isLoggedIn) { onRequireAuth(); return; }
     if (voteBusy) return;
     setVoteBusy(cityName);
     try {
@@ -659,7 +655,7 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
       bumpVoteState(cityName, created ? 1 : -1);
       track(created ? 'city_voted' : 'city_unvoted', { city: cityName, continent });
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, 'city_votes');
+      handleSupabaseError(e, OperationType.UPDATE, 'city_votes');
     } finally {
       setVoteBusy(null);
     }
@@ -668,7 +664,7 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
   const submitSuggestion = useCallback(async () => {
     const value = suggestion.trim();
     if (!value) return;
-    if (!isLoggedIn || !auth.currentUser) { onRequireAuth(); return; }
+    if (!isLoggedIn) { onRequireAuth(); return; }
     setSuggestionStatus('sending');
     try {
       const { created } = await toggleOwnedDoc('city_votes', 'city', value, { continent: 'suggestion', isSuggestion: true });
@@ -678,24 +674,20 @@ export const Explore: React.FC<ExploreProps> = ({ petName, isLoggedIn, onRequire
       setSuggestionStatus('sent');
       setTimeout(() => setSuggestionStatus('idle'), 2500);
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, 'city_votes');
+      handleSupabaseError(e, OperationType.UPDATE, 'city_votes');
       setSuggestionStatus('idle');
     }
   }, [suggestion, isLoggedIn, onRequireAuth, bumpVoteState]);
 
   const toggleFavorite = async (placeId: string) => {
     if (!isLoggedIn) { onRequireAuth(); return; }
-    if (!auth.currentUser) return;
-    // Saving spots is a paid-tier perk. Free / signed-out users see the
-    // upgrade modal explaining how to unlock it. Existing favourites can
-    // still be removed, so the unfavourite path skips the gate.
     const alreadySaved = favorites.includes(placeId);
     if (!alreadySaved && !canSave) {
       onRequireUpgrade?.();
       return;
     }
     try {
-      const { created } = await toggleOwnedDoc('favorites', 'placeId', placeId);
+      const { created } = await toggleOwnedDoc('favorites', 'place_id', placeId);
       track(created ? 'place_favorited' : 'place_unfavorited', { placeId });
       setFavorites(prev => created ? [...prev, placeId] : prev.filter(id => id !== placeId));
     } catch (e) {

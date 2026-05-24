@@ -1,37 +1,18 @@
-import { getAuth } from 'firebase-admin/auth';
 import { randomBytes } from 'crypto';
 import { sendVenueInviteEmail } from '../src/lib/email/index.js';
 import { isAdminEmail } from '../src/lib/admin.js';
-import { getAdminApp, getAdminDb } from './_admin.js';
+import { getAdminClient, appUrl } from './_supabase.js';
 
 // Admin endpoint: issue a venue invitation.
 //
 // POST /api/invite-venue
-//   Authorization: Bearer <Firebase ID token of an admin>
+//   Authorization: Bearer <Supabase access token of an admin>
 //   Body: { placeId, businessEmail? }
-//
-// What it does, atomically as far as a single SDK roundtrip allows:
-//   1. Resolves the caller's identity from the bearer token; rejects unless
-//      the email matches the configured admin (defaults to hello@silviamogas.com).
-//   2. Generates a cryptographically random base64url token.
-//   3. Persists the token + invite metadata to /place_secrets/{placeId}
-//      (admin-only collection, never readable from the client).
-//   4. Patches /places/{placeId} with the new verification + partner statuses
-//      and the date/email of the invite (visible to the back office).
-//   5. Sends the invite email via Resend if RESEND_API_KEY is set; otherwise
-//      returns the rendered claim URL so the operator can send manually.
 
 const TOKEN_TTL_DAYS = 30;
 
 function newToken(): string {
   return randomBytes(32).toString('base64url');
-}
-
-function appUrl(req: any): string {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  const proto = (req.headers?.['x-forwarded-proto'] as string) || 'https';
-  const host = (req.headers?.['x-forwarded-host'] as string) || (req.headers?.host as string) || 'heylola.co';
-  return `${proto}://${host}`;
 }
 
 export default async function handler(req: any, res: any) {
@@ -46,9 +27,9 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  let db: ReturnType<typeof getAdminDb>;
+  let db: ReturnType<typeof getAdminClient>;
   try {
-    db = getAdminDb();
+    db = getAdminClient();
   } catch (err) {
     console.error('invite-venue: admin init failed', err);
     res.status(500).json({ success: false, error: 'Server is not configured for invitations.' });
@@ -63,8 +44,9 @@ export default async function handler(req: any, res: any) {
   }
   let callerEmail: string | undefined;
   try {
-    const decoded = await getAuth(getAdminApp()).verifyIdToken(idToken);
-    callerEmail = decoded.email;
+    const { data: { user }, error } = await db.auth.getUser(idToken);
+    if (error || !user) throw error || new Error('No user');
+    callerEmail = user.email;
   } catch {
     res.status(401).json({ success: false, error: 'Invalid bearer token.' });
     return;
@@ -75,18 +57,16 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const placeRef = db.collection('places').doc(placeId);
-    const placeSnap = await placeRef.get();
-    if (!placeSnap.exists) {
+    const { data: place } = await db.from('places').select('*').eq('id', placeId).maybeSingle();
+    if (!place) {
       res.status(404).json({ success: false, error: 'Place not found.' });
       return;
     }
-    const place = placeSnap.data() || {};
 
-    const secretRef = db.collection('place_secrets').doc(placeId);
-    const secretSnap = await secretRef.get();
-    const existingSecret = secretSnap.data() || {};
-    const recipient = (businessEmail || existingSecret.businessEmail || place.contactEmail || '').trim();
+    const { data: existingSecret } = await db.from('place_secrets').select('*').eq('id', placeId).maybeSingle();
+    const secretData = (existingSecret || {}) as Record<string, any>;
+    const placeData = place as Record<string, any>;
+    const recipient = (businessEmail || secretData.business_email || placeData.contact_email || '').trim();
     if (!recipient) {
       res.status(400).json({ success: false, error: 'No email available for this venue.' });
       return;
@@ -96,25 +76,25 @@ export default async function handler(req: any, res: any) {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
 
-    await secretRef.set({
-      ...existingSecret,
-      verificationToken: token,
-      verificationTokenExpiresAt: expiresAt.toISOString(),
-      businessEmail: recipient,
-      lastInvitedAt: now.toISOString(),
-    }, { merge: true });
-
-    await placeRef.update({
-      verificationStatus: 'invitation_sent',
-      partnerStatus: 'invited',
-      verificationEmailSentAt: now.toISOString(),
-      verificationEmailSentTo: recipient,
-      updatedAt: now.toISOString(),
+    await db.from('place_secrets').upsert({
+      id: placeId,
+      verification_token: token,
+      verification_token_expires_at: expiresAt.toISOString(),
+      business_email: recipient,
+      last_invited_at: now.toISOString(),
     });
+
+    await db.from('places').update({
+      verification_status: 'invitation_sent',
+      partner_status: 'invited',
+      verification_email_sent_at: now.toISOString(),
+      verification_email_sent_to: recipient,
+      updated_at: now.toISOString(),
+    }).eq('id', placeId);
 
     const claimUrl = `${appUrl(req)}/claim-listing/${encodeURIComponent(token)}`;
     const result = await sendVenueInviteEmail({
-      venueName: (place.name as string) || 'your venue',
+      venueName: (placeData.name as string) || 'your venue',
       recipientEmail: recipient,
       claimUrl,
     });

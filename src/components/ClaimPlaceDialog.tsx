@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Loader2, Send, ShieldCheck } from 'lucide-react';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { Place } from '../types';
 import { track } from '../lib/analytics';
 import { useTranslation } from '../lib/LanguageContext';
@@ -47,41 +47,39 @@ export function ClaimPlaceDialog({ place, open, onClose, onSubmitted }: ClaimPla
 
   const handleSubmit = async () => {
     setError(null);
-    if (!auth.currentUser) {
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) {
       setError(t.explore.signInToClaim);
       return;
     }
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      const ref = collection(db, 'claim_requests');
-      const docRef = doc(ref);
-      await setDoc(docRef, {
-        userId: auth.currentUser.uid,
-        placeId: place.id,
-        placeName: place.name,
-        businessName: form.businessName.trim(),
-        contactPerson: form.contactPerson.trim(),
-        businessEmail: form.businessEmail.trim(),
+      const { data: row } = await supabase.from('claim_requests').insert({
+        user_id: currentUser.id,
+        place_id: place.id,
+        place_name: place.name,
+        business_name: form.businessName.trim(),
+        contact_person: form.contactPerson.trim(),
+        business_email: form.businessEmail.trim(),
         phone: form.phone.trim(),
         website: form.website.trim(),
         message: form.message.trim(),
         status: 'Pending review',
-        createdAt: new Date().toISOString(),
-      });
+        created_at: new Date().toISOString(),
+      }).select('id').single();
       track('place_claimed', { placeId: place.id, placeName: place.name, city: place.city });
-      // Fire-and-forget: confirmation email to the claimant with the
-      // 1-week SLA + internal alert to hey@heylola.co. Endpoint re-reads
-      // the claim doc via Admin SDK so the client can't spoof recipients.
-      void fetch('/api/notify-claim', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ claimId: docRef.id }),
-      }).catch(() => { /* email is best-effort, never block the claim flow */ });
+      if (row) {
+        void fetch('/api/notify-claim', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ claimId: row.id }),
+        }).catch(() => {});
+      }
       setForm(EMPTY);
       onSubmitted();
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, 'claim_requests');
+      handleSupabaseError(e, OperationType.CREATE, 'claim_requests');
       setError(t.explore.claimError);
     } finally {
       setSubmitting(false);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
+import { handleSupabaseError, OperationType } from '../lib/dbHelpers';
 import { Place, PlaceCategory, PlaceStatus, ClaimRequest, VerificationStatus, PerkStatus, ReservationProvider, BookingStatus } from '../types';
 import { Plus, Edit2, Trash2, Save, X, ArrowLeft, Loader2, Eye, EyeOff, CheckCircle2, XCircle, Mail, Gift, Upload } from 'lucide-react';
 import { curatedPlaces } from '../data/curatedPlaces';
@@ -84,7 +84,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
     setImportProgress({ done: 0, total: toImport.length });
     let done = 0;
     for (const place of toImport) {
-      await addDoc(collection(db, 'places'), { ...place, createdAt: new Date().toISOString() });
+      await supabase.from('places').insert({ ...place, created_at: new Date().toISOString() });
       done++;
       setImportProgress({ done, total: toImport.length });
     }
@@ -169,18 +169,18 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
     let active = true;
     (async () => {
       try {
-        const [usersSnap, petsSnap, claimsSnap] = await Promise.all([
-          getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'pets')),
-          getDocs(collection(db, 'claim_requests')),
+        const [usersRes, petsRes, claimsRes] = await Promise.all([
+          supabase.from('users').select('id, onboarded'),
+          supabase.from('pets').select('id'),
+          supabase.from('claim_requests').select('id, status'),
         ]);
         if (!active) return;
-        const usersList = usersSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+        const usersList = usersRes.data || [];
         setStats({
           totalUsers: usersList.length,
           onboardedUsers: usersList.filter((u: any) => u.onboarded).length,
-          totalPets: petsSnap.size,
-          pendingClaims: claimsSnap.docs.filter(d => (d.data() as any).status === 'Pending review').length,
+          totalPets: (petsRes.data || []).length,
+          pendingClaims: (claimsRes.data || []).filter((d: any) => d.status === 'Pending review').length,
         });
       } catch (err) {
         console.warn('Admin stats fetch failed', err);
@@ -193,35 +193,34 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
     setLoading(true);
     try {
       if (activeTab === 'places') {
-        const querySnapshot = await getDocs(collection(db, 'places'));
-        setPlaces(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Place)));
+        const { data } = await supabase.from('places').select('*');
+        setPlaces((data || []).map(d => ({ ...d } as Place)));
       } else if (activeTab === 'claims') {
-        const [claimsSnap, usersSnap, placesSnap] = await Promise.all([
-          getDocs(collection(db, 'claim_requests')),
-          getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'places')),
+        const [claimsRes, usersRes, placesRes] = await Promise.all([
+          supabase.from('claim_requests').select('*'),
+          supabase.from('users').select('*'),
+          supabase.from('places').select('*'),
         ]);
-        setClaims(claimsSnap.docs.map(d => ({ id: d.id, ...d.data() } as ClaimRequest)));
-        setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as any)));
-        setPlaces(placesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Place)));
-        setStats(prev => ({ ...prev, pendingClaims: claimsSnap.docs.filter(d => (d.data() as any).status === 'Pending review').length }));
+        setClaims((claimsRes.data || []) as ClaimRequest[]);
+        setUsers((usersRes.data || []) as any[]);
+        setPlaces((placesRes.data || []) as Place[]);
+        setStats(prev => ({ ...prev, pendingClaims: (claimsRes.data || []).filter((d: any) => d.status === 'Pending review').length }));
       } else if (activeTab === 'blog') {
-        const querySnapshot = await getDocs(collection(db, 'blog_posts'));
-        setBlogPosts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const { data } = await supabase.from('blog_posts').select('*');
+        setBlogPosts((data || []) as any[]);
       } else if (activeTab === 'posts') {
-        const querySnapshot = await getDocs(collection(db, 'posts'));
-        setCommunityPosts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const { data } = await supabase.from('posts').select('*');
+        setCommunityPosts((data || []) as any[]);
       } else if (activeTab === 'applications') {
-        const querySnapshot = await getDocs(collection(db, 'partner_applications'));
-        setApplications(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const { data } = await supabase.from('partner_applications').select('*');
+        setApplications((data || []) as any[]);
       } else if (activeTab === 'users') {
-        // Merged CRM: fetch users + every pet so each row can show breeds.
-        const [usersSnap, petsSnap] = await Promise.all([
-          getDocs(collection(db, 'users')),
-          getDocs(collection(db, 'pets')),
+        const [usersRes, petsRes] = await Promise.all([
+          supabase.from('users').select('*'),
+          supabase.from('pets').select('*'),
         ]);
-        const fetchedUsers = usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
-        const fetchedPets = petsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const fetchedUsers = (usersRes.data || []) as any[];
+        const fetchedPets = (petsRes.data || []) as any[];
         setUsers(fetchedUsers);
         setAllPets(fetchedPets);
         setStats(prev => ({
@@ -231,11 +230,11 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
           totalPets: fetchedPets.length,
         }));
       } else if (activeTab === 'creators') {
-        const snap = await getDocs(collection(db, 'creators'));
-        setCreators(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const { data } = await supabase.from('creators').select('*');
+        setCreators((data || []) as any[]);
       }
     } catch (err) {
-      handleFirestoreError(err, OperationType.GET, activeTab);
+      handleSupabaseError(err, OperationType.GET, activeTab);
     } finally {
       setLoading(false);
     }
@@ -249,10 +248,10 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
 
   const updatePlaceField = async (id: string, patch: Partial<Place>) => {
     try {
-      await updateDoc(doc(db, 'places', id), { ...patch, updatedAt: new Date().toISOString() });
+      await supabase.from('places').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id);
       fetchData();
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `places/${id}`);
+      handleSupabaseError(e, OperationType.UPDATE, `places/${id}`);
     }
   };
 
@@ -284,9 +283,10 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   };
 
   const inviteToVerify = async (place: Place) => {
-    if (!auth.currentUser) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
     try {
-      const idToken = await auth.currentUser.getIdToken();
+      const idToken = session.access_token;
       const res = await fetch('/api/invite-venue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
@@ -312,63 +312,65 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   };
 
   const setVerification = async (place: Place, status: VerificationStatus, alsoMarkPartner = false) => {
-    if (!auth.currentUser) return;
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return;
     const now = new Date().toISOString();
     const patch: Partial<Place> = {
       verificationStatus: status,
-      ...(status === 'verified' ? { approvedAt: now, approvedBy: auth.currentUser.email || 'admin', status: 'Verified' as PlaceStatus } : {}),
-      ...(status === 'rejected' ? { rejectedAt: now, rejectedBy: auth.currentUser.email || 'admin' } : {}),
+      ...(status === 'verified' ? { approvedAt: now, approvedBy: currentUser.email || 'admin', status: 'Verified' as PlaceStatus } : {}),
+      ...(status === 'rejected' ? { rejectedAt: now, rejectedBy: currentUser.email || 'admin' } : {}),
       ...(alsoMarkPartner ? { partnerStatus: 'active_partner' } : {}),
     };
     await updatePlaceField(place.id, patch);
   };
 
   const setPerkStatus = async (place: Place, status: PerkStatus) => {
-    if (!auth.currentUser) return;
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return;
     const now = new Date().toISOString();
     const patch: Partial<Place> = {
       perkStatus: status,
-      ...(status === 'perk_active' ? { perkApprovedAt: now, perkApprovedBy: auth.currentUser.email || 'admin' } : {}),
-      ...(status === 'perk_rejected' ? { perkRejectedAt: now, perkRejectedBy: auth.currentUser.email || 'admin' } : {}),
+      ...(status === 'perk_active' ? { perkApprovedAt: now, perkApprovedBy: currentUser.email || 'admin' } : {}),
+      ...(status === 'perk_rejected' ? { perkRejectedAt: now, perkRejectedBy: currentUser.email || 'admin' } : {}),
     };
     await updatePlaceField(place.id, patch);
   };
 
   const reviewClaim = async (claim: ClaimRequest, decision: 'Approved' | 'Rejected', alsoVerify = false) => {
     try {
-      await updateDoc(doc(db, 'claim_requests', claim.id), {
+      await supabase.from('claim_requests').update({
         status: decision,
-        reviewedAt: new Date().toISOString(),
-      });
+        reviewed_at: new Date().toISOString(),
+      }).eq('id', claim.id);
       if (decision === 'Approved' && claim.placeId) {
-        await updateDoc(doc(db, 'places', claim.placeId), {
+        await supabase.from('places').update({
           status: alsoVerify ? 'Verified' : 'Claimed',
-          claimedBy: claim.userId,
-          claimApprovedAt: new Date().toISOString(),
-          contactEmail: claim.businessEmail,
-          updatedAt: new Date().toISOString(),
-        });
+          claimed_by: claim.userId,
+          claim_approved_at: new Date().toISOString(),
+          contact_email: claim.businessEmail,
+          updated_at: new Date().toISOString(),
+        }).eq('id', claim.placeId);
       }
       fetchData();
     } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `claim_requests/${claim.id}`);
+      handleSupabaseError(e, OperationType.UPDATE, `claim_requests/${claim.id}`);
     }
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      const collectionName = activeTab === 'places' ? 'places' : 'blog_posts';
+      const tableName = activeTab === 'places' ? 'places' : 'blog_posts';
       if (isEditing && isEditing !== 'new') {
-        await updateDoc(doc(db, collectionName, isEditing), formData);
+        await supabase.from(tableName).update(formData).eq('id', isEditing);
       } else {
-        await addDoc(collection(db, collectionName), formData);
+        await supabase.from(tableName).insert(formData);
       }
       setIsEditing(null);
       resetFormData();
       fetchData();
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, activeTab);
+      handleSupabaseError(error, OperationType.WRITE, activeTab);
     } finally {
       setLoading(false);
     }
@@ -382,11 +384,11 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure?")) {
       try {
-        const collectionName = activeTab === 'places' ? 'places' : 'blog_posts';
-        await deleteDoc(doc(db, collectionName, id));
+        const tableName = activeTab === 'places' ? 'places' : 'blog_posts';
+        await supabase.from(tableName).delete().eq('id', id);
         fetchData();
       } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `${activeTab}/${id}`);
+        handleSupabaseError(error, OperationType.DELETE, `${activeTab}/${id}`);
       }
     }
   };
@@ -842,7 +844,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                            <div className="flex gap-2">
                              <button onClick={async () => {
                                try {
-                                 await updateDoc(doc(db, 'partner_applications', app.id), { status: 'verified' });
+                                 await supabase.from('partner_applications').update({ status: 'verified' }).eq('id', app.id);
                                  setApplications(prev => prev.map(a => a.id === app.id ? { ...a, status: 'verified' } : a));
                                } catch (err) {
                                  console.error(err);
@@ -852,7 +854,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                              </button>
                              <button onClick={async () => {
                                try {
-                                 await updateDoc(doc(db, 'partner_applications', app.id), { status: 'rejected' });
+                                 await supabase.from('partner_applications').update({ status: 'rejected' }).eq('id', app.id);
                                  setApplications(prev => prev.map(a => a.id === app.id ? { ...a, status: 'rejected' } : a));
                                } catch (err) {
                                  console.error(err);
@@ -1004,10 +1006,10 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                           onClick={async () => {
                             if(confirm("Remove user?")) {
                               try {
-                                await deleteDoc(doc(db, 'users', user.id));
+                                await supabase.from('users').delete().eq('id', user.id);
                                 fetchData();
                               } catch (error) {
-                                handleFirestoreError(error, OperationType.DELETE, `users/${user.id}`);
+                                handleSupabaseError(error, OperationType.DELETE, `users/${user.id}`);
                               }
                             }
                           }}
@@ -1069,12 +1071,12 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                         }
                         const now = new Date().toISOString();
                         if (editingCreator === 'new') {
-                          await addDoc(collection(db, 'creators'), { ...creatorForm, commissionPercent: Number(creatorForm.commissionPercent || 10), status: creatorForm.status || 'invited', createdAt: now, updatedAt: now });
+                          await supabase.from('creators').insert({ ...creatorForm, commission_percent: Number(creatorForm.commissionPercent || 10), status: creatorForm.status || 'invited', created_at: now, updated_at: now });
                         } else {
-                          await updateDoc(doc(db, 'creators', editingCreator), { ...creatorForm, commissionPercent: Number(creatorForm.commissionPercent), updatedAt: now });
+                          await supabase.from('creators').update({ ...creatorForm, commission_percent: Number(creatorForm.commissionPercent), updated_at: now }).eq('id', editingCreator);
                         }
-                        const snap = await getDocs(collection(db, 'creators'));
-                        setCreators(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                        const { data: creatorsData } = await supabase.from('creators').select('*');
+                        setCreators((creatorsData || []) as any[]);
                         setEditingCreator(null);
                         setCreatorForm({});
                       }}
@@ -1116,7 +1118,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                       <button
                         onClick={async () => {
                           if (confirm('Delete creator?')) {
-                            await deleteDoc(doc(db, 'creators', creator.id));
+                            await supabase.from('creators').delete().eq('id', creator.id);
                             setCreators(prev => prev.filter(c => c.id !== creator.id));
                           }
                         }}
@@ -1148,10 +1150,10 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                   <button onClick={async () => {
                    if (window.confirm("Delete this user post?")) {
                      try {
-                       await deleteDoc(doc(db, 'posts', post.id));
+                       await supabase.from('posts').delete().eq('id', post.id);
                        fetchData();
                      } catch (error) {
-                       handleFirestoreError(error, OperationType.DELETE, `posts/${post.id}`);
+                       handleSupabaseError(error, OperationType.DELETE, `posts/${post.id}`);
                      }
                    }
                  }} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors">

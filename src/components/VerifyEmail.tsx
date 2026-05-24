@@ -1,8 +1,7 @@
 import React from 'react';
 import { Mail, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { auth } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 
 interface VerifyEmailProps {
   email: string;
@@ -58,7 +57,7 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ email, onResend }) => 
           </button>
           
           <button 
-            onClick={() => signOut(auth)}
+            onClick={() => supabase.auth.signOut()}
             className="w-full text-stone-300 font-black text-[10px] uppercase tracking-widest hover:text-charcoal transition-colors"
           >
             Sign out

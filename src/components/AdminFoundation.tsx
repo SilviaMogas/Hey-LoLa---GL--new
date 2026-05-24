@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  updateDoc,
-  serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
+
 import { Copy, QrCode, Eye, EyeOff, Mail, ExternalLink, CheckCircle2 } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import type { FoundationDog } from '../data/foundationDogs';
 import { passportUrl, qrCodeUrl } from '../lib/passportShare';
 
@@ -25,7 +16,7 @@ interface FoundationInterest {
   contact: { email: string; name?: string; phone?: string };
   message?: string;
   userId?: string;
-  createdAt?: Timestamp;
+  createdAt?: string;
 }
 
 /**
@@ -44,15 +35,19 @@ export const AdminFoundation: React.FC = () => {
   const [copiedDogId, setCopiedDogId] = useState<string | null>(null);
 
   useEffect(() => {
-    const dogsQ = query(collection(db, 'foundationDogs'), orderBy('passport.createdAt', 'desc'));
-    const unsubDogs = onSnapshot(dogsQ, (snap) => {
-      setDogs(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FoundationDog, 'id'>) })));
-    });
-    const interestsQ = query(collection(db, 'foundation_interests'), orderBy('createdAt', 'desc'));
-    const unsubInterests = onSnapshot(interestsQ, (snap) => {
-      setInterests(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FoundationInterest, 'id'>) })));
-    });
-    return () => { unsubDogs(); unsubInterests(); };
+    const fetchDogs = () => supabase.from('foundation_dogs').select('*').order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setDogs(data as FoundationDog[]); });
+    const fetchInterests = () => supabase.from('foundation_interests').select('*').order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setInterests(data as FoundationInterest[]); });
+    fetchDogs();
+    fetchInterests();
+    const ch1 = supabase.channel('admin-foundation-dogs').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'foundation_dogs',
+    }, () => fetchDogs()).subscribe();
+    const ch2 = supabase.channel('admin-foundation-interests').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'foundation_interests',
+    }, () => fetchInterests()).subscribe();
+    return () => { supabase.removeChannel(ch1); supabase.removeChannel(ch2); };
   }, []);
 
   // Auto-clear the "Copied" affordance after a short delay. Effect-based
@@ -66,10 +61,10 @@ export const AdminFoundation: React.FC = () => {
 
   const toggleVisibility = async (dog: FoundationDog) => {
     const next = dog.passport.visibility === 'public' ? 'hidden' : 'public';
-    await updateDoc(doc(db, 'foundationDogs', dog.id), {
-      'passport.visibility': next,
-      updatedAt: serverTimestamp(),
-    });
+    await supabase.from('foundation_dogs').update({
+      passport: { ...dog.passport, visibility: next },
+      updated_at: new Date().toISOString(),
+    }).eq('id', dog.id);
   };
 
   const copyLink = async (dog: FoundationDog) => {
@@ -83,10 +78,10 @@ export const AdminFoundation: React.FC = () => {
   };
 
   const setInterestStatus = async (id: string, status: FoundationInterestStatus) => {
-    await updateDoc(doc(db, 'foundation_interests', id), {
+    await supabase.from('foundation_interests').update({
       status,
-      updatedAt: serverTimestamp(),
-    });
+      updated_at: new Date().toISOString(),
+    }).eq('id', id);
   };
 
   return (

@@ -1,0 +1,222 @@
+[
+  {
+    "id": "bobbi-abby",
+    "slug": "bobbi-abby",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Abby",
+    "sex": "female",
+    "age": "9 yrs",
+    "breed": "Pitbull Terrier mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "This beautiful girl has not had an easy life. Abby’s mom was no longer able to care for her and so we stepped in to help. With her sweet and easygoing nature, Abby loves everyone she meets including children.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2025/02/482358688_122216509544229903_3555225045807675956_n-768x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-athena",
+    "slug": "bobbi-athena",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Athena",
+    "sex": "female",
+    "age": "7 yrs",
+    "breed": "Pit Bull Terrier mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Athena is a 7 year old Pit Bull Terrier mix who has overcome unthinkable hardships and is ready for a fresh start! She’s spayed, microchipped, heartworm negative, up to date on vaccinations and is healthy and eager for a forever home.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2022/12/385907442_10231561518047156_2954351285001090201_n.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-biscuit",
+    "slug": "bobbi-biscuit",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Biscuit",
+    "sex": "female",
+    "age": "12 yrs",
+    "breed": "Pug mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Brave little Biscuit is all ready to begin her new golden chapter in a home where she will be loved forever. At 12 years old and left at the shelter through no fault of her own, she deserves better. Are you ready to make her dreams come true and bring her home?",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2026/04/669885288_10230870437004967_2817426302205603059_n-790x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-bravo",
+    "slug": "bobbi-bravo",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Bravo",
+    "sex": "male",
+    "age": "13 yrs",
+    "breed": "Morkie (Maltese/Yorkshire Terrier mix)",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Bravo is a gentle, loving senior with some vision impairment. He can see, but bright sunlight can make it harder, so he prefers shady spots where he feels more confident. He still enjoys being outside and taking in the world at his own pace.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2026/02/658157127_26476333505327016_5896507743526475596_n-682x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-buckey",
+    "slug": "bobbi-buckey",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Buckey",
+    "sex": "male",
+    "age": "1 yr",
+    "breed": "Chocolate Labrador Retriever",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Buckey is a 1 year-old bundle of love with a heart of gold. Once he warms up to you, he’ll be your loyal companion for life. Affectionate, gentle, and full of personality, he’s the kind of pup who will fill your home with joy every single day.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2025/09/549511460_24722282740732110_7967736384481264689_n-768x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-candy",
+    "slug": "bobbi-candy",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Candy",
+    "sex": "female",
+    "age": "1 yr",
+    "breed": "Chihuahua",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Our delicious and sweet Candy is all ready to begin her new life in a home where she will be loved forever. She will surely add lots of joy to your life!",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2026/04/680749532_10231012781563492_742745350360228881_n-1024x716.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-clover",
+    "slug": "bobbi-clover",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Clover (Buddy)",
+    "sex": "male",
+    "age": "8 yrs",
+    "breed": "Cocker Spaniel / Shih Tzu mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Clover (Buddy) is a gorgeous 8 1/2 year old Cocker Spaniel/Shi tzu mix who needs a new forever home! He also responds to the name “Buddy”.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2019/09/338192929_1550562875436084_5886594316250828194_n.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-griselda",
+    "slug": "bobbi-griselda",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Griselda",
+    "sex": "female",
+    "age": "8 yrs",
+    "breed": "Husky mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Are you looking for a best friend who is very friendly, loving and super sweet? Well, then Griselda is your gal! Found as a stray, she is safe in our care and has been waiting to go to her forever home. She walks beautifully on leash and is completely housebroken.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2024/02/476358253_9306545306065770_3539563277779394879_n-767x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-gucci",
+    "slug": "bobbi-gucci",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Gucci",
+    "sex": "male",
+    "age": "3 yrs",
+    "breed": "Pit Bull Terrier mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Handsome Gucci (along with his brother, Cosmo) was abandoned in the cold by the person he trusted the most. Now he is waiting to live the good life he deserves with an owner who will love and respect him forever.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2025/02/648870855_26274067995553569_5785104265734854406_n-768x1024.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  },
+  {
+    "id": "bobbi-henry",
+    "slug": "bobbi-henry",
+    "shelterId": "bobbi-and-the-strays",
+    "name": "Henry",
+    "sex": "male",
+    "age": "5 yrs",
+    "breed": "Hound mix",
+    "location": "Bobbi and the Strays",
+    "partnerId": "bobbi-and-the-strays",
+    "partnerName": "Bobbi and the Strays",
+    "sourceUrl": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "description": "Henry (along with his housemate, Stella) lost his special person and is now in search of a new forever home and an active family. He is laid back, a good listener, and housebroken. This guy enjoys a good walk but will pull if he encounters a squirrel or a cat.",
+    "heroImage": "https://bobbiandthestrays.org/wp-content/uploads/2026/01/624254530_3014599682080917_5603843912712303186_n.jpg",
+    "status": "available",
+    "lastSyncedAt": "2026-05-26",
+    "passport": {
+      "visibility": "public",
+      "verificationStatus": "partner_source",
+      "createdAt": "2026-05-26"
+    }
+  }
+]

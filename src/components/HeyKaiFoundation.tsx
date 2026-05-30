@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowLeft,
+  ArrowRight,
   Heart,
   Sprout,
   ShieldCheck,
@@ -13,6 +14,12 @@ import { SEO } from '../lib/seo';
 
 interface HeyKaiFoundationProps {
   onBack: () => void;
+  /**
+   * Optional: when provided, the page surfaces a CTA section for the
+   * horse-adoption listing at /heykai/horses. Wired through App.tsx so
+   * this component stays presentation-only.
+   */
+  onSeeHorses?: () => void;
 }
 
 const BREADCRUMBS = [
@@ -49,7 +56,7 @@ const PILLARS = [
   },
 ];
 
-export const HeyKaiFoundation: React.FC<HeyKaiFoundationProps> = ({ onBack }) => {
+export const HeyKaiFoundation: React.FC<HeyKaiFoundationProps> = ({ onBack, onSeeHorses }) => {
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby="heykai-heading">
       <SEO
@@ -166,6 +173,41 @@ export const HeyKaiFoundation: React.FC<HeyKaiFoundationProps> = ({ onBack }) =>
           </div>
         </div>
       </section>
+
+      {/* Horses for adoption — opens the live listing */}
+      {onSeeHorses && (
+        <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-5xl mx-auto">
+          <div
+            className="rounded-[2rem] border p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+            style={{ background: '#F4F8EF', borderColor: '#e2ead9' }}
+          >
+            <div className="space-y-2 max-w-xl">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: GRASS }}>
+                Horses looking for adopters
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-serif italic tracking-tight leading-tight">
+                Meet rescue horses from our verified partners
+                <span
+                  aria-hidden="true"
+                  className="inline-block ml-2"
+                  style={{ width: '0.18em', height: '0.18em', background: GRASS, verticalAlign: 'baseline' }}
+                />
+              </h3>
+              <p className="text-sm sm:text-base text-stone-500 font-light italic leading-snug">
+                Each passport links back to the rescue handling the adoption — HeyKai surfaces them; the rescue decides.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onSeeHorses}
+              className="inline-flex items-center gap-2 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-full px-7 py-3.5 hover:opacity-90 transition-opacity self-start sm:self-auto"
+              style={{ background: GRASS }}
+            >
+              See horses <ArrowRight size={13} />
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Contact / CTA */}
       <section className="py-14 sm:py-16 px-5 sm:px-6 max-w-3xl mx-auto text-center space-y-5">

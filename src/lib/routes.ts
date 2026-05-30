@@ -31,6 +31,8 @@ export const paths = {
   foundationDogs: '/foundation/dogs',
   foundationDogPassport: '/foundation/dogs/:slug',
   heyKaiFoundation: '/heykai',
+  heyKaiHorses: '/heykai/horses',
+  heyKaiHorsePassport: '/heykai/horses/:slug',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',
@@ -69,6 +71,7 @@ export const buildPath = {
   blogArticle: (slug: string) => `/blog/${encodeURIComponent(slug)}`,
   venue: (slug: string) => `/venue/${encodeURIComponent(slug)}`,
   foundationDogPassport: (slug: string) => `/foundation/dogs/${encodeURIComponent(slug)}`,
+  heyKaiHorsePassport: (slug: string) => `/heykai/horses/${encodeURIComponent(slug)}`,
   foundationShelter: (shelterId: string) => `/foundation/shelter/${encodeURIComponent(shelterId)}`,
   verifyVenue: (placeId: string, token: string) =>
     `/verify/${encodeURIComponent(placeId)}/${encodeURIComponent(token)}`,

@@ -60,6 +60,7 @@ export const Footer: React.FC = () => {
         { label: t.footerCta.brandBook, path: paths.brandBook },
         { label: t.footerCta.theConcierges, path: paths.concierges },
         { label: t.footerCta.foundation, path: paths.foundation },
+        { label: 'HeyKai Foundation', path: paths.heyKaiFoundation },
         { label: t.footerCta.pressMedia, path: paths.media },
       ],
     },

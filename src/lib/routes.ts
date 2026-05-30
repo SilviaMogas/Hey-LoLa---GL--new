@@ -30,6 +30,7 @@ export const paths = {
   foundationShelter: '/foundation/shelter/:shelterId',
   foundationDogs: '/foundation/dogs',
   foundationDogPassport: '/foundation/dogs/:slug',
+  heyKaiFoundation: '/heykai',
   club: '/club',
   clubWelcome: '/club/welcome',
   brandBook: '/brand-book',

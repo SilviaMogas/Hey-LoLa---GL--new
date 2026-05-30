@@ -128,8 +128,10 @@ function extractCards(
   base: string,
   detailFragment: RegExp,
 ): Array<{ href: string; name: string; photo?: string }> {
-  const anchorRe = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  const imgInsideRe = /<img\b[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*?(?:alt=["']([^"']*)["'])?/i;
+  // All quantifiers are bounded to keep the matcher linear on adversarial
+  // input (no super-linear backtracking).
+  const anchorRe = /<a\b[^>]{0,500}href=["']([^"']{1,500})["'][^>]{0,500}>([\s\S]{0,4000}?)<\/a>/gi;
+  const imgInsideRe = /<img\b[^>]{0,500}(?:src|data-src)=["']([^"']{1,500})["'][^>]{0,500}?(?:alt=["']([^"']{0,200})["'])?/i;
   const out: Array<{ href: string; name: string; photo?: string }> = [];
 
   for (const m of html.matchAll(anchorRe)) {

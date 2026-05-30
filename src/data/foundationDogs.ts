@@ -58,26 +58,41 @@ function slugify(s: string): string {
 }
 
 /** Convert a snake_case Supabase row into a camelCase FoundationDog.
- *  DB columns differ from the TS interface in both casing and naming. */
+ *  DB columns differ from the TS interface in both casing and naming.
+ *  Supports rows from both the legacy `foundation_dogs` table and the
+ *  newer relational `shelter_dogs` table (migration 005). */
 export function rowToFoundationDog(row: Record<string, unknown>): FoundationDog {
+  const rawPassport = (row.passport as Partial<DogPassport> | undefined) || undefined;
+  const rowSlug = (row.slug as string | undefined) || (row.id as string | undefined) || '';
+  const passport: DogPassport = {
+    slug: rawPassport?.slug || rowSlug,
+    publicUrl: rawPassport?.publicUrl || (rowSlug ? `/foundation/dogs/${rowSlug}` : ''),
+    visibility: (rawPassport?.visibility as 'public' | 'hidden') ?? 'public',
+    verificationStatus: (rawPassport?.verificationStatus as VerificationStatus) ?? 'partner_source',
+    createdAt: rawPassport?.createdAt ?? (row.created_at as string) ?? '',
+    updatedAt: rawPassport?.updatedAt ?? (row.updated_at as string) ?? '',
+  };
   return {
     id: row.id as string,
     name: (row.name as string) ?? '',
     partnerId: (row.shelter_id as string) ?? (row.partner_id as string) ?? '',
     partnerName: (row.partner_name as string) ?? '',
     sourceUrl: row.source_url as string | undefined,
-    imageUrl: (row.photo as string) ?? (row.image_url as string | undefined),
+    imageUrl:
+      (row.hero_image as string | undefined) ??
+      (row.photo as string | undefined) ??
+      (row.image_url as string | undefined),
     sex: (row.sex as Sex) ?? 'unknown',
     ageLabel: (row.age as string) ?? (row.age_label as string | undefined),
     breed: row.breed as string | undefined,
     weightKg: row.weight_kg as number | undefined,
     location: row.location as string | undefined,
-    description: (row.bio as string) ?? (row.description as string) ?? '',
+    description: (row.description as string) ?? (row.bio as string) ?? '',
     specialCareNotes: row.special_care_notes as string | undefined,
     adoptionFeeUsd: row.adoption_fee_usd as number | undefined,
     status: (row.status as DogStatus) ?? 'available',
     lastSyncedAt: row.last_synced_at as string | undefined,
-    passport: row.passport as DogPassport ?? { slug: '', publicUrl: '', visibility: 'hidden' as const, verificationStatus: 'pending' as const, createdAt: '', updatedAt: '' },
+    passport,
     ensName: row.ens_name as string | undefined,
   };
 }

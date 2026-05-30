@@ -45,14 +45,33 @@ export const FoundationDogPassport: React.FC<FoundationDogPassportProps> = ({ sl
   const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Prefer the live Firestore record when it exists; fall back to seed.
+  // Look up the dog in the new relational `shelter_dogs` table first
+  // (where the row's `slug` column carries the id used in the URL),
+  // then in the legacy `foundation_dogs` table (where the slug lives
+  // inside the passport jsonb), then fall back to the local seed.
   useEffect(() => {
     void (async () => {
       try {
-        const { data } = await supabase.from('foundation_dogs').select('*').eq('passport->>slug', slug).maybeSingle();
-        if (data) setLiveDog(rowToFoundationDog(data as Record<string, unknown>));
+        const { data: shelterRow } = await supabase
+          .from('shelter_dogs')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+        if (shelterRow) {
+          setLiveDog(rowToFoundationDog(shelterRow as Record<string, unknown>));
+          setLoading(false);
+          return;
+        }
+        const { data: legacyRow } = await supabase
+          .from('foundation_dogs')
+          .select('*')
+          .eq('passport->>slug', slug)
+          .maybeSingle();
+        if (legacyRow) setLiveDog(rowToFoundationDog(legacyRow as Record<string, unknown>));
         else setLiveDog(null);
-      } catch { setLiveDog(null); }
+      } catch {
+        setLiveDog(null);
+      }
       setLoading(false);
     })();
   }, [slug]);

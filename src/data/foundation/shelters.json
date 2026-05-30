@@ -1,0 +1,120 @@
+[
+  {
+    "id": "hey-lola",
+    "slug": "hey-lola",
+    "name": "Hey Lola",
+    "city": "New York City",
+    "country": "United States",
+    "description": "Trial rescue partner for Hey Lola — used to preview the foundation listing, shelter profile and claim flow.",
+    "website": "https://heylola.co",
+    "verified": true,
+    "status": "active"
+  },
+  {
+    "id": "animal-haven",
+    "slug": "animal-haven",
+    "name": "Animal Haven",
+    "city": "New York City",
+    "country": "United States",
+    "description": "Animal Haven is a 501(c)(3) nonprofit shelter in SoHo, NYC, finding homes for cats and dogs since 1967. Their adoption process is in-person at the shelter, with a focus on careful matchmaking and lifelong support after adoption.",
+    "website": "https://animalhaven.org",
+    "instagram": "@animalhaven",
+    "contactEmail": "info@animalhavenshelter.org",
+    "verified": true,
+    "status": "active",
+    "platform": "shelterluv",
+    "source": {
+      "listingUrl": "https://animalhaven.org/adopt/dogs",
+      "maxDogs": 24
+    }
+  },
+  {
+    "id": "bobbi-and-the-strays",
+    "slug": "bobbi-and-the-strays",
+    "name": "Bobbi and the Strays",
+    "city": "Queens & Long Island, NY",
+    "country": "United States",
+    "description": "A no-kill organization rescuing and rehabilitating orphaned, stray, abused and special-needs cats and dogs across New York City and Long Island.",
+    "website": "https://bobbiandthestrays.org/adopt-a-dog/",
+    "verified": true,
+    "status": "active",
+    "source": {
+      "listingUrl": "https://bobbiandthestrays.org/adopt-a-dog/"
+    }
+  },
+  {
+    "id": "badass-animal-rescue",
+    "slug": "badass-animal-rescue",
+    "name": "Badass Animal Rescue",
+    "city": "Brooklyn, NY",
+    "country": "United States",
+    "description": "A foster-based 501(c)3 saving and rehabilitating loving dogs from high-kill shelters since 2011 — over 4,000 dogs rescued.",
+    "website": "https://badassanimalrescue.com/find-a-dog-new",
+    "verified": true,
+    "status": "active",
+    "source": {
+      "listingUrl": "https://badassanimalrescue.com/find-a-dog-new"
+    }
+  },
+  {
+    "id": "ama-animal-rescue",
+    "slug": "ama-animal-rescue",
+    "name": "AMA Animal Rescue",
+    "city": "Brooklyn, NY",
+    "country": "United States",
+    "description": "Angels for Mistreated Animals — a no-kill rescue in Brooklyn rehabilitating abused and injured dogs and cats and giving them loving futures.",
+    "website": "https://amaanimalrescue.org/pet-type/dogs/",
+    "verified": true,
+    "status": "active",
+    "source": {
+      "listingUrl": "https://amaanimalrescue.org/pet-type/dogs/"
+    }
+  },
+  {
+    "id": "social-tees",
+    "slug": "social-tees",
+    "name": "Social Tees Animal Rescue",
+    "city": "East Village, NYC",
+    "country": "United States",
+    "description": "A foster-based, strictly no-kill rescue in the East Village that takes abandoned animals from kill shelters into safe homes, matching each one with the right family.",
+    "website": "https://socialteesnyc.org/see-our-animals",
+    "verified": true,
+    "status": "active",
+    "source": {
+      "listingUrl": "https://socialteesnyc.org/see-our-animals"
+    }
+  },
+  {
+    "id": "korean-k9-rescue",
+    "slug": "korean-k9-rescue",
+    "name": "Korean K9 Rescue",
+    "city": "New York City",
+    "country": "United States",
+    "description": "Rescues dogs from the meat trade and high-kill shelters in South Korea and finds them loving homes across the New York area.",
+    "website": "",
+    "verified": false,
+    "status": "active"
+  },
+  {
+    "id": "nyc-second-chance-rescue",
+    "slug": "nyc-second-chance-rescue",
+    "name": "NYC Second Chance Rescue",
+    "city": "New York City",
+    "country": "United States",
+    "description": "A New York City rescue saving abused, neglected and medically fragile animals and giving them a second chance at a loving home.",
+    "website": "",
+    "verified": false,
+    "status": "active"
+  },
+  {
+    "id": "jcnj",
+    "slug": "jcnj",
+    "name": "JCNJ",
+    "city": "New Jersey",
+    "country": "United States",
+    "description": "New Jersey rescue partner — full profile details to be confirmed.",
+    "website": "",
+    "verified": false,
+    "status": "active"
+  }
+]

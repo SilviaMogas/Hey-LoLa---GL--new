@@ -63,10 +63,67 @@ export const FoundationShelters: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await supabase.from('shelters').select('*').order('order', { ascending: true });
+        // Source of truth: the relational shelter_profiles + shelter_dogs
+        // tables (migration 005). Each profile is joined to its public,
+        // available dogs and reshaped into the Shelter / ShelterDog form
+        // the rest of the page already renders.
+        const [profilesRes, dogsRes] = await Promise.all([
+          supabase
+            .from('shelter_profiles')
+            .select('*')
+            .eq('status', 'active')
+            .order('order_index', { ascending: true }),
+          supabase
+            .from('shelter_dogs')
+            .select('*')
+            .eq('status', 'available'),
+        ]);
         if (cancelled) return;
-        const list = (data || []).map((s: any) => ({ ...s, dogs: Array.isArray(s.dogs) ? s.dogs : [] })) as Shelter[];
-        setShelters(list.length > 0 ? list : DEFAULT_SHELTERS);
+
+        const profiles = profilesRes.data || [];
+        const dogs = dogsRes.data || [];
+
+        if (profiles.length > 0) {
+          const dogsByShelter = new Map<string, ShelterDog[]>();
+          for (const d of dogs) {
+            const sex = d.sex === 'female' ? 'Female' : d.sex === 'male' ? 'Male' : undefined;
+            const list = dogsByShelter.get(d.shelter_id) || [];
+            list.push({
+              id: d.id,
+              name: d.name,
+              breed: d.breed || '',
+              age: d.age || '',
+              sex,
+              photo: d.hero_image || undefined,
+              bio: d.description || '',
+            });
+            dogsByShelter.set(d.shelter_id, list);
+          }
+          const list: Shelter[] = profiles.map((p: any, i: number) => ({
+            id: p.id,
+            name: p.name,
+            city: p.city || '',
+            region: p.region || 'Americas',
+            blurb: p.description || '',
+            website: p.website || '',
+            logo: p.logo || undefined,
+            order: p.order_index ?? i + 1,
+            dogs: dogsByShelter.get(p.id) || [],
+          }));
+          setShelters(list);
+        } else {
+          // Legacy fallback: the old jsonb-bucket `shelters` table, then
+          // the local seed if even that is empty.
+          const { data: legacy } = await supabase
+            .from('shelters')
+            .select('*')
+            .order('order', { ascending: true });
+          const legacyList = (legacy || []).map((s: any) => ({
+            ...s,
+            dogs: Array.isArray(s.dogs) ? s.dogs : [],
+          })) as Shelter[];
+          setShelters(legacyList.length > 0 ? legacyList : DEFAULT_SHELTERS);
+        }
       } catch (err) {
         handleSupabaseError(err, OperationType.READ, 'shelters');
         if (!cancelled) setShelters(DEFAULT_SHELTERS);

@@ -34,6 +34,16 @@ function applyConsent(choice: Choice) {
   });
 }
 
+/**
+ * Editorial cookie banner — designed as a "small note from Lola" rather
+ * than a regulatory pop-up. Bone surface, brand serif headline, square
+ * brand dot, charcoal accept pill, ghost decline. Slides in from the
+ * bottom-right with a soft scale, sits on a faint orange glow.
+ *
+ * Visually intentional contrast against the dark GTM-injected banner —
+ * if both fire at once, this one is the brand asset; the GTM tag
+ * should be retired in the Tag Manager dashboard.
+ */
 export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy }) => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
@@ -45,7 +55,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy })
       return;
     }
     if (!inEEA()) return;
-    const timer = setTimeout(() => setVisible(true), 800);
+    const timer = setTimeout(() => setVisible(true), 1100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -58,57 +68,89 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy })
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-[320px] z-[60]"
+        <motion.aside
+          initial={{ y: 32, opacity: 0, scale: 0.96 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 32, opacity: 0, scale: 0.96 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-[400px] z-[60] font-boutique"
           role="dialog"
           aria-label={t.cookies.ariaLabel}
         >
-          <div className="bg-white/95 backdrop-blur-md border border-stone-200/70 rounded-2xl shadow-[0_10px_40px_-8px_rgba(17,17,17,0.18)] px-5 pt-4 pb-3.5 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-brand-orange rounded-[2px]" aria-hidden="true" />
-              <span className="text-[9.5px] font-black uppercase tracking-[0.32em] text-stone-400">Hey Lola</span>
-            </div>
-            <p className="text-[12px] leading-relaxed text-stone-500 font-light">
-              {t.cookies.message}{' '}
-              {onNavigatePrivacy && (
+          {/* Floating orange glow behind the card */}
+          <div
+            aria-hidden="true"
+            className="absolute -inset-6 rounded-[2.5rem] bg-brand-orange/15 blur-3xl pointer-events-none"
+          />
+
+          {/* The card */}
+          <div className="relative bg-bone rounded-[1.75rem] border border-stone-200/70 shadow-[0_30px_80px_-30px_rgba(17,17,17,0.35)] overflow-hidden">
+            {/* Decorative top accent — a thin warm gradient line */}
+            <div
+              aria-hidden="true"
+              className="h-[3px] w-full"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, var(--color-brand-orange) 35%, var(--color-brand-orange) 65%, transparent 100%)',
+              }}
+            />
+
+            <div className="px-6 pt-5 pb-5 sm:px-7 sm:pt-6 sm:pb-6 flex flex-col gap-4">
+              {/* Brand line */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="brand-dot" aria-hidden="true" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.42em] text-stone-400">
+                    A note from Lola
+                  </span>
+                </div>
+                {onNavigatePrivacy && (
+                  <button
+                    type="button"
+                    onClick={onNavigatePrivacy}
+                    className="text-[9px] font-black uppercase tracking-[0.3em] text-stone-300 hover:text-charcoal transition-colors"
+                  >
+                    {t.cookies.learnMore}
+                  </button>
+                )}
+              </div>
+
+              {/* Editorial headline + body */}
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-[26px] font-serif italic tracking-tight leading-[0.95] text-charcoal">
+                  Hey there<span className="brand-dot" aria-hidden="true" />
+                </h2>
+                <p className="text-[13.5px] leading-relaxed text-stone-500 font-light italic">
+                  {t.cookies.message}
+                </p>
+              </div>
+
+              {/* Choices */}
+              <div className="flex items-center justify-end gap-1 pt-1">
                 <button
-                  onClick={onNavigatePrivacy}
-                  className="underline underline-offset-2 text-charcoal/70 hover:text-brand-orange transition-colors"
+                  type="button"
+                  onClick={() => choose('denied')}
+                  className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-stone-400 hover:text-charcoal transition-colors"
                 >
-                  {t.cookies.learnMore}
+                  {t.cookies.reject}
                 </button>
-              )}
-            </p>
-            <div className="flex gap-2 justify-end pt-0.5">
-              <ChoiceButton onClick={() => choose('denied')} variant="ghost" label={t.cookies.reject} />
-              <ChoiceButton onClick={() => choose('granted')} variant="solid" label={t.cookies.accept} />
+                <button
+                  type="button"
+                  onClick={() => choose('granted')}
+                  className="group relative px-6 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-white bg-charcoal hover:bg-brand-orange rounded-full transition-colors shadow-[0_8px_22px_-6px_rgba(17,17,17,0.45)] inline-flex items-center gap-1.5"
+                >
+                  {t.cookies.accept}
+                  <span
+                    aria-hidden="true"
+                    className="inline-block w-1 h-1 rounded-full bg-brand-orange group-hover:bg-white transition-colors"
+                  />
+                </button>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </motion.aside>
       )}
     </AnimatePresence>
-  );
-};
-
-interface ChoiceButtonProps {
-  onClick: () => void;
-  variant: 'ghost' | 'solid';
-  label: string;
-}
-
-const ChoiceButton: React.FC<ChoiceButtonProps> = ({ onClick, variant, label }) => {
-  const base = 'px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-lg transition-colors';
-  const styles = variant === 'solid'
-    ? 'bg-charcoal text-white hover:bg-brand-orange'
-    : 'text-stone-400 hover:text-charcoal hover:bg-stone-50';
-  return (
-    <button onClick={onClick} className={`${base} ${styles}`}>
-      {label}
-    </button>
   );
 };
 

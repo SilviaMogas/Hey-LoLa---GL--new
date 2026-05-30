@@ -14,7 +14,26 @@
 // Per the spec: if a source's HTML is too dynamic to parse, we log a
 // warning and continue — the endpoint never crashes mid-run.
 
+import { timingSafeEqual } from 'node:crypto';
 import { getAdminClient } from './_supabase.js';
+
+/**
+ * Constant-time comparison so an attacker can't infer the expected
+ * SCRAPER_SECRET from response-time differences during brute force.
+ * Falls back to a length-mismatched compare against a fixed buffer so
+ * we always pay the same comparison cost regardless of the candidate.
+ */
+function safeTokenEqual(candidate: string, expected: string): boolean {
+  const a = Buffer.from(candidate, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) {
+    // Equalise the length before comparing so timingSafeEqual itself
+    // can't throw on mismatched buffers and leak via the catch path.
+    timingSafeEqual(b, b);
+    return false;
+  }
+  return timingSafeEqual(a, b);
+}
 
 const USER_AGENT =
   'Mozilla/5.0 (compatible; HeyKaiBot/1.0; +https://heylola.co/heykai) HeyLolaFoundation';
@@ -319,10 +338,24 @@ const SOURCES: SourceConfig[] = [
  * Fetch the detail page for a horse to fill in breed/age/discipline/bio.
  * Anything we fail to parse is left undefined — the listing already
  * gives us a usable card.
+ *
+ * SSRF guard: horse.source_url is extracted from third-party HTML, so
+ * we only follow URLs whose hostname matches the trusted rescue listing
+ * we just scraped. Anything else (internal infra, file://, redirected
+ * shorteners) is rejected before fetch.
  */
-async function enrich(horse: ScrapedHorse): Promise<ScrapedHorse> {
+async function enrich(horse: ScrapedHorse, trustedListUrl: string): Promise<ScrapedHorse> {
+  let target: URL;
   try {
-    const res = await fetch(horse.source_url, {
+    target = new URL(horse.source_url);
+    const trusted = new URL(trustedListUrl);
+    if (target.protocol !== 'https:' && target.protocol !== 'http:') return horse;
+    if (target.hostname !== trusted.hostname) return horse;
+  } catch {
+    return horse;
+  }
+  try {
+    const res = await fetch(target.toString(), {
       headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,*/*' },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
@@ -441,7 +474,7 @@ async function runSource(cfg: SourceConfig, enableEnrich: boolean): Promise<Sour
     const MAX_ENRICH = 8;
     const enriched: ScrapedHorse[] = [];
     for (let i = 0; i < horses.length; i++) {
-      enriched.push(i < MAX_ENRICH ? await enrich(horses[i]) : horses[i]);
+      enriched.push(i < MAX_ENRICH ? await enrich(horses[i], cfg.listUrl) : horses[i]);
     }
     horses = enriched;
   }
@@ -531,8 +564,8 @@ export default async function handler(req: VercelLikeReq, res: VercelLikeRes) {
     res.status(500).json({ success: false, error: 'SCRAPER_SECRET is not configured.' });
     return;
   }
-  const token = authHeader?.replace(/^Bearer\s+/i, '').trim();
-  if (!token || token !== expected) {
+  const token = authHeader?.replace(/^Bearer\s+/i, '').trim() ?? '';
+  if (!token || !safeTokenEqual(token, expected)) {
     res.status(401).json({ success: false, error: 'Unauthorized.' });
     return;
   }

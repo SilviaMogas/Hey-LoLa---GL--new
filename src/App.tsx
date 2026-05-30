@@ -511,7 +511,6 @@ function AppContent() {
               <FadeIn>
                 <BrandBook
                   onBack={() => navigate(paths.home)}
-                  onOpenCharacter={(name) => navigate(buildPath.brandBookCharacter(name))}
                 />
               </FadeIn>
             } />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { CONCIERGES, POSE_COUNT, type ConciergeProfile } from '../data/concierges';
 import { ConciergeAvatar } from './ConciergeAvatar';
@@ -13,7 +13,6 @@ const BRAND_BOOK_BREADCRUMBS = [
 
 interface BrandBookProps {
   onBack: () => void;
-  onOpenCharacter: (id: ConciergeProfile['id']) => void;
 }
 
 const PALETTE = [
@@ -67,12 +66,12 @@ const MASCOT_ASSETS: MascotAsset[] = [
   { label: 'On Dark',     surface: 'bg-charcoal', dark: true, card: true, logoVariant: 'white' },
 ];
 
-export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter }) => {
+export const BrandBook: React.FC<BrandBookProps> = ({ onBack }) => {
   return (
     <main className="bg-white page-shell font-boutique text-charcoal" aria-labelledby="brandbook-heading">
       <SEO
-        title="Hey Lola Brand Kit — Logos, Colours, Typography & Concierges"
-        description="Official brand assets and usage guidelines for Hey Lola, a boutique lifestyle concierge for dog parents. Download the logo, browse the palette and meet the four concierges."
+        title="Hey Lola Brand Kit — Logos, Colours, Typography & Usage"
+        description="Official brand assets and usage guidelines for Hey Lola, a boutique lifestyle concierge for dog parents. Download the logo, browse the palette and read the usage rules."
         url="/brand-book"
         breadcrumbs={BRAND_BOOK_BREADCRUMBS}
       />
@@ -221,72 +220,6 @@ export const BrandBook: React.FC<BrandBookProps> = ({ onBack, onOpenCharacter })
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Concierges */}
-      <section id="concierges" aria-labelledby="concierges-heading" className="py-14 sm:py-16 px-5 sm:px-6 max-w-7xl mx-auto">
-        <header className="mb-10 space-y-2 max-w-2xl">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400">Concierges</span>
-          <h2 id="concierges-heading" className="text-3xl sm:text-4xl font-serif italic tracking-tight leading-none">The four concierges<span className="brand-dot" aria-hidden="true" /></h2>
-          <p className="text-sm text-stone-500 font-light italic leading-relaxed">
-            Each concierge has a personality, a role and a full pose pack. Tap any face to open their dedicated page.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {CONCIERGES.map((c) => {
-            if (!c.revealed) {
-              return (
-                <article
-                  key={c.id}
-                  className="relative flex flex-col h-full rounded-[2rem] bg-stone-50 border border-dashed border-stone-200 overflow-hidden"
-                  aria-label={`Concierge starting with ${c.name[0]} — coming soon`}
-                >
-                  <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200/60 flex items-center justify-center relative overflow-hidden">
-                    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[9rem] font-serif italic text-stone-300/40 select-none blur-[2px]">?</span>
-                    <span className="relative text-7xl font-serif italic text-stone-400 select-none tracking-tight">{c.name[0]}…</span>
-                    <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-[0.3em] bg-white/80 backdrop-blur text-stone-500 rounded-full px-2.5 py-1 border border-stone-100">
-                      Coming soon
-                    </span>
-                  </div>
-                  <div className="p-6 space-y-2">
-                    <h3 className="text-2xl font-serif italic tracking-tight leading-none text-stone-500">{c.name[0]}…</h3>
-                    <p className="text-[11px] text-stone-400 italic">A new face joining the pack soon.</p>
-                  </div>
-                </article>
-              );
-            }
-            return (
-              <motion.button
-                key={c.id}
-                type="button"
-                onClick={() => onOpenCharacter(c.id)}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="group relative flex flex-col h-full rounded-[2rem] bg-white border border-stone-100 overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/40"
-                aria-label={`Open ${c.name}'s page — ${c.role}`}
-              >
-                <div className={`aspect-square ${c.color} flex items-center justify-center relative overflow-hidden`}>
-                  <ConciergeAvatar
-                    id={c.id}
-                    poseIndex={1}
-                    rounded="none"
-                    alt={`${c.name} — ${c.role}`}
-                    className="relative z-10 w-full h-full !object-contain group-hover:scale-110 transition-all duration-700"
-                  />
-                </div>
-                <div className="p-6 space-y-2">
-                  <h3 className="text-2xl font-serif italic tracking-tight leading-none">{c.name}</h3>
-                  <p className="text-[11px] text-stone-400 italic">{c.role}</p>
-                  <p className="text-[11px] font-black uppercase tracking-[0.25em] text-charcoal inline-flex items-center gap-1 pt-3">
-                    Open page <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
-                  </p>
-                </div>
-              </motion.button>
-            );
-          })}
         </div>
       </section>
 

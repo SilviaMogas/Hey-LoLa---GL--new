@@ -195,3 +195,26 @@
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
 }
+
+/* ──────────────────────────────────────────────────────────────
+ * Defensive shield against any consent banner injected by Google
+ * Tag Manager / OneTrust / Cookiebot / generic CMP tags. The
+ * brand banner lives in <CookieBanner>; if both fire at once we
+ * keep ours visible and hide the injected one. Remove the GTM
+ * consent tag in Tag Manager to make this redundant.
+ * ────────────────────────────────────────────────────────────── */
+#onetrust-consent-sdk,
+#onetrust-banner-sdk,
+#CybotCookiebotDialog,
+.CookieDeclaration,
+.cookieconsent,
+.cc-window,
+.cc-revoke,
+[id^="CookieConsent"],
+[class*="cookie-banner"]:not(.brand-dot):not([data-heylola]),
+[class*="cookie-consent"]:not(.brand-dot):not([data-heylola]),
+[id*="cookie-notice"]:not([data-heylola]),
+[id*="cookieconsent"]:not([data-heylola]) {
+  display: none !important;
+  visibility: hidden !important;
+}

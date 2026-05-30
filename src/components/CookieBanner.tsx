@@ -73,9 +73,11 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ onNavigatePrivacy })
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 32, opacity: 0, scale: 0.96 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-[400px] z-[60] font-boutique"
+          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-[400px] font-boutique"
+          style={{ zIndex: 2147483647 }}
           role="dialog"
           aria-label={t.cookies.ariaLabel}
+          data-heylola="cookie-banner"
         >
           {/* Floating orange glow behind the card */}
           <div

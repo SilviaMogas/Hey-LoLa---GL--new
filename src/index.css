@@ -198,23 +198,44 @@
 
 /* ──────────────────────────────────────────────────────────────
  * Defensive shield against any consent banner injected by Google
- * Tag Manager / OneTrust / Cookiebot / generic CMP tags. The
- * brand banner lives in <CookieBanner>; if both fire at once we
- * keep ours visible and hide the injected one. Remove the GTM
- * consent tag in Tag Manager to make this redundant.
+ * Tag Manager / OneTrust / Cookiebot / Iubenda / Quantcast / a
+ * generic CMP template. The brand banner lives in <CookieBanner>;
+ * if both fire at once we keep ours visible and hide the injected
+ * one. Removing the GTM consent tag in Tag Manager would make
+ * this CSS redundant.
+ *
+ * The :not([data-heylola]) escape hatch keeps anything we render
+ * ourselves (always tagged with data-heylola) immune to the shield.
  * ────────────────────────────────────────────────────────────── */
 #onetrust-consent-sdk,
 #onetrust-banner-sdk,
 #CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
 .CookieDeclaration,
 .cookieconsent,
 .cc-window,
 .cc-revoke,
-[id^="CookieConsent"],
+.iubenda-cs-container,
+.iubenda-tp-btn,
+.qc-cmp2-container,
+.qc-cmp-ui-container,
+#usercentrics-root,
+#axeptio_main_button,
+[id^="CookieConsent"]:not([data-heylola]),
 [class*="cookie-banner"]:not(.brand-dot):not([data-heylola]),
 [class*="cookie-consent"]:not(.brand-dot):not([data-heylola]),
+[class*="consent-banner"]:not([data-heylola]),
+[class*="cmp-banner"]:not([data-heylola]),
+[class*="gdpr-banner"]:not([data-heylola]),
 [id*="cookie-notice"]:not([data-heylola]),
-[id*="cookieconsent"]:not([data-heylola]) {
+[id*="cookieconsent"]:not([data-heylola]),
+[id*="consent-banner"]:not([data-heylola]),
+[id*="cmp-banner"]:not([data-heylola]),
+[id*="gdpr-banner"]:not([data-heylola]),
+[aria-label*="cookie consent" i]:not([data-heylola]),
+[aria-label*="cookies banner" i]:not([data-heylola]),
+[aria-label*="consent management" i]:not([data-heylola]) {
   display: none !important;
   visibility: hidden !important;
+  pointer-events: none !important;
 }

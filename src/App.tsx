@@ -94,6 +94,8 @@ const Concierges = lazyWithReload(() => import('./components/Concierges').then(m
 const Perks = lazyWithReload(() => import('./components/Perks').then(m => ({ default: m.Perks })));
 const Foundation = lazyWithReload(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
 const HeyKaiFoundation = lazyWithReload(() => import('./components/HeyKaiFoundation').then(m => ({ default: m.HeyKaiFoundation })));
+const HeyKaiHorses = lazyWithReload(() => import('./components/HeyKaiHorses').then(m => ({ default: m.HeyKaiHorses })));
+const HeyKaiHorsePassport = lazyWithReload(() => import('./components/HeyKaiHorsePassport').then(m => ({ default: m.HeyKaiHorsePassport })));
 const FoundationDogs = lazyWithReload(() => import('./components/FoundationDogs').then(m => ({ default: m.FoundationDogs })));
 const FoundationDogPassport = lazyWithReload(() => import('./components/FoundationDogPassport').then(m => ({ default: m.FoundationDogPassport })));
 
@@ -570,8 +572,17 @@ function AppContent() {
             } />
             <Route path={paths.foundationDogPassport} element={<FoundationDogPassportRoute />} />
             <Route path={paths.heyKaiFoundation} element={
-              <FadeIn><HeyKaiFoundation onBack={() => navigate(paths.home)} /></FadeIn>
+              <FadeIn><HeyKaiFoundation onBack={() => navigate(paths.home)} onSeeHorses={() => navigate(paths.heyKaiHorses)} /></FadeIn>
             } />
+            <Route path={paths.heyKaiHorses} element={
+              <FadeIn>
+                <HeyKaiHorses
+                  onBack={() => navigate(paths.heyKaiFoundation)}
+                  onOpenPassport={(slug) => navigate(buildPath.heyKaiHorsePassport(slug))}
+                />
+              </FadeIn>
+            } />
+            <Route path={paths.heyKaiHorsePassport} element={<HeyKaiHorsePassportRoute />} />
             <Route path={paths.media} element={
               <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
             } />
@@ -933,6 +944,21 @@ function FoundationDogPassportRoute() {
         slug={slug}
         onBack={() => navigate(paths.foundationDogs)}
         onNotFound={() => navigate(paths.foundationDogs)}
+      />
+    </FadeIn>
+  );
+}
+
+function HeyKaiHorsePassportRoute() {
+  const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+  if (!slug) return <Navigate to={paths.heyKaiHorses} replace />;
+  return (
+    <FadeIn>
+      <HeyKaiHorsePassport
+        slug={slug}
+        onBack={() => navigate(paths.heyKaiHorses)}
+        onNotFound={() => navigate(paths.heyKaiHorses)}
       />
     </FadeIn>
   );

@@ -93,6 +93,7 @@ const PartnerOnboarding = lazyWithReload(() => import('./components/PartnerOnboa
 const Concierges = lazyWithReload(() => import('./components/Concierges').then(m => ({ default: m.Concierges })));
 const Perks = lazyWithReload(() => import('./components/Perks').then(m => ({ default: m.Perks })));
 const Foundation = lazyWithReload(() => import('./components/Foundation').then(m => ({ default: m.Foundation })));
+const HeyKaiFoundation = lazyWithReload(() => import('./components/HeyKaiFoundation').then(m => ({ default: m.HeyKaiFoundation })));
 const FoundationDogs = lazyWithReload(() => import('./components/FoundationDogs').then(m => ({ default: m.FoundationDogs })));
 const FoundationDogPassport = lazyWithReload(() => import('./components/FoundationDogPassport').then(m => ({ default: m.FoundationDogPassport })));
 
@@ -568,6 +569,9 @@ function AppContent() {
               </FadeIn>
             } />
             <Route path={paths.foundationDogPassport} element={<FoundationDogPassportRoute />} />
+            <Route path={paths.heyKaiFoundation} element={
+              <FadeIn><HeyKaiFoundation onBack={() => navigate(paths.home)} /></FadeIn>
+            } />
             <Route path={paths.media} element={
               <FadeIn><Media onBack={() => navigate(paths.home)} /></FadeIn>
             } />

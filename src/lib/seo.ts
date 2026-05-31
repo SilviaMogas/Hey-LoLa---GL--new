@@ -17,7 +17,7 @@ const SITE = {
   name: 'Hey Lola',
   origin: 'https://heylola.co',
   defaultDescription:
-    "Hey Lola is a boutique lifestyle concierge for dog parents. Organise your dog's essentials, discover trusted dog-friendly places, and access curated local perks.",
+    "Hey Lola is a boutique lifestyle concierge for dog parents. Considered partners, curated places and an unhurried community for the dogs we love.",
   ogImage: 'https://heylola.co/og-image.png',
 };
 

@@ -23,20 +23,41 @@ const SEED_VISIBLE = FOUNDATION_DOGS.filter(
 export const FoundationDogs: React.FC<FoundationDogsProps> = ({ onBack, onOpenPassport }) => {
   const [live, setLive] = useState<FoundationDog[] | null>(null);
 
-  // Subscribe to the live Firestore collection. If it has any verified
-  // public dogs we use them; otherwise we fall back to the seed sample.
+  // Prefer the relational shelter_dogs table (migration 005, the source
+  // of truth for adoptable dogs). Fall back to the legacy foundation_dogs
+  // table if that one is empty, then to the local SEED_VISIBLE sample.
   useEffect(() => {
     const fetchDogs = async () => {
       try {
-        const { data } = await supabase.from('foundation_dogs').select('*').eq('status', 'available');
-        const dogs = (data || []).map((d: Record<string, unknown>) => rowToFoundationDog(d)).filter((d) => d.passport?.visibility === 'public');
+        const { data: shelterRows } = await supabase
+          .from('shelter_dogs')
+          .select('*')
+          .eq('status', 'available');
+        if (shelterRows && shelterRows.length > 0) {
+          const dogs = shelterRows
+            .map((d: Record<string, unknown>) => rowToFoundationDog(d))
+            .filter((d) => d.passport?.visibility === 'public');
+          setLive(dogs);
+          return;
+        }
+        const { data: legacyRows } = await supabase
+          .from('foundation_dogs')
+          .select('*')
+          .eq('status', 'available');
+        const dogs = (legacyRows || [])
+          .map((d: Record<string, unknown>) => rowToFoundationDog(d))
+          .filter((d) => d.passport?.visibility === 'public');
         setLive(dogs);
-      } catch { setLive([]); }
+      } catch {
+        setLive([]);
+      }
     };
     fetchDogs();
-    const channel = supabase.channel('foundation-dogs-live').on('postgres_changes', {
-      event: '*', schema: 'public', table: 'foundation_dogs',
-    }, () => fetchDogs()).subscribe();
+    const channel = supabase
+      .channel('foundation-dogs-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shelter_dogs' }, () => fetchDogs())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'foundation_dogs' }, () => fetchDogs())
+      .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
 

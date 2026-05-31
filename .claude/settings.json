@@ -5,7 +5,8 @@
       "mcp__github__get_file_contents",
       "mcp__github__list_pull_requests",
       "mcp__github__list_commits",
-      "mcp__github__list_branches"
+      "mcp__github__list_branches",
+      "mcp__c138a9ba-bcec-41de-ad41-f6e900b8dcf3__get_access_to_vercel_url"
     ]
   }
 }
